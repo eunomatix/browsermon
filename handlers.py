@@ -1,0 +1,139 @@
+import time
+import json
+import logging 
+import os
+import sys 
+import platform
+import datetime 
+from logging.handlers import TimedRotatingFileHandler
+from logging.handlers import RotatingFileHandler
+from datetime import datetime 
+
+
+SYSTEM = platform.system()
+
+if SYSTEM == 'Windows':
+    import win32com.client
+
+def convert_to_cron_syntax(time_string):
+    unit = time_string[-1]   # get the time unit: h, d, m
+    value = int(time_string[:-1])  # get the numerical value
+
+    if unit == 'm':   
+        if value != 1:   
+            print("Cron can't handle minutes greater than 59. Please provide valid input.")
+            return
+        cron_syntax = '* * * * *'
+    elif unit == 'h':   
+        if value < 0 or value > 23:  
+            print("Cron can't handle hours outside the range 0-23. Please provide valid input.")
+            return
+        cron_syntax = f'0 {value} * * *'
+    elif unit == 'd':  
+        if value < 1 or value > 31:   
+            print("Cron can't handle days outside the range 1-31. Please provide valid input.")
+            return
+        cron_syntax = f'0 0 {value} * *'
+    else:
+        print("Please provide valid input. Accepted formats: '1m' for 1 minute, '2h' for 2 hours, '3d' for 3 days.")
+        return
+
+    return cron_syntax
+
+def set_schedule_job(rotation, path_of_script):
+    python_path = sys.executable
+    if (SYSTEM == 'Linux'):
+        cron_command = f"{python_path} {path_of_script}"
+
+#        cron_schedule = "*/1 * * * *"
+
+        cron_schedule = convert_to_cron_syntax(rotation)
+
+        temp_cron_file = "/tmp/temp_cron"
+
+        with open(temp_cron_file, 'w') as file:
+            file.write(cron_schedule + ' ' + cron_command + '\n')
+
+        os.system('crontab {}'.format(temp_cron_file))
+
+        os.remove(temp_cron_file)
+
+
+
+    elif(SYSTEM== 'Windows'):
+
+        scheduler = win32com.client.Dispatch('Schedule.Service')
+        scheduler.Connect()
+
+        root_folder = scheduler.GetFolder('\\')
+        task_def = scheduler.NewTask(0)
+
+        # Create trigger
+        start_time = datetime.datetime.now()
+
+        if rotation.endswith('h'):
+            hours = int(rotation[:-1])
+            TASK_TRIGGER_DAILY = 2  # 2 means the task is meant to run daily
+            trigger = task_def.Triggers.Create(TASK_TRIGGER_DAILY)
+            trigger.StartBoundary = start_time.isoformat()
+            trigger.DaysInterval = 1
+            trigger.Repetition.Duration = ""
+            trigger.Repetition.Interval = f"PT{hours * 60}M"  # Convert hours to minutes
+
+        elif rotation.endswith('d'):
+            days = int(rotation[:-1])
+            TASK_TRIGGER_WEEKLY = 3  # 3 means the task is meant to run weekly
+            trigger = task_def.Triggers.Create(TASK_TRIGGER_WEEKLY)
+            trigger.StartBoundary = start_time.isoformat()
+            trigger.DaysOfWeek = 0x7F  # Run on all days of the week
+            trigger.WeeksInterval = days
+            trigger.Repetition.Duration = ""
+            trigger.Repetition.Interval = "PT24H"  # 24 hours interval
+
+        elif rotation.endswith('m'):
+            minutes = int(rotation[:-1])
+            TASK_TRIGGER_DAILY = 2  # 2 means the task is meant to run daily
+            trigger = task_def.Triggers.Create(TASK_TRIGGER_DAILY)
+            trigger.StartBoundary = start_time.isoformat()
+            trigger.DaysInterval = 1
+            trigger.Repetition.Duration = ""
+            trigger.Repetition.Interval = f"PT{minutes}M"
+
+        else:
+            raise ValueError("Invalid time format")
+
+        # Create action
+        TASK_ACTION_EXEC = 0  # means that the action is an executable action
+        action = task_def.Actions.Create(TASK_ACTION_EXEC)
+        action.ID = 'Run webdoggy rotation task'
+        action.Path = python_path# Use the Python executable from the current environment
+        action.Arguments = path_of_script  # Replace with the path to your Python script
+
+        # Set parameters
+        task_def.RegistrationInfo.Description = 'Test Task'
+        task_def.Settings.Enabled = True
+        task_def.Settings.StopIfGoingOnBatteries = False
+
+        # Register task
+        # If task already exists, it will be updated
+        TASK_CREATE_OR_UPDATE = 6
+        TASK_LOGON_NONE = 0
+        root_folder.RegisterTaskDefinition(
+            'webdoggy rotation task',  
+            task_def,
+            TASK_CREATE_OR_UPDATE,
+            '',  # No user
+            '',  # No password
+            TASK_LOGON_NONE)
+
+
+def init_logger(logdir):
+	#<Summary>
+	# init_logger function:
+	#   initializes the logging module of python used for logging log files
+	#</Summary>
+	handler = RotatingFileHandler(f'{logdir}/webdoggy_controller.log', maxBytes=1e+7, backupCount=5)
+	logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - \'controller:\' - %(levelname)s - %(message)s', handlers=[handler])
+	return logging.getLogger(None)
+
+

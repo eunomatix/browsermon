@@ -1,0 +1,305 @@
+2023-07-12 11:44:19,708 - 'controller:' - INFO - Reading config file
+2023-07-12 11:44:19,708 - 'controller:' - DEBUG - Browser: chrome
+2023-07-12 11:44:19,708 - 'controller:' - DEBUG - mode: scheduled
+2023-07-12 11:44:19,708 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-12 11:44:19,708 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-12 11:44:19,708 - 'controller:' - DEBUG - logmode: csv
+2023-07-12 11:44:19,708 - 'controller:' - DEBUG - rotation:1h
+2023-07-12 11:44:19,708 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-12 11:44:19,711 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-12 11:44:19,711 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-12 11:44:19,711 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-12 11:44:19,712 - 'controller:' - DEBUG - Monitoring thread pid: 22511
+2023-07-12 11:44:19,712 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-12 11:44:24,714 - 'controller:' - INFO - Rotated File at 11:44:24
+2023-07-12 11:44:29,716 - 'controller:' - INFO - Rotated File at 11:44:29
+2023-07-12 11:44:34,718 - 'controller:' - INFO - Rotated File at 11:44:34
+2023-07-12 11:44:37,879 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
+2023-07-12 12:01:36,539 - 'controller:' - INFO - Reading config file
+2023-07-12 12:01:36,539 - 'controller:' - DEBUG - Browser: chrome
+2023-07-12 12:01:36,539 - 'controller:' - DEBUG - mode: scheduled
+2023-07-12 12:01:36,539 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-12 12:01:36,540 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-12 12:01:36,540 - 'controller:' - DEBUG - logmode: csv
+2023-07-12 12:01:36,540 - 'controller:' - DEBUG - rotation:1h
+2023-07-12 12:01:36,540 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-12 12:01:36,542 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-12 12:01:36,542 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-12 12:01:36,542 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-12 12:01:36,543 - 'controller:' - DEBUG - Monitoring thread pid: 24815
+2023-07-12 12:01:36,543 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-12 12:01:36,543 - 'controller:' - INFO - Setting rotation to size based
+2023-07-12 12:11:33,291 - 'controller:' - INFO - Reading config file
+2023-07-12 12:11:33,291 - 'controller:' - DEBUG - Browser: chrome
+2023-07-12 12:11:33,291 - 'controller:' - DEBUG - mode: scheduled
+2023-07-12 12:11:33,291 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-12 12:11:33,291 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-12 12:11:33,291 - 'controller:' - DEBUG - logmode: csv
+2023-07-12 12:11:33,291 - 'controller:' - DEBUG - rotation:1h
+2023-07-12 12:11:33,291 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-12 12:11:33,293 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-12 12:11:33,293 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-12 12:11:33,294 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-12 12:11:33,294 - 'controller:' - DEBUG - Monitoring thread pid: 26902
+2023-07-12 12:11:33,294 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-12 12:11:33,294 - 'controller:' - INFO - Setting rotation to size based
+2023-07-12 12:11:42,297 - 'controller:' - INFO - Rotated File at 12:11:42 with size 0
+2023-07-12 12:11:47,938 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
+2023-07-12 12:18:52,151 - 'controller:' - INFO - Reading config file
+2023-07-12 12:18:52,151 - 'controller:' - DEBUG - Browser: chrome
+2023-07-12 12:18:52,151 - 'controller:' - DEBUG - mode: scheduled
+2023-07-12 12:18:52,151 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-12 12:18:52,151 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-12 12:18:52,151 - 'controller:' - DEBUG - logmode: csv
+2023-07-12 12:18:52,152 - 'controller:' - DEBUG - rotation:1h
+2023-07-12 12:18:52,152 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-12 12:18:52,154 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-12 12:18:52,154 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-12 12:18:52,154 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-12 12:18:52,154 - 'controller:' - DEBUG - Monitoring thread pid: 27882
+2023-07-12 12:18:52,154 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-12 12:18:52,155 - 'controller:' - INFO - Setting rotation to size based
+2023-07-12 12:18:59,357 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
+2023-07-12 14:18:43,454 - 'controller:' - INFO - Reading config file
+2023-07-12 14:18:43,455 - 'controller:' - DEBUG - Browser: chrome
+2023-07-12 14:18:43,455 - 'controller:' - DEBUG - mode: scheduled
+2023-07-12 14:18:43,455 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-12 14:18:43,455 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-12 14:18:43,455 - 'controller:' - DEBUG - logmode: csv
+2023-07-12 14:18:43,455 - 'controller:' - DEBUG - rotation:1h
+2023-07-12 14:18:43,455 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-12 14:18:43,457 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-12 14:18:43,458 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-12 14:18:43,458 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-12 14:18:43,458 - 'controller:' - DEBUG - Monitoring thread pid: 32941
+2023-07-12 14:18:43,458 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-12 14:18:43,458 - 'controller:' - INFO - Setting rotation to time based
+2023-07-12 14:18:48,460 - 'controller:' - INFO - Rotated File at 14:18:48
+2023-07-12 14:18:53,463 - 'controller:' - INFO - Rotated File at 14:18:53
+2023-07-12 14:18:58,465 - 'controller:' - INFO - Rotated File at 14:18:58
+2023-07-12 14:19:01,247 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
+2023-07-12 19:54:46,532 - 'controller:' - INFO - Reading config file
+2023-07-12 19:54:46,560 - 'controller:' - DEBUG - Browser: chrome
+2023-07-12 19:54:46,560 - 'controller:' - DEBUG - mode: scheduled
+2023-07-12 19:54:46,561 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-12 19:54:46,561 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-12 19:54:46,561 - 'controller:' - DEBUG - logmode: csv
+2023-07-12 19:54:46,561 - 'controller:' - DEBUG - rotation:1h
+2023-07-12 19:54:46,561 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-12 19:54:46,566 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-12 19:54:46,567 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-12 19:54:46,567 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-12 19:54:46,568 - 'controller:' - DEBUG - Monitoring thread pid: 21220
+2023-07-12 19:54:46,568 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-12 19:54:46,569 - 'controller:' - INFO - Setting rotation to time based
+2023-07-12 19:54:51,571 - 'controller:' - INFO - Rotated File at 19:54:51
+2023-07-12 19:54:56,573 - 'controller:' - INFO - Rotated File at 19:54:56
+2023-07-12 19:54:59,292 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
+2023-07-12 21:16:40,068 - 'controller:' - INFO - Reading config file
+2023-07-12 21:16:40,069 - 'controller:' - DEBUG - Browser: chrome
+2023-07-12 21:16:40,069 - 'controller:' - DEBUG - mode: scheduled
+2023-07-12 21:16:40,069 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-12 21:16:40,069 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-12 21:16:40,069 - 'controller:' - DEBUG - logmode: csv
+2023-07-12 21:16:40,069 - 'controller:' - DEBUG - rotation:1h
+2023-07-12 21:16:40,069 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-12 21:16:40,071 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-12 21:16:40,072 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-12 21:16:40,072 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-12 21:16:40,072 - 'controller:' - DEBUG - Monitoring thread pid: 37251
+2023-07-12 21:16:40,072 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-12 21:16:40,072 - 'controller:' - INFO - Setting rotation to time based
+2023-07-12 21:16:45,076 - 'controller:' - INFO - Rotated File at 21:16:45
+2023-07-12 21:16:48,304 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
+2023-07-12 21:18:08,454 - 'controller:' - INFO - Reading config file
+2023-07-12 21:18:08,454 - 'controller:' - DEBUG - Browser: chrome
+2023-07-12 21:18:08,454 - 'controller:' - DEBUG - mode: scheduled
+2023-07-12 21:18:08,454 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-12 21:18:08,454 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-12 21:18:08,454 - 'controller:' - DEBUG - logmode: csv
+2023-07-12 21:18:08,454 - 'controller:' - DEBUG - rotation:1h
+2023-07-12 21:18:08,454 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-12 21:18:08,456 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-12 21:18:08,456 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-12 21:18:08,457 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-12 21:18:08,457 - 'controller:' - DEBUG - Monitoring thread pid: 37623
+2023-07-12 21:18:08,457 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-12 21:18:08,457 - 'controller:' - INFO - Setting rotation to time based
+2023-07-12 21:18:13,457 - 'controller:' - INFO - Rotated File at 21:18:13
+2023-07-12 21:18:16,600 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
+2023-07-12 21:36:43,571 - 'controller:' - INFO - Reading config file
+2023-07-12 21:36:43,571 - 'controller:' - DEBUG - Browser: chrome
+2023-07-12 21:36:43,571 - 'controller:' - DEBUG - mode: scheduled
+2023-07-12 21:36:43,571 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-12 21:36:43,571 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-12 21:36:43,571 - 'controller:' - DEBUG - logmode: csv
+2023-07-12 21:36:43,571 - 'controller:' - DEBUG - rotation:1h
+2023-07-12 21:36:43,571 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-12 21:36:43,574 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-12 21:36:43,574 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-12 21:36:43,574 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-12 21:36:43,574 - 'controller:' - DEBUG - Monitoring thread pid: 41493
+2023-07-12 21:36:43,574 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-12 21:36:43,575 - 'controller:' - INFO - Setting rotation to time based
+2023-07-12 21:36:48,576 - 'controller:' - INFO - Rotated File at 21:36:48
+2023-07-12 21:36:53,579 - 'controller:' - INFO - Rotated File at 21:36:53
+2023-07-12 21:36:55,078 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
+2023-07-12 23:29:08,831 - 'controller:' - INFO - Reading config file
+2023-07-12 23:29:08,831 - 'controller:' - DEBUG - Browser: chrome
+2023-07-12 23:29:08,831 - 'controller:' - DEBUG - mode: scheduled
+2023-07-12 23:29:08,831 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-12 23:29:08,831 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-12 23:29:08,831 - 'controller:' - DEBUG - logmode: csv
+2023-07-12 23:29:08,831 - 'controller:' - DEBUG - rotation:1h
+2023-07-12 23:29:08,831 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-12 23:29:08,833 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-12 23:29:08,834 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-12 23:29:08,834 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-12 23:29:08,834 - 'controller:' - DEBUG - Monitoring thread pid: 54493
+2023-07-12 23:29:08,834 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-12 23:29:08,834 - 'controller:' - INFO - Setting rotation to time based
+2023-07-12 23:29:13,837 - 'controller:' - INFO - Rotated File at 23:29:13
+2023-07-12 23:29:18,839 - 'controller:' - INFO - Rotated File at 23:29:18
+2023-07-12 23:29:23,842 - 'controller:' - INFO - Rotated File at 23:29:23
+2023-07-12 23:29:28,844 - 'controller:' - INFO - Rotated File at 23:29:28
+2023-07-12 23:29:33,847 - 'controller:' - INFO - Rotated File at 23:29:33
+2023-07-12 23:29:36,809 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
+2023-07-12 23:44:57,462 - 'controller:' - INFO - Reading config file
+2023-07-12 23:44:57,462 - 'controller:' - DEBUG - Browser: chrome
+2023-07-12 23:44:57,462 - 'controller:' - DEBUG - mode: scheduled
+2023-07-12 23:44:57,462 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-12 23:44:57,462 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-12 23:44:57,462 - 'controller:' - DEBUG - logmode: csv
+2023-07-12 23:44:57,462 - 'controller:' - DEBUG - rotation:1h
+2023-07-12 23:44:57,462 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-12 23:44:57,464 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-12 23:44:57,465 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-12 23:44:57,465 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-12 23:44:57,465 - 'controller:' - DEBUG - Monitoring thread pid: 59008
+2023-07-12 23:44:57,465 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-12 23:44:57,465 - 'controller:' - INFO - Setting rotation to time based
+2023-07-12 23:44:59,399 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
+2023-07-13 09:52:54,833 - 'controller:' - INFO - Reading config file
+2023-07-13 09:52:54,833 - 'controller:' - DEBUG - Browser: chrome
+2023-07-13 09:52:54,833 - 'controller:' - DEBUG - mode: scheduled
+2023-07-13 09:52:54,833 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-13 09:52:54,833 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-13 09:52:54,833 - 'controller:' - DEBUG - logmode: csv
+2023-07-13 09:52:54,833 - 'controller:' - DEBUG - rotation:1h
+2023-07-13 09:52:54,833 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-13 09:52:54,836 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-13 09:52:54,836 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-13 09:52:54,836 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-13 09:52:54,837 - 'controller:' - DEBUG - Monitoring thread pid: 66592
+2023-07-13 09:52:54,837 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-13 09:52:54,837 - 'controller:' - INFO - Setting rotation to time based
+2023-07-13 09:52:59,839 - 'controller:' - INFO - Rotated File at 9:52:59
+2023-07-13 09:53:04,841 - 'controller:' - INFO - Rotated File at 9:53:4
+2023-07-13 09:53:09,484 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
+2023-07-13 16:22:12,193 - 'controller:' - INFO - Reading config file
+2023-07-13 16:22:12,193 - 'controller:' - DEBUG - Browser: chrome
+2023-07-13 16:22:12,193 - 'controller:' - DEBUG - mode: scheduled
+2023-07-13 16:22:12,193 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-13 16:22:12,193 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-13 16:22:12,193 - 'controller:' - DEBUG - logmode: csv
+2023-07-13 16:22:12,194 - 'controller:' - DEBUG - rotation:1m
+2023-07-13 16:22:12,194 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-13 16:22:12,196 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-13 16:22:12,196 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-13 16:22:12,196 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-13 16:22:12,197 - 'controller:' - DEBUG - Monitoring thread pid: 21493
+2023-07-13 16:22:12,197 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-13 16:26:49,600 - 'controller:' - INFO - Reading config file
+2023-07-13 16:26:49,600 - 'controller:' - DEBUG - Browser: chrome
+2023-07-13 16:26:49,600 - 'controller:' - DEBUG - mode: scheduled
+2023-07-13 16:26:49,600 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-13 16:26:49,600 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-13 16:26:49,600 - 'controller:' - DEBUG - logmode: csv
+2023-07-13 16:26:49,601 - 'controller:' - DEBUG - rotation:1m
+2023-07-13 16:26:49,601 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-13 16:26:49,602 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-13 16:26:49,603 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-13 16:26:49,603 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-13 16:26:49,603 - 'controller:' - DEBUG - Monitoring thread pid: 22243
+2023-07-13 16:26:49,603 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-13 16:31:43,506 - 'controller:' - INFO - Reading config file
+2023-07-13 16:31:43,506 - 'controller:' - DEBUG - Browser: chrome
+2023-07-13 16:31:43,506 - 'controller:' - DEBUG - mode: scheduled
+2023-07-13 16:31:43,506 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-13 16:31:43,506 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-13 16:31:43,506 - 'controller:' - DEBUG - logmode: csv
+2023-07-13 16:31:43,507 - 'controller:' - DEBUG - rotation:1m
+2023-07-13 16:31:43,507 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-13 16:31:43,509 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-13 16:31:43,509 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-13 16:31:43,509 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-13 16:31:43,510 - 'controller:' - DEBUG - Monitoring thread pid: 23121
+2023-07-13 16:31:43,510 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-13 16:38:45,705 - 'controller:' - INFO - Reading config file
+2023-07-13 16:38:45,705 - 'controller:' - DEBUG - Browser: chrome
+2023-07-13 16:38:45,705 - 'controller:' - DEBUG - mode: scheduled
+2023-07-13 16:38:45,705 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-13 16:38:45,705 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-13 16:38:45,705 - 'controller:' - DEBUG - logmode: csv
+2023-07-13 16:38:45,705 - 'controller:' - DEBUG - rotation:1m
+2023-07-13 16:38:45,705 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-13 16:38:45,707 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-13 16:38:45,708 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-13 16:38:45,708 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-13 16:38:45,708 - 'controller:' - DEBUG - Monitoring thread pid: 24240
+2023-07-13 16:38:45,708 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-13 16:51:02,783 - 'controller:' - INFO - Reading config file
+2023-07-13 16:51:02,783 - 'controller:' - DEBUG - Browser: chrome
+2023-07-13 16:51:02,783 - 'controller:' - DEBUG - mode: scheduled
+2023-07-13 16:51:02,783 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-13 16:51:02,783 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-13 16:51:02,783 - 'controller:' - DEBUG - logmode: csv
+2023-07-13 16:51:02,783 - 'controller:' - DEBUG - rotation:1m
+2023-07-13 16:51:02,783 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-13 16:51:02,785 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-13 16:51:02,786 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-13 16:51:02,786 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-13 16:51:02,786 - 'controller:' - DEBUG - Monitoring thread pid: 26428
+2023-07-13 16:51:02,786 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-13 16:57:58,116 - 'controller:' - INFO - Reading config file
+2023-07-13 16:57:58,116 - 'controller:' - DEBUG - Browser: chrome
+2023-07-13 16:57:58,116 - 'controller:' - DEBUG - mode: scheduled
+2023-07-13 16:57:58,116 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-13 16:57:58,116 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-13 16:57:58,116 - 'controller:' - DEBUG - logmode: csv
+2023-07-13 16:57:58,116 - 'controller:' - DEBUG - rotation:1m
+2023-07-13 16:57:58,116 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-13 17:26:19,503 - 'controller:' - INFO - Reading config file
+2023-07-13 17:26:19,503 - 'controller:' - DEBUG - Browser: chrome
+2023-07-13 17:26:19,503 - 'controller:' - DEBUG - mode: scheduled
+2023-07-13 17:26:19,503 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-13 17:26:19,503 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-13 17:26:19,504 - 'controller:' - DEBUG - logmode: csv
+2023-07-13 17:26:19,504 - 'controller:' - DEBUG - rotation:1m
+2023-07-13 17:26:19,504 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-13 17:36:38,211 - 'controller:' - INFO - Reading config file
+2023-07-13 17:36:38,219 - 'controller:' - DEBUG - Browser: chrome
+2023-07-13 17:36:38,219 - 'controller:' - DEBUG - mode: scheduled
+2023-07-13 17:36:38,219 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-13 17:36:38,219 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-13 17:36:38,219 - 'controller:' - DEBUG - logmode: csv
+2023-07-13 17:36:38,219 - 'controller:' - DEBUG - rotation:1m
+2023-07-13 17:36:38,219 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-13 17:36:38,221 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-13 17:36:38,222 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-13 17:36:38,222 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-13 17:36:38,222 - 'controller:' - DEBUG - Monitoring thread pid: 5552
+2023-07-13 17:36:38,222 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-13 17:37:28,642 - 'controller:' - INFO - Reading config file
+2023-07-13 17:37:28,643 - 'controller:' - DEBUG - Browser: chrome
+2023-07-13 17:37:28,643 - 'controller:' - DEBUG - mode: scheduled
+2023-07-13 17:37:28,643 - 'controller:' - DEBUG - scheduled: 1m
+2023-07-13 17:37:28,643 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy
+2023-07-13 17:37:28,643 - 'controller:' - DEBUG - logmode: csv
+2023-07-13 17:37:28,643 - 'controller:' - DEBUG - rotation:1m
+2023-07-13 17:37:28,643 - 'controller:' - INFO - Reading config file completed, all options fetched
+2023-07-13 17:37:28,645 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-13 17:37:28,646 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-13 17:37:28,646 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-13 17:37:28,646 - 'controller:' - DEBUG - Monitoring thread pid: 5652
+2023-07-13 17:37:28,646 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
