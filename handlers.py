@@ -40,14 +40,16 @@ def convert_to_cron_syntax(time_string):
 
     return cron_syntax
 
-def set_schedule_job(rotation, path_of_script):
+def set_schedule_job(rotation, path_of_script, logger):
     python_path = sys.executable
     if (SYSTEM == 'Linux'):
-        cron_command = f"{python_path} {path_of_script}"
+        logger.info("System identified as Linux")
+        cron_command = f"{python_path} {path_of_script} >> /tmp/cron_job.log 2>&1"
 
 #        cron_schedule = "*/1 * * * *"
 
         cron_schedule = convert_to_cron_syntax(rotation)
+        logging.debug(f"cron_schedule: {cron_schedule}")
 
         temp_cron_file = "/tmp/temp_cron"
 
@@ -57,13 +59,17 @@ def set_schedule_job(rotation, path_of_script):
         os.system('crontab {}'.format(temp_cron_file))
 
         os.remove(temp_cron_file)
-
-
+        logger.debug(f"Cron Command: {cron_schedule} {cron_command}")
+        logger.info("Cron job added")
+        
 
     elif(SYSTEM== 'Windows'):
+        logger.info("System identified as Windows")
 
         scheduler = win32com.client.Dispatch('Schedule.Service')
         scheduler.Connect()
+
+        logger.info("Connected to scheduler")
 
         root_folder = scheduler.GetFolder('\\')
         task_def = scheduler.NewTask(0)
@@ -102,6 +108,11 @@ def set_schedule_job(rotation, path_of_script):
         else:
             raise ValueError("Invalid time format")
 
+        logger.info("Trigger created")
+        logger.debug(f"Trigger start boundary set to {start_time.isoformat()}")
+        logger.debug(f"Trigger repetition interval set to {trigger.Repetition.Interval}")
+
+
         # Create action
         TASK_ACTION_EXEC = 0  # means that the action is an executable action
         action = task_def.Actions.Create(TASK_ACTION_EXEC)
@@ -126,6 +137,9 @@ def set_schedule_job(rotation, path_of_script):
             '',  # No password
             TASK_LOGON_NONE)
 
+        logger.info("Task registered")
+
+
 
 def init_logger(logdir):
 	#<Summary>
@@ -136,4 +150,18 @@ def init_logger(logdir):
 	logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - \'controller:\' - %(levelname)s - %(message)s', handlers=[handler])
 	return logging.getLogger(None)
 
-
+def clean_scheduled_jobs(logger):
+    if SYSTEM == 'Linux':
+        logger.info("Removing entries in crontab")
+        temp_cron_file = '/tmp/temp_cron.backup'
+        os.system("crontab -l > {}".format(temp_cron_file))
+        logger.info(f"Creating backup of crontab in {temp_cron_file}")
+        os.system('crontab -r')
+        logger.info("Removed entries in crontab")
+    elif SYSTEM == 'Windows':
+        logger.info("Removing scheduled tasks")
+        scheduler = win32com.client.Dispatch('Schedule.Service')
+        scheduler.Connect()
+        root_folder = scheduler.GetFolder('\\')
+        root_folder.DeleteTask('webdoggy rotation task', 0)
+        logger.info("Removed scheduled tasks")

@@ -77,20 +77,30 @@ def config_reader():
 
 
 
-
 def run():
     options = config_reader()
-    installed_browsers = get_installed_browsers()
-    Launcher = launcher.launcher(installed_browsers, logger, options)
-    Launcher.start()    
     cwd = os.getcwd()
     file_to_rotate = '/home/appleconda/Documents/Files/webdoggy/file.json'
-    handlers.set_schedule_job(options['rotation'], f"{cwd}/rollover.py {file_to_rotate} 5")
+
+    installed_browsers = get_installed_browsers()
+
+    Launcher = launcher.launcher(installed_browsers, logger, options)
+    Launcher.start()    
+
+    handlers.set_schedule_job(options['rotation'], f"{cwd}/rollover.py {file_to_rotate} 5", logger)
+
 
 
 
 if __name__ == '__main__': 
-    run()
-    time.sleep(300)
+    try: 
+        run()
+        time.sleep(300)
+    except KeyboardInterrupt:
+        logger.info('Keyboard Interrupt')
+        handlers.clean_scheduled_jobs(logger)
+        logger.info("exiting program")
+        exit(0)
+
 
 
