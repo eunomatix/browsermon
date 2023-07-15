@@ -33,9 +33,9 @@ def get_installed_browsers():
         output = subprocess.getoutput(command)
         browsers = {line.split(',')[1].strip() if line.split(',')[1].strip() != 'google-chrome' else 'chrome' for line in output.split('\n') if line.strip() != ''}
     elif SYSTEM == 'Linux':
-        command = 'which -a google-chrome firefox chromium-browser brave-browser 2>/dev/null'
+        command = 'which -a google-chrome firefox chromium-browser microsoft-edge brave-browser 2>/dev/null'
         output = subprocess.getoutput(command)
-        browsers = {line.strip().replace('/usr/bin/', '') if line.strip().replace('/usr/bin/', '') != 'google-chrome' else 'chrome' for line in output.split('\n') if line.strip() != ''}
+        browsers = {line.strip().replace('/usr/bin/', '') if line.strip().replace('/usr/bin/', '') != 'google-chrome' else 'chrome' if 'google-chrome' in line else 'edge' if 'microsoft-edge' in line else line for line in output.split('\n') if line.strip() != ''}
     else:
         browsers = set()
 
@@ -73,8 +73,6 @@ def config_reader():
 
     options = {'browser': browser, 'mode' : mode, 'scheduled_window': scheduled_window, 'logdir': logdir, 'logmode': logmode, 'rotation': rotation}
     return options
-
-
 
 
 def run():
