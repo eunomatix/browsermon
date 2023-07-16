@@ -35,7 +35,15 @@ def get_installed_browsers():
     elif SYSTEM == 'Linux':
         command = 'which -a google-chrome firefox chromium-browser microsoft-edge brave-browser 2>/dev/null'
         output = subprocess.getoutput(command)
-        browsers = {line.strip().replace('/usr/bin/', '') if line.strip().replace('/usr/bin/', '') != 'google-chrome' else 'chrome' if 'google-chrome' in line else 'edge' if 'microsoft-edge' in line else line for line in output.split('\n') if line.strip() != ''}
+        for line in output.split('\n'):
+            line = line.strip().replace('/usr/bin/', '')
+            if line == 'google-chrome':
+                browsers.add('chrome')
+            elif line == 'microsoft-edge':
+                browsers.add('edge')
+            elif line == 'firefox':
+                browsers.add('firefox')
+
     else:
         browsers = set()
 
