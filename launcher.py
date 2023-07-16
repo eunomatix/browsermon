@@ -4,7 +4,7 @@ import subprocess
 import threading
     
 
-class launcher:
+class Launcher:
     def __init__(self, installed_browsers, logger, options):
         self.installed_browsers = installed_browsers
         self.logger = logger
@@ -68,7 +68,7 @@ class launcher:
 
 
         if self.options['browser'] in self.installed_browsers:
-            self.launch_reader(self.options['browser'], self.options['mode'], self.options['scheduled_window'], self.options['logdir'], self.options['logmode'])
+            self.launch_reader(self.options['browser'], self.options['mode'], self.options['schedule_window'], self.options['logdir'], self.options['logmode'])
         else: 
             allowed_browsers = {'chrome', 'opera', 'firefox', 'edge', 'safari'}
             readers_list = self.options['browser'].split(",")

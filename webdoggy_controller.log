@@ -1,134 +1,15 @@
-2023-07-15 12:48:33,242 - 'controller:' - INFO - Reading config file
-2023-07-15 12:48:33,243 - 'controller:' - DEBUG - Browser: chrome
-2023-07-15 12:48:33,243 - 'controller:' - DEBUG - mode: scheduled
-2023-07-15 12:48:33,243 - 'controller:' - DEBUG - scheduled: 1m
-2023-07-15 12:48:33,243 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy/
-2023-07-15 12:48:33,243 - 'controller:' - DEBUG - logmode: csv
-2023-07-15 12:48:33,243 - 'controller:' - DEBUG - rotation:1m
-2023-07-15 12:48:33,243 - 'controller:' - INFO - Reading config file completed, all options fetched
-2023-07-15 12:48:33,245 - 'controller:' - INFO - Invoking chrome_reader.py
-2023-07-15 12:48:33,245 - 'controller:' - INFO - Invoked chrome_reader.py
-2023-07-15 12:48:33,245 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
-2023-07-15 12:48:33,246 - 'controller:' - DEBUG - Monitoring thread pid: 22775
-2023-07-15 12:48:33,246 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
-2023-07-15 12:48:53,260 - 'controller:' - INFO - Keyboard Interrupt
-2023-07-15 12:48:53,260 - 'controller:' - INFO - Removing entries in crontab
-2023-07-15 12:48:53,264 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
-2023-07-15 12:48:53,267 - 'controller:' - INFO - Creating backup of crontab in /tmp/temp_cron.backup
-2023-07-15 12:48:53,272 - 'controller:' - INFO - Removed entries in crontab
-2023-07-15 12:48:53,273 - 'controller:' - INFO - exiting program
-2023-07-15 12:58:19,993 - 'controller:' - INFO - Reading config file
-2023-07-15 12:58:19,994 - 'controller:' - DEBUG - Browser: chrome
-2023-07-15 12:58:19,994 - 'controller:' - DEBUG - mode: scheduled
-2023-07-15 12:58:19,994 - 'controller:' - DEBUG - scheduled: 1m
-2023-07-15 12:58:19,994 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy/
-2023-07-15 12:58:19,994 - 'controller:' - DEBUG - logmode: csv
-2023-07-15 12:58:19,994 - 'controller:' - DEBUG - rotation:1m
-2023-07-15 12:58:19,994 - 'controller:' - INFO - Reading config file completed, all options fetched
-2023-07-15 12:58:19,995 - 'controller:' - INFO - Invoking chrome_reader.py
-2023-07-15 12:58:19,996 - 'controller:' - INFO - Invoked chrome_reader.py
-2023-07-15 12:58:19,996 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
-2023-07-15 12:58:19,996 - 'controller:' - DEBUG - Monitoring thread pid: 24135
-2023-07-15 12:58:19,996 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
-2023-07-15 12:58:19,996 - 'controller:' - INFO - System identified as Linux
-2023-07-15 12:58:19,996 - 'controller:' - DEBUG - cron_schedule: * * * * *
-2023-07-15 12:58:20,003 - 'controller:' - DEBUG - Cron Command: * * * * * /usr/bin/python /home/appleconda/Documents/Files/webdoggy/rollover.py /home/appleconda/Documents/Files/webdoggy/file.json 5 >> /tmp/cron_job.log 2>&1
-2023-07-15 12:58:20,003 - 'controller:' - INFO - Cron job added
-2023-07-15 12:59:24,148 - 'controller:' - INFO - Keyboard Interrupt
-2023-07-15 12:59:24,148 - 'controller:' - INFO - Removing entries in crontab
-2023-07-15 12:59:24,152 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
-2023-07-15 12:59:24,155 - 'controller:' - INFO - Creating backup of crontab in /tmp/temp_cron.backup
-2023-07-15 12:59:24,162 - 'controller:' - INFO - Removed entries in crontab
-2023-07-15 12:59:24,162 - 'controller:' - INFO - exiting program
-2023-07-15 13:02:23,838 - 'controller:' - INFO - Reading config file
-2023-07-15 13:02:23,838 - 'controller:' - DEBUG - Browser: chrome
-2023-07-15 13:02:23,838 - 'controller:' - DEBUG - mode: scheduled
-2023-07-15 13:02:23,838 - 'controller:' - DEBUG - scheduled: 1m
-2023-07-15 13:02:23,838 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy/
-2023-07-15 13:02:23,838 - 'controller:' - DEBUG - logmode: csv
-2023-07-15 13:02:23,838 - 'controller:' - DEBUG - rotation:1m
-2023-07-15 13:02:23,838 - 'controller:' - INFO - Reading config file completed, all options fetched
-2023-07-15 13:02:23,840 - 'controller:' - INFO - Invoking chrome_reader.py
-2023-07-15 13:02:23,840 - 'controller:' - INFO - Invoked chrome_reader.py
-2023-07-15 13:02:23,840 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
-2023-07-15 13:02:23,841 - 'controller:' - DEBUG - Monitoring thread pid: 24846
-2023-07-15 13:02:23,841 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
-2023-07-15 13:02:23,841 - 'controller:' - INFO - System identified as Linux
-2023-07-15 13:02:23,841 - 'controller:' - DEBUG - cron_schedule: * * * * *
-2023-07-15 13:02:23,848 - 'controller:' - DEBUG - Cron Command: * * * * * /usr/bin/python /home/appleconda/Documents/Files/webdoggy/rollover.py /home/appleconda/Documents/Files/webdoggy/file.json 5 >> /tmp/cron_job.log 2>&1
-2023-07-15 13:02:23,848 - 'controller:' - INFO - Cron job added
-2023-07-15 13:04:58,055 - 'controller:' - INFO - Keyboard Interrupt
-2023-07-15 13:04:58,055 - 'controller:' - INFO - Removing entries in crontab
-2023-07-15 13:04:58,059 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
-2023-07-15 13:04:58,062 - 'controller:' - INFO - Creating backup of crontab in /tmp/temp_cron.backup
-2023-07-15 13:04:58,068 - 'controller:' - INFO - Removed entries in crontab
-2023-07-15 13:04:58,068 - 'controller:' - INFO - exiting program
-2023-07-15 13:06:59,909 - 'controller:' - INFO - Reading config file
-2023-07-15 13:06:59,910 - 'controller:' - DEBUG - Browser: chrome
-2023-07-15 13:06:59,910 - 'controller:' - DEBUG - mode: scheduled
-2023-07-15 13:06:59,910 - 'controller:' - DEBUG - scheduled: 1m
-2023-07-15 13:06:59,910 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy/
-2023-07-15 13:06:59,910 - 'controller:' - DEBUG - logmode: csv
-2023-07-15 13:06:59,910 - 'controller:' - DEBUG - rotation:1m
-2023-07-15 13:06:59,910 - 'controller:' - INFO - Reading config file completed, all options fetched
-2023-07-15 13:06:59,912 - 'controller:' - INFO - Invoking chrome_reader.py
-2023-07-15 13:06:59,912 - 'controller:' - INFO - Invoked chrome_reader.py
-2023-07-15 13:06:59,912 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
-2023-07-15 13:06:59,913 - 'controller:' - DEBUG - Monitoring thread pid: 25852
-2023-07-15 13:06:59,913 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
-2023-07-15 13:06:59,913 - 'controller:' - INFO - System identified as Linux
-2023-07-15 13:06:59,913 - 'controller:' - DEBUG - cron_schedule: * * * * *
-2023-07-15 13:06:59,919 - 'controller:' - DEBUG - Cron Command: * * * * * /usr/bin/python /home/appleconda/Documents/Files/webdoggy/rollover.py /home/appleconda/Documents/Files/webdoggy/file.json 5 logger >> /tmp/cron_job.log 2>&1
-2023-07-15 13:06:59,919 - 'controller:' - INFO - Cron job added
-2023-07-15 13:09:01,233 - 'controller:' - INFO - Keyboard Interrupt
-2023-07-15 13:09:01,233 - 'controller:' - INFO - Removing entries in crontab
-2023-07-15 13:09:01,236 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
-2023-07-15 13:09:01,239 - 'controller:' - INFO - Creating backup of crontab in /tmp/temp_cron.backup
-2023-07-15 13:09:01,246 - 'controller:' - INFO - Removed entries in crontab
-2023-07-15 13:09:01,246 - 'controller:' - INFO - exiting program
-2023-07-15 13:13:06,968 - 'controller:' - INFO - Reading config file
-2023-07-15 13:13:06,968 - 'controller:' - DEBUG - Browser: chrome
-2023-07-15 13:13:06,968 - 'controller:' - DEBUG - mode: scheduled
-2023-07-15 13:13:06,968 - 'controller:' - DEBUG - scheduled: 1m
-2023-07-15 13:13:06,968 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy/
-2023-07-15 13:13:06,968 - 'controller:' - DEBUG - logmode: csv
-2023-07-15 13:13:06,968 - 'controller:' - DEBUG - rotation:1m
-2023-07-15 13:13:06,968 - 'controller:' - INFO - Reading config file completed, all options fetched
-2023-07-15 13:13:06,970 - 'controller:' - INFO - Invoking chrome_reader.py
-2023-07-15 13:13:06,971 - 'controller:' - INFO - Invoked chrome_reader.py
-2023-07-15 13:13:06,971 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
-2023-07-15 13:13:06,971 - 'controller:' - DEBUG - Monitoring thread pid: 27405
-2023-07-15 13:13:06,971 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
-2023-07-15 13:13:06,971 - 'controller:' - INFO - System identified as Linux
-2023-07-15 13:13:06,971 - 'controller:' - DEBUG - cron_schedule: * * * * *
-2023-07-15 13:13:06,979 - 'controller:' - DEBUG - Cron Command: * * * * * /usr/bin/python /home/appleconda/Documents/Files/webdoggy/rollover.py /home/appleconda/Documents/Files/webdoggy/file.json 5 >> /tmp/cron_job.log 2>&1
-2023-07-15 13:13:06,980 - 'controller:' - INFO - Cron job added
-2023-07-15 13:14:06,032 - 'controller:' - INFO - Keyboard Interrupt
-2023-07-15 13:14:06,032 - 'controller:' - INFO - Removing entries in crontab
-2023-07-15 13:14:06,035 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
-2023-07-15 13:14:06,038 - 'controller:' - INFO - Creating backup of crontab in /tmp/temp_cron.backup
-2023-07-15 13:14:06,044 - 'controller:' - INFO - Removed entries in crontab
-2023-07-15 13:14:06,044 - 'controller:' - INFO - exiting program
-2023-07-15 15:31:18,161 - 'controller:' - INFO - Reading config file
-2023-07-15 15:31:18,163 - 'controller:' - DEBUG - Browser: chrome
-2023-07-15 15:31:18,163 - 'controller:' - DEBUG - mode: scheduled
-2023-07-15 15:31:18,164 - 'controller:' - DEBUG - scheduled: 1m
-2023-07-15 15:31:18,164 - 'controller:' - DEBUG - logdir: /home/appleconda/Documents/Files/webdoggy/
-2023-07-15 15:31:18,164 - 'controller:' - DEBUG - logmode: csv
-2023-07-15 15:31:18,164 - 'controller:' - DEBUG - rotation:1m
-2023-07-15 15:31:18,164 - 'controller:' - INFO - Reading config file completed, all options fetched
-2023-07-15 15:31:18,166 - 'controller:' - INFO - Invoking chrome_reader.py
-2023-07-15 15:31:18,167 - 'controller:' - INFO - Invoked chrome_reader.py
-2023-07-15 15:31:18,167 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
-2023-07-15 15:31:18,167 - 'controller:' - DEBUG - Monitoring thread pid: 11548
-2023-07-15 15:31:18,167 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
-2023-07-15 15:31:18,167 - 'controller:' - INFO - System identified as Linux
-2023-07-15 15:31:18,167 - 'controller:' - DEBUG - cron_schedule: * * * * *
-2023-07-15 15:31:18,178 - 'controller:' - DEBUG - Cron Command: * * * * * /usr/bin/python /home/appleconda/Documents/Files/webdoggy/rollover.py /home/appleconda/Documents/Files/webdoggy/file.json 5 >> /tmp/cron_job.log 2>&1
-2023-07-15 15:31:18,178 - 'controller:' - INFO - Cron job added
-2023-07-15 15:32:08,580 - 'controller:' - INFO - Keyboard Interrupt
-2023-07-15 15:32:08,580 - 'controller:' - INFO - Removing entries in crontab
-2023-07-15 15:32:08,587 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
-2023-07-15 15:32:08,594 - 'controller:' - INFO - Creating backup of crontab in /tmp/temp_cron.backup
-2023-07-15 15:32:08,605 - 'controller:' - INFO - Removed entries in crontab
-2023-07-15 15:32:08,605 - 'controller:' - INFO - exiting program
+2023-07-16 17:07:30,214 - 'controller:' - INFO - Options fetched from config file
+2023-07-16 17:07:30,216 - 'controller:' - INFO - Invoking chrome_reader.py
+2023-07-16 17:07:30,216 - 'controller:' - INFO - Invoked chrome_reader.py
+2023-07-16 17:07:30,217 - 'controller:' - INFO - Starting monitoring thread for chrome_reader.py
+2023-07-16 17:07:30,217 - 'controller:' - DEBUG - Monitoring thread pid: 27327
+2023-07-16 17:07:30,217 - 'controller:' - INFO - Started monitoring thread for chrome_reader.py
+2023-07-16 17:07:30,217 - 'controller:' - INFO - System identified as Linux
+2023-07-16 17:07:30,217 - 'controller:' - DEBUG - cron_schedule: * * * * *
+2023-07-16 17:07:30,223 - 'controller:' - DEBUG - Cron Command: * * * * * /usr/bin/python /home/appleconda/Documents/Files/webdoggy/rollover.py /home/appleconda/Documents/Files/webdoggy/file.json 5 >> /tmp/cron_job.log 2>&1
+2023-07-16 17:07:30,223 - 'controller:' - INFO - Cron job added
+2023-07-16 17:07:30,223 - 'controller:' - INFO - Creating scheduled job
+2023-07-16 17:07:36,006 - 'controller:' - INFO - Removing entries in crontab
+2023-07-16 17:07:36,010 - 'controller:' - INFO - Subprocess completed with no errors; Monitor thread is exiting
+2023-07-16 17:07:36,012 - 'controller:' - INFO - Creating backup of crontab in /tmp/temp_cron.backup
+2023-07-16 17:07:36,018 - 'controller:' - INFO - Removed entries in crontab
