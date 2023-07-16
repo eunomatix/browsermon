@@ -20,31 +20,45 @@ class Handlers:
         self.Args = Args
 
     def convert_to_cron_syntax(self, time_string):
+        """
+        Function converts the time string to cron syntax
+        Args: time_string: time string in the format <number><unit> example 1h, 1d , 1m
+        """
         unit = time_string[-1]   # get the time unit: h, d, m
         value = int(time_string[:-1])  # get the numerical value
 
         if unit == 'm':
             if value != 1:
-                self.logger.error("Cron can't handle minutes greater than 59. Please provide valid input.")
+                self.logger.error(
+                    "Cron can't handle minutes greater than 59. Please provide valid input.")
                 return None
             cron_syntax = '* * * * *'
         elif unit == 'h':
             if value < 0 or value > 23:
-                self.logger.error("Cron can't handle hours outside the range 0-23. Please provide valid input.")
+                self.logger.error(
+                    "Cron can't handle hours outside the range 0-23. Please provide valid input.")
                 return None
             cron_syntax = f'0 {value} * * *'
         elif unit == 'd':
             if value < 1 or value > 31:
-                self.logger.error("Cron can't handle days outside the range 1-31. Please provide valid input.")
+                self.logger.error(
+                    "Cron can't handle days outside the range 1-31. Please provide valid input.")
                 return None
             cron_syntax = f'0 0 {value} * *'
         else:
-            self.logger.error("Invalid time format. Please provide valid input.")
+            self.logger.error(
+                "Invalid time format. Please provide valid input.")
             return None
 
         return cron_syntax
 
     def set_schedule_job(self, rotation, path_of_script, Args):
+        """
+        Function sets the schedule job based on the rotation provided
+        For linux it uses CronJobs to set up the schedule job
+        For windows it uses win32com api to connect Scheduler api and register a task. 
+        Args: rotation: time string in the format <number><unit> example 1h, 1d , 1m
+        """
         python_path = sys.executable
         if (SYSTEM == 'Linux'):
             self.logger.info("System identified as Linux")
@@ -143,10 +157,11 @@ class Handlers:
                 TASK_LOGON_NONE)
 
             self.logger.info("Task registered")
-    
+
     def __enter__(self):
         self.set_schedule_job(self.rotation, self.path_of_script, self.Args)
         pass
+
     def __exit__(self, exc_type, exc_value, traceback):
         if SYSTEM == 'Linux':
             self.logger.info("Removing entries in crontab")
