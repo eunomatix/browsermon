@@ -28,10 +28,11 @@ def get_installed_browsers():
     #   returns a set of installed browsers on the system works on windows and linux
     #</Summary> 
 
+    browsers = set()
     if SYSTEM == 'Windows':
         command = 'wmic datafile where "Extension=\'exe\' and (Filename like \'%\\Google\\Chrome\\%\' or Filename like \'%\\Mozilla Firefox\\%\' or Filename like \'%\\Microsoft\\Edge\\%\')" get Version, Manufacturer'
         output = subprocess.getoutput(command)
-        browsers = {line.split(',')[1].strip() if line.split(',')[1].strip() != 'google-chrome' else 'chrome' for line in output.split('\n') if line.strip() != ''}
+        browsers = (line.split(',')[1].strip() if line.split(',')[1].strip() != 'google-chrome' else 'chrome' for line in output.split('\n') if line.strip() != '')
     elif SYSTEM == 'Linux':
         command = 'which -a google-chrome firefox chromium-browser microsoft-edge brave-browser 2>/dev/null'
         output = subprocess.getoutput(command)
@@ -43,9 +44,6 @@ def get_installed_browsers():
                 browsers.add('edge')
             elif line == 'firefox':
                 browsers.add('firefox')
-
-    else:
-        browsers = set()
 
     return browsers
 
