@@ -89,7 +89,7 @@ def run():
     options = config_reader()
 
     handler = RotatingFileHandler(
-        f"{options['logdir']}/webdoggy_controller.log",
+        "../browsermon.log",
         maxBytes=1e+7,
         backupCount=5)
 
@@ -102,14 +102,14 @@ def run():
     logger.info("Options fetched from config file")
 
     cwd = os.getcwd()
-    file_to_rotate = '/home/appleconda/Documents/Files/webdoggy/file.json'
 
     installed_browsers = get_installed_browsers()
 
     launcherObj = launcher.Launcher(installed_browsers, logger, options)
     launcherObj.start()
 
-    with handlers.Handler(logger, options['rotation'], f"{cwd}/file.json", 5) as handler:
+
+    with handlers.Handler(logger, options['rotation'], "../history/history.json", 5) as handler:
         logger.info("Creating scheduled job")
         time.sleep(300)
     
