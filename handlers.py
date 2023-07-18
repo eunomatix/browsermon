@@ -1,179 +1,85 @@
-import logging
-import os
-import sys
-import platform
-import datetime
-from logging.handlers import RotatingFileHandler
-from datetime import datetime
+import os 
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.triggers.cron import CronTrigger
+import re
 
-SYSTEM = platform.system()
-
-if SYSTEM == 'Windows':
-    import win32com.client
-
-
-class Handlers:
-    def __init__(self, logger, rotation, path_of_script, Args):
+class Handler:
+    def __init__(self, logger, rotation, file_path, backup_count):
         self.logger = logger
         self.rotation = rotation
-        self.path_of_script = path_of_script
-        self.Args = Args
+        self.backup_count = backup_count
+        self.file_path = file_path
+        self.scheduler = BackgroundScheduler()
 
-    def convert_to_cron_syntax(self, time_string):
-        """
-        Function converts the time string to cron syntax
-        Args: time_string: time string in the format <number><unit> example 1h, 1d , 1m
-        """
-        unit = time_string[-1]   # get the time unit: h, d, m
-        value = int(time_string[:-1])  # get the numerical value
+    
+    def rollover(self):
+        rotated_files = [self.file_path] + [self.file_path + '.{}'.format(i) for i in range(1, self.backup_count + 1)]
 
-        if unit == 'm':
-            if value != 1:
-                self.logger.error(
-                    "Cron can't handle minutes greater than 59. Please provide valid input.")
-                return None
-            cron_syntax = '* * * * *'
-        elif unit == 'h':
-            if value < 0 or value > 23:
-                self.logger.error(
-                    "Cron can't handle hours outside the range 0-23. Please provide valid input.")
-                return None
-            cron_syntax = f'0 {value} * * *'
-        elif unit == 'd':
-            if value < 1 or value > 31:
-                self.logger.error(
-                    "Cron can't handle days outside the range 1-31. Please provide valid input.")
-                return None
-            cron_syntax = f'0 0 {value} * *'
-        else:
-            self.logger.error(
-                "Invalid time format. Please provide valid input.")
-            return None
+        if os.path.exists(rotated_files[-1]):
+            os.remove(rotated_files[-1])
 
-        return cron_syntax
+        for i in range(len(rotated_files) - 1, 0, -1):
+            source_file = rotated_files[i - 1]
+            destination_file = rotated_files[i]
+            
+            if os.path.exists(source_file):
+                os.rename(source_file, destination_file)
 
-    def set_schedule_job(self, rotation, path_of_script, Args):
-        """
-        Function sets the schedule job based on the rotation provided
-        For linux it uses CronJobs to set up the schedule job
-        For windows it uses win32com api to connect Scheduler api and register a task. 
-        Args: rotation: time string in the format <number><unit> example 1h, 1d , 1m
-        """
-        python_path = sys.executable
-        if (SYSTEM == 'Linux'):
-            self.logger.info("System identified as Linux")
-            cron_command = f"{python_path} {path_of_script} {Args} >> /tmp/cron_job.log 2>&1"
+        open(self.file_path, 'a').close()
+    def get_scheduler_info(self, scheduler, logger):
+        logger.info("Scheduler information:")
 
-    #        cron_schedule = "*/1 * * * *"
+        # Iterate over all jobs in the scheduler
+        for job in scheduler.get_jobs():
+            logger.info(f"Job ID: {job.id}")
+            logger.info(f"Job Name: {job.name}")
+            logger.info(f"Job Function: {job.func.__name__}")
+            logger.info(f"Job Arguments: {job.args}")
+            logger.info(f"Job Keyword Arguments: {job.kwargs}")
 
-            cron_schedule = self.convert_to_cron_syntax(rotation)
-            logging.debug(f"cron_schedule: {cron_schedule}")
-
-            temp_cron_file = "/tmp/temp_cron"
-
-            with open(temp_cron_file, 'w') as file:
-                file.write(cron_schedule + ' ' + cron_command + '\n')
-
-            os.system('crontab {}'.format(temp_cron_file))
-
-            os.remove(temp_cron_file)
-            self.logger.debug(f"Cron Command: {cron_schedule} {cron_command}")
-            self.logger.info("Cron job added")
-
-        elif (SYSTEM == 'Windows'):
-            self.logger.info("System identified as Windows")
-
-            scheduler = win32com.client.Dispatch('Schedule.Service')
-            scheduler.Connect()
-
-            self.logger.info("Connected to scheduler")
-
-            root_folder = scheduler.GetFolder('\\')
-            task_def = scheduler.NewTask(0)
-
-            # Create trigger
-            start_time = datetime.datetime.now()
-
-            if rotation.endswith('h'):
-                hours = int(rotation[:-1])
-                TASK_TRIGGER_DAILY = 2  # 2 means the task is meant to run daily
-                trigger = task_def.Triggers.Create(TASK_TRIGGER_DAILY)
-                trigger.StartBoundary = start_time.isoformat()
-                trigger.DaysInterval = 1
-                trigger.Repetition.Duration = ""
-                # Convert hours to minutes
-                trigger.Repetition.Interval = f"PT{hours * 60}M"
-
-            elif rotation.endswith('d'):
-                days = int(rotation[:-1])
-                TASK_TRIGGER_WEEKLY = 3  # 3 means the task is meant to run weekly
-                trigger = task_def.Triggers.Create(TASK_TRIGGER_WEEKLY)
-                trigger.StartBoundary = start_time.isoformat()
-                trigger.DaysOfWeek = 0x7F  # Run on all days of the week
-                trigger.WeeksInterval = days
-                trigger.Repetition.Duration = ""
-                trigger.Repetition.Interval = "PT24H"  # 24 hours interval
-
-            elif rotation.endswith('m'):
-                minutes = int(rotation[:-1])
-                TASK_TRIGGER_DAILY = 2  # 2 means the task is meant to run daily
-                trigger = task_def.Triggers.Create(TASK_TRIGGER_DAILY)
-                trigger.StartBoundary = start_time.isoformat()
-                trigger.DaysInterval = 1
-                trigger.Repetition.Duration = ""
-                trigger.Repetition.Interval = f"PT{minutes}M"
-
+            # Retrieve trigger information
+            if isinstance(job.trigger, CronTrigger):
+                cron_expression = job.trigger.fields
+                logger.info(f"Job Trigger Type: CronTrigger")
+                logger.info(f"Cron Expression: {cron_expression}")
+                next_run_time = job.next_run_time  # Use job's next_run_time attribute
+                logger.info(f"Next Run Time: {next_run_time}")
             else:
-                raise ValueError("Invalid time format")
+                logger.info(f"Job Trigger Type: {type(job.trigger).__name__}")
+                next_run_time = job.next_run_time  # Use job's next_run_time attribute
+                logger.info(f"Next Run Time: {next_run_time}")
 
-            self.logger.info("Trigger created")
-            self.logger.debug(
-                f"Trigger start boundary set to {start_time.isoformat()}")
-            self.logger.debug(
-                f"Trigger repetition interval set to {trigger.Repetition.Interval}")
+            logger.info("")
 
-            # Create action
-            TASK_ACTION_EXEC = 0  # means that the action is an executable action
-            action = task_def.Actions.Create(TASK_ACTION_EXEC)
-            action.ID = 'Run webdoggy rotation task'
-            action.Path = python_path  # Use the Python executable from the current environment
-            action.Arguments = path_of_script  # Replace with the path to your Python script
+    def schedule_background_job(self):
+        # Extract the numeric value and unit from the input string
+        match = re.match(r'^(\d+)([mhd])$', self.rotation)
+        if not match:
+            raise ValueError("Invalid interval format")
 
-            # Set parameters
-            task_def.RegistrationInfo.Description = 'Test Task'
-            task_def.Settings.Enabled = True
-            task_def.Settings.StopIfGoingOnBatteries = False
+        value = int(match.group(1))
+        unit = match.group(2)
 
-            # Register task
-            # If task already exists, it will be updated
-            TASK_CREATE_OR_UPDATE = 6
-            TASK_LOGON_NONE = 0
-            root_folder.RegisterTaskDefinition(
-                'webdoggy rotation task',
-                task_def,
-                TASK_CREATE_OR_UPDATE,
-                '',  # No user
-                '',  # No password
-                TASK_LOGON_NONE)
+        # Map the unit to the appropriate cron expression
+        if unit == 'm':
+            cron_expr = f"*/{value} * * * *"
+        elif unit == 'h':
+            cron_expr = f"0 */{value} * * *"
+        elif unit == 'd':
+            cron_expr = f"0 0 */{value} * *"
+        else:
+            raise ValueError("Invalid interval unit")
 
-            self.logger.info("Task registered")
-
-    def __enter__(self):
-        self.set_schedule_job(self.rotation, self.path_of_script, self.Args)
-        pass
-
+        self.scheduler.add_job(self.rollover, trigger=CronTrigger.from_crontab(cron_expr))
+        self.scheduler.start() 
+                
+    def __enter__(self):   
+        self.logger.info("Handler class invoked")
+        self.logger.info("Running the scheduled job: rollover (funciton) for duration: {}".format(self.rotation))
+        self.schedule_background_job()
+        self.get_scheduler_info(self.scheduler, self.logger)
     def __exit__(self, exc_type, exc_value, traceback):
-        if SYSTEM == 'Linux':
-            self.logger.info("Removing entries in crontab")
-            temp_cron_file = '/tmp/temp_cron.backup'
-            os.system("crontab -l > {}".format(temp_cron_file))
-            self.logger.info(f"Creating backup of crontab in {temp_cron_file}")
-            os.system('crontab -r')
-            self.logger.info("Removed entries in crontab")
-        elif SYSTEM == 'Windows':
-            self.logger.info("Removing scheduled tasks")
-            scheduler = win32com.client.Dispatch('Schedule.Service')
-            scheduler.Connect()
-            root_folder = scheduler.GetFolder('\\')
-            root_folder.DeleteTask('webdoggy rotation task', 0)
-            self.logger.info("Removed scheduled tasks")
+        self.logger.info("Cleanup of Handler class")
+        self.scheduler.shutdown()
+        self.scheduler.remove_all_jobs()

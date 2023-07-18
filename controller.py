@@ -1,14 +1,12 @@
 import configparser
-import sys
 import time
 import os
 import subprocess
 import logging
 from logging.handlers import RotatingFileHandler
-import threading
 import platform
-import handlers
 import launcher
+import handlers
 
 SYSTEM = platform.system()
 config = configparser.ConfigParser()
@@ -111,9 +109,10 @@ def run():
     launcherObj = launcher.Launcher(installed_browsers, logger, options)
     launcherObj.start()
 
-    with handlers.Handlers(logger, options['rotation'], f"{cwd}/rollover.py", f"{file_to_rotate} 5") as handler:
+    with handlers.Handler(logger, options['rotation'], f"{cwd}/file.json", 5) as handler:
         logger.info("Creating scheduled job")
         time.sleep(300)
+    
 
 
 if __name__ == '__main__':
