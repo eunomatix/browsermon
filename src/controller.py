@@ -4,6 +4,7 @@ import os
 import subprocess
 import logging
 from logging.handlers import RotatingFileHandler
+import winreg as reg
 import platform
 import launcher
 import handlers
@@ -27,16 +28,34 @@ def get_installed_browsers():
     """
     browsers = set()
     if SYSTEM == 'Windows':
-        command = (
-            'wmic datafile where "Extension=\'exe\' and '
-            '(Filename like \'%\\Google\\Chrome\\%\' or '
-            'Filename like \'%\\Mozilla Firefox\\%\' or '
-            'Filename like \'%\\Microsoft\\Edge\\%\')" '
-            'get Version, Manufacturer'
-        )
-        output = subprocess.getoutput(command)
-        browsers = (line.split(',')[1].strip() if line.split(',')[1].strip(
-        ) != 'google-chrome' else 'chrome' for line in output.split('\n') if line.strip() != '')
+        paths = [
+        r"SOFTWARE\Clients\StartMenuInternet",
+        r"SOFTWARE\WOW6432Node\Clients\StartMenuInternet"  # For 32-bit apps on 64-bit system
+        ]
+
+        for path in paths:
+            try:
+                # Open the registry key
+                key = reg.OpenKey(reg.HKEY_LOCAL_MACHINE, path)
+                i = 0
+                while True:
+                    try:
+                        # Enumerating subkeys
+                        browser = reg.EnumKey(key, i)
+                        if (browser[:13] == "Google Chrome"):
+                            browsers.add("chrome")
+                        elif browser[:14] == "Microsoft Edge":
+                            browsers.add("edge")
+                        elif browser[:7] == "Firefox":
+                            browsers.add("firefox")
+
+                        i += 1
+                    except WindowsError:
+                        # If no more subkey, break the loop
+                        break
+            except WindowsError:
+                pass  # If key doesn't exist, move on to next one
+
     elif SYSTEM == 'Linux':
         command = 'which -a google-chrome firefox chromium-browser microsoft-edge brave-browser 2>/dev/null'
         output = subprocess.getoutput(command)
@@ -110,7 +129,6 @@ def run():
 
 
     with handlers.Handler(logger, options['rotation'], "../history/history.json", 5) as handler:
-        logger.info("Creating scheduled job")
         time.sleep(300)
     
 

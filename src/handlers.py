@@ -76,7 +76,7 @@ class Handler:
                 
     def __enter__(self):   
         self.logger.info("Handler class invoked")
-        self.logger.info("Running the scheduled job: rollover (funciton) for duration: {}".format(self.rotation))
+        self.logger.info(f"Running the scheduled job: rollover (funciton) for duration: {self.rotation}")
         self.schedule_background_job()
         self.get_scheduler_info(self.scheduler, self.logger)
     def __exit__(self, exc_type, exc_value, traceback):
