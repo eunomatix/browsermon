@@ -1,26 +1,27 @@
 import atexit
 import base64
+import ctypes
 import datetime
-import getpass
+import hashlib
 import json
 import logging
 import os
 import platform
 import sqlite3
-import subprocess
 import sys
 
 from apscheduler.schedulers.blocking import BlockingScheduler
+from cryptography.fernet import Fernet
 
 
 def write_logs(level, message):
     """
-    Write logs to the webdoggy.log file
+    Write logs to the browsermon.log file
     :param level: Log level (info, error, warning)
     :param message: Log message
     :return: None
     """
-    log_file = os.path.join(logdir, "webdoggy.log")
+    log_file = os.path.join(loggingdir, "browsermon.log")
     log_format = "%(asctime)s WD%(process)d:: \'MICROSOFT-EDGE:\' - %(levelname)s %(message)s"  # noqa
     logging.basicConfig(filename=log_file, level=logging.INFO,
                         format=log_format)
@@ -54,13 +55,13 @@ def get_static_metadata(user_profile_dir, username):
     :return: Static metadata dictionary
     """
     metadata = {
-            "hostname": platform.node(),
-            "os": platform.system(),
-            "os_username": username,
-            "browser": "Microsoft Edge",
-            "browser_version": get_browser_version(user_profile_dir),
-            "browser_db": f"SQLite {sqlite3.sqlite_version}"
-            }
+        "hostname": platform.node(),
+        "os": system,
+        "os_username": username,
+        "browser": "Microsoft Edge",
+        "browser_version": get_browser_version(user_profile_dir),
+        "browser_db": f"SQLite {sqlite3.sqlite_version}"
+    }
     return metadata
 
 
@@ -79,16 +80,16 @@ def get_profiles(user_profile_dir, username):
     profiles = {}
     if profile_info and "info_cache" in profile_info:
         profiles = {
-                profile_name: {
-                    "profile_title": user_data.get("name"),
-                    "profile_username": user_data.get("user_name"),
-                    "profile_path": os.path.join(user_profile_dir,
-                                                 profile_name),
-                    "username": username
-                    }
-                for profile_name, user_data in
-                profile_info["info_cache"].items()
-                }
+            profile_name: {
+                "profile_title": user_data.get("name"),
+                "profile_username": user_data.get("user_name"),
+                "profile_path": os.path.join(user_profile_dir,
+                                             profile_name),
+                "username": username,
+            }
+            for profile_name, user_data in
+            profile_info["info_cache"].items()
+        }
 
     return profiles
 
@@ -98,22 +99,44 @@ def get_all_profiles():
     Get all the profiles for all the users on the operating system.
     :return: Dictionary of profiles
     """
-    write_logs("info", f"sniffing users from {platform.node()}")
+    write_logs("info", f"Sniffing users from {platform.node()}")
     profiles = {}
 
-    # Get the list of users on the operating system
-    users = os.listdir('/home')
+    if system == "Windows":
+        import winreg
 
-    for user in users:
-        user_profile_dir = os.path.join('/home', user, '.config',
-                                        'microsoft-edge')
+        try:
+            reg_path = r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList"
+            reg_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, reg_path)
+            for i in range(winreg.QueryInfoKey(reg_key)[0]):
+                sid = winreg.EnumKey(reg_key, i)
+                user_key = winreg.OpenKey(reg_key, sid)
+                try:
+                    profile_dir, _ = winreg.QueryValueEx(user_key, "ProfileImagePath")
+                    username = os.path.basename(profile_dir)
+                    user_profile_dir = os.path.join(profile_dir, "AppData",
+                                                    "Local", "Microsoft", "Edge",
+                                                    "User Data")
+                    if os.path.exists(user_profile_dir):
+                        write_logs("info",
+                                   f"Found Microsoft Edge profile directory for user: {username}") #noqa
+                        user_profiles = get_profiles(user_profile_dir, username)
+                        profiles.update(user_profiles)
+                finally:
+                    winreg.CloseKey(user_key)
+        finally:
+            winreg.CloseKey(reg_key)
+    else:  # Assume Linux
+        for user in os.listdir('/home'):
+            user_profile_dir = os.path.join('/home', user, '.config',
+                                            'microsoft-edge')
 
-        # Check if the user has a Microsoft Edge profile directory
-        if os.path.exists(user_profile_dir):
-            write_logs("info",
-                       f"Found Microsoft Edge profile directory for user: {user}")
-            user_profiles = get_profiles(user_profile_dir, user)
-            profiles.update(user_profiles)
+            # Check if the user has a Microsoft Edge profile directory
+            if os.path.exists(user_profile_dir):
+                write_logs("info",
+                           f"Found Microsoft Edge profile directory for user: {user}")
+                user_profiles = get_profiles(user_profile_dir, user)
+                profiles.update(user_profiles)
 
     return profiles
 
@@ -124,26 +147,10 @@ def write_history_data_to_json(profile):
     :param profile: Profile information
     :return: None
     """
-    global last_visit_time
     metadata = get_static_metadata(profile["profile_path"],
                                    profile["username"])
 
     history_file = os.path.join(profile["profile_path"], "History")
-
-    # Get the size of the history file
-    file_size_command = f"du -b '{history_file}' | awk '{{print $1}}'"
-    file_size_output = subprocess.check_output(file_size_command,
-                                               shell=True,
-                                               text=True).strip()
-    history_file_size = int(file_size_output)
-
-    # Check if the history file size has changed
-    if history_file_size == profile.get("history_file_size"):
-        write_logs("info",
-                   f"No new records found for profile '{profile['profile_title']}' user: '{profile['username']}'")  # noqa
-        return
-    else:
-        profile["history_file_size"] = history_file_size
 
     connection = sqlite3.connect(f"file:{history_file}?immutable=1",
                                  uri=True)
@@ -166,9 +173,12 @@ def write_history_data_to_json(profile):
             LEFT JOIN URLs AS u_referrer ON v_referrer.url = u_referrer.id
         """
 
-    # Filter for new records based on last processed visit time
+    last_visit_time = last_visit_times.get(
+        profile["profile_title"])  # Get the last visit time for the profile
+
     if last_visit_time:
-        query += "WHERE v.visit_time > ?"
+        # Filter for new records based on last processed visit time
+        query += " WHERE v.visit_time > ?"
         cursor.execute(query, (last_visit_time,))
     else:
         cursor.execute(query)
@@ -177,7 +187,7 @@ def write_history_data_to_json(profile):
     with open(output_file, "a+") as file:
 
         num_new_records = len(
-                rows)  # Count the number of new records found
+            rows)  # Count the number of new records found
         write_logs("info",
                    f"Found {num_new_records} new records for profile '{profile['profile_title']}' user: '{profile['username']}'")  # noqa
 
@@ -191,9 +201,9 @@ def write_history_data_to_json(profile):
 
             visit_time_obj = datetime.datetime(1601, 1,
                                                1) + datetime.timedelta(
-                                                       microseconds=visit_time)
+                microseconds=visit_time)
             visit_time_str = visit_time_obj.strftime(
-                    "%Y-%m-%d %H:%M:%S")
+                "%Y-%m-%d %H:%M:%S")
 
             entry = {}
 
@@ -207,14 +217,14 @@ def write_history_data_to_json(profile):
                 "title": title,
                 "visit_time": visit_time_str,
                 "visit_count": visit_count
-                })
+            })
 
             file.write(json.dumps(entry, indent=4))
             file.write(",\n")
 
         if rows:
             # Update the last processed visit time to the latest record's visit time
-            last_visit_time = rows[-1][4]
+            last_visit_times[profile["profile_title"]] = rows[-1][4]
 
     cursor.close()
     connection.close()
@@ -261,83 +271,103 @@ def parse_schedule_window(window):
             raise InvalidScheduleWindowFormat
     except InvalidScheduleWindowFormat:
         print(
-                "Invalid schedule window format. Please use the valid format (e.g., 1m, 1h, 1d)")  # noqa
+            "Invalid schedule window format. Please use the valid format (e.g., 1m, 1h, 1d)")  # noqa
         sys.exit(1)
+
+
+def gen_fernet_key(passcode: bytes) -> bytes:
+    assert isinstance(passcode, bytes)
+    hlib = hashlib.md5()
+    hlib.update(passcode)
+    return base64.urlsafe_b64encode(hlib.hexdigest().encode('latin-1'))
+
+
+def encrypt_data(data, key):
+    """
+    Encrypt the data using AES encryption with the key.
+    :param data: Data to be encrypted
+    :param key: Encryption key
+    :return: Encrypted data
+    """
+    cipher = Fernet(key)
+    encrypted_data = cipher.encrypt(data.encode())
+    return encrypted_data
+
+
+def decrypt_data(data, key):
+    """
+    Decrypt the data using AES encryption with the key.
+    :param data: Data to be decrypted
+    :param key: Decryption key
+    :return: Decrypted data
+    """
+    cipher = Fernet(key)
+    decrypted_data = cipher.decrypt(data)
+    return decrypted_data.decode()
 
 
 def write_cache_file():
     """
-    Write the cache file with the last visit time in encrypted JSON format.
+    Write the cache file with the last visit times in encrypted format.
     :return: None
     """
-    cache_data = {
-            "last_visit_time": last_visit_time
-            }
+    encrypted_data = encrypt_data(json.dumps(last_visit_times), encryption_key)
 
-    # Encrypt the cache data using base64 encoding
-    encrypted_data = base64.b64encode(
-            json.dumps(cache_data).encode()).decode()
+    with open(cache_file, "wb") as file:
+        file.write(encrypted_data)
 
-    # Get the current system username to use as the encryption key
-    encryption_key = getpass.getuser()
-
-    # Encrypt the cache data using the encryption key
-    encrypted_cache_data = []
-    for i, char in enumerate(encrypted_data):
-        key_char = encryption_key[i % len(encryption_key)]
-        encrypted_char = chr(ord(char) ^ ord(key_char))
-        encrypted_cache_data.append(encrypted_char)
-
-    # Write the encrypted cache data to the cache file
-    with open(cache_file, "w") as file:
-        file.write("".join(encrypted_cache_data))
-
-    write_logs("info",
-               "Cache file written with last visit time (encrypted)")
+    write_logs("info", "Cache file written with last visit times")
 
 
 def read_cache_file():
     """
-    Read the cache file and decrypt the last visit time.
-    return: None
+    Read the cache file and decrypt the last visit times.
+    :return: None
     """
+    global last_visit_times
+
     if os.path.exists(cache_file):
-        global last_visit_time
-        with open(cache_file, "r") as file:
-            encrypted_cache_data = file.read()
+        with open(cache_file, "rb") as file:
+            encrypted_data = file.read()
 
-        # Get the current system username to use as the encryption key
-        encryption_key = getpass.getuser()
+        decrypted_data = decrypt_data(encrypted_data, encryption_key)
 
-        # Decrypt the cache data using the encryption key
-        decrypted_cache_data = []
-        for i, char in enumerate(encrypted_cache_data):
-            key_char = encryption_key[i % len(encryption_key)]
-            decrypted_char = chr(ord(char) ^ ord(key_char))
-            decrypted_cache_data.append(decrypted_char)
+        last_visit_times = json.loads(decrypted_data)
 
-        # Decrypt the cache data from base64 encoding
-        decrypted_data = base64.b64decode(
-                "".join(decrypted_cache_data)).decode()
-
-        # Parse the decrypted cache data as JSON
-        cache_data = json.loads(decrypted_data)
-
-        # Retrieve the last visit time from the cache data
-        last_visit_time = cache_data.get("last_visit_time")
-
-        write_logs("info",
-                   "Cache file read and last visit time decrypted")
+        write_logs("info", "Cache file read and last visit times decrypted")
 
 
 if __name__ == "__main__":
     try:
-        # if not os.geteuid() == 0:
-        #     sys.exit("\nOnly root can run this script\n")
+        system = None
 
-        last_visit_time = None
+        if platform.system() == "Linux":
+            system = "Linux"
+        elif platform.system() == "Windows":
+            system = "Windows"
 
-        logdir = str(sys.argv[1])
+        if system == 'Linux':
+            if not os.geteuid() == 0:
+                print("Error, Shutting Down! Only root can run this script")
+                sys.exit(1)
+        elif system == 'Windows':
+            if not ctypes.windll.shell32.IsUserAnAdmin() != 0:
+                print("Error, Shutting Down! Only root can run this script")
+                sys.exit(1)
+
+        loggingdir = None
+
+        if system == "Linux":
+            loggingdir = '/opt/browsermon'
+        elif system == "Windows":
+            loggingdir = 'C:\\browsermon'
+
+        if not os.path.exists(loggingdir):
+            os.makedirs(loggingdir)
+            write_logs("warning",
+                       f"{loggingdir} not found, creating new")
+
+        logdir = sys.argv[1]
 
         if os.path.exists(logdir):
             write_logs("info",
@@ -347,18 +377,24 @@ if __name__ == "__main__":
             write_logs("warning",
                        f"Logdir {logdir} not found, creating new")
 
-        cache_file = os.path.join(logdir, "webdoggy_cache.json")
+        last_visit_times = {}
 
-        mode = str(sys.argv[2])  # Mode argument (scheduled or real-time)
+        cache_file = os.path.join(logdir, "browsermon_cache.json")
+
+        mode = sys.argv[2]  # Mode argument (scheduled or real-time)
 
         write_logs("info",
                    f"Reader started successfully in {mode} mode")
 
         # Path to the output file
-        output_file = os.path.join(logdir, "webdoggy_history.log")
+        output_file = os.path.join(logdir, "browsermon_history.log")
 
         # Register the write_cache_file function to be called when the program exits
         atexit.register(write_cache_file)
+
+        # encryption key
+        passcode = '249524.405925.606329'
+        encryption_key = gen_fernet_key(passcode.encode('utf-8'))
 
         # Read the cache file if it exists
         read_cache_file()
@@ -375,8 +411,6 @@ if __name__ == "__main__":
             process_edge_history()  # Run immediately when the script starts
 
         elif mode == "real-time":
-            print("Real-time mode: Running in real-time (scheduler)")
-
             scheduler.add_job(process_edge_history, 'interval',
                               seconds=10)  # Run every 10 seconds
 
@@ -389,11 +423,10 @@ if __name__ == "__main__":
     except IndexError:
         print("Invalid number of arguments!")
         print(
-                "Valid format: program [logdir] [mode](scheduled, realtime) [scheduled_window]")  # noqa
+            "Valid format: program [logdir] [mode](scheduled, realtime) [scheduled_window]")  # noqa
         write_logs("error", "Invalid number of arguments!")
 
     except Exception as e:
         print("An error occurred:")
         print(str(e))
         write_logs("error", f"Error: {str(e)}")
-
