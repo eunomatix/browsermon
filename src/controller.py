@@ -11,7 +11,7 @@ import handlers
 SYSTEM = platform.system()
 
 if SYSTEM == "Windows":
-    import wingreg as reg
+    import winreg as reg
 config = configparser.ConfigParser()
 
 
