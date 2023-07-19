@@ -41,10 +41,11 @@ class Launcher:
                     f"Relaunching the subprocess: {browser}_reader.py")
                 process = subprocess.Popen(['python',
                                             f'{browser}_reader.py',
-                                            mode,
-                                            scheduled_window,
-                                            logdir,
-                                            logmode],
+                                            self.options['logdir'],
+                                            self.options['mode'],
+                                            self.options['schedule_window'],
+                                            self.options['logmode']
+                                            ],
                                            stderr=subprocess.PIPE)
                 self.logger.info(
                     "Relaunched the reader that exited with error")
@@ -58,7 +59,7 @@ class Launcher:
                     "Subprocess completed with no errors; Monitor thread is exiting")
                 break
 
-    def launch_reader(self, browser, mode, scheduled_window, logdir, logmode):
+    def launch_reader(self, browser):
         """
         Function launches the reader based on the browser provided
 
@@ -71,17 +72,19 @@ class Launcher:
         self.logger.info(f"Invoking {browser}_reader.py")
         process = subprocess.Popen(['python',
                                     f'{browser}_reader.py',
-                                    mode,
-                                    scheduled_window,
-                                    logdir,
-                                    logmode],
+                                    self.options['logdir'],
+                                    self.options['mode'],
+                                    self.options['schedule_window'],
+                                    self.options['logmode']
+                                    ],
                                    stderr=subprocess.PIPE)
+                                   
         self.processes.append(process)
         self.logger.info(f"Invoked {browser}_reader.py")
         self.logger.info(f"Starting monitoring thread for {browser}_reader.py")
         monitorThread = threading.Thread(
             target=self.monitor_subprocess, args=(
-                process, browser, mode, scheduled_window, logdir, logmode,))
+                process, browser, self.options['mode'], self.options['schedule_window'], self.options['logdir'], self.options['logmode']))
         monitorThread.start()
         self.logger.info(f'Started monitoring thread for {browser}_reader.py')
 
@@ -96,20 +99,10 @@ class Launcher:
         """
         if self.options['browser'] == 'all':
             for browser in self.installed_browsers:
-                self.launch_reader(
-                    browser,
-                    self.options['mode'],
-                    self.options['scheduled_window'],
-                    self.options['logdir'],
-                    self.options['logmode'])
+                self.launch_reader(browser)
 
         if self.options['browser'] in self.installed_browsers:
-            self.launch_reader(
-                self.options['browser'],
-                self.options['mode'],
-                self.options['schedule_window'],
-                self.options['logdir'],
-                self.options['logmode'])
+            self.launch_reader(self.options['browser'])
         else:
             allowed_browsers = {'chrome', 'opera', 'firefox', 'edge', 'safari'}
             readers_list = self.options['browser'].split(",")
@@ -117,10 +110,4 @@ class Launcher:
                 readers_to_launch = [
                     reader for reader in readers_list if reader in self.installed_browsers]
                 for browser in readers_to_launch:
-                    self.launch_reader(
-                        browser,
-                        self.options['mode'],
-                        self.options['scheduled_window'],
-                        self.options['logdir'],
-                        self.options['logmode'])
-
+                    self.launch_reader(browser)

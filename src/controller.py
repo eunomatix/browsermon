@@ -4,12 +4,14 @@ import os
 import subprocess
 import logging
 from logging.handlers import RotatingFileHandler
-import winreg as reg
 import platform
 import launcher
 import handlers
 
 SYSTEM = platform.system()
+
+if SYSTEM == "Windows":
+    import wingreg as reg
 config = configparser.ConfigParser()
 
 
@@ -70,7 +72,7 @@ def get_installed_browsers():
     return browsers
 
 
-def config_reader(conf_file_path='/opt/browsermon/browsermon.conf'):
+def config_reader(conf_file_path='../browsermon.conf'):
     """
     Function reads the config file and returns a dictionary of options
     Args: conf_file_path: path to config file
