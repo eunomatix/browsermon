@@ -15,11 +15,20 @@ if SYSTEM == "Windows":
 config = configparser.ConfigParser()
 
 
+class ExcludeTimeZoneFilter(logging.Filter):
+    def filter(self, record):
+        # Exclude log records with the specific message about the timezone configuration
+        if record.getMessage() == "/etc/localtime is a symlink to: Asia/Karachi":
+            return False
+        return True
+
 defaults = {'browser': 'all',
             'mode': 'scheduled',
             'schedule_window': '1m',
-            'logdir': '/home/appleconda/Documents/webdoggy/logs',
-            'logmode': 'csv'}
+            'logdir': '/opt/history',
+            'logmode': 'csv',
+            'rotation': '1m',
+            'deletion': '1w'}
 
 
 def get_installed_browsers():
@@ -114,9 +123,11 @@ def run():
         maxBytes=1e+7,
         backupCount=5)
 
+    handler.addFilter(ExcludeTimeZoneFilter())
+
     logging.basicConfig(
         level=logging.DEBUG,
-        format='%(asctime)s - \'controller:\' - %(levelname)s - %(message)s',
+        format='%(asctime)s WD%(process)d:: \'CONTROLLER:\' - %(levelname)s - %(message)s',
         handlers=[handler])
 
     logger = logging.getLogger()
@@ -130,7 +141,7 @@ def run():
     launcherObj.start()
 
 
-    with handlers.Handler(logger, options['rotation'], "../history/history.json", 5) as handler:
+    with handlers.Handler(logger, options['rotation'], "../history/browsermon_history.log", 5) as handler:
         time.sleep(300)
     
 
