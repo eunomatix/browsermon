@@ -12,6 +12,7 @@ SYSTEM = platform.system()
 
 if SYSTEM == "Windows":
     import winreg as reg
+
 config = configparser.ConfigParser()
 
 
@@ -33,8 +34,12 @@ defaults = {'browser': 'all',
 
 def get_installed_browsers():
     """
-    Function returns a set of browsers installed on the system.
+    Function returns a set of browsers installed on the system. For windows it uses 
+    'reg' library to read windows registry and fetch the installed browsers. 
+    For Linux it uses a simple command of 'which'
+
     Args: None
+
     Returns: set of browsers installed on the system
     """
     browsers = set()
@@ -84,9 +89,11 @@ def get_installed_browsers():
 def config_reader(conf_file_path='../browsermon.conf'):
     """
     Function reads the config file and returns a dictionary of options
+
     Args: conf_file_path: path to config file
     """
-
+    global config 
+    global defaults
     config.read(conf_file_path)
 
     options = [
@@ -95,15 +102,18 @@ def config_reader(conf_file_path='../browsermon.conf'):
         'schedule_window',
         'logdir',
         'logmode',
-        'rotation']
+        'rotation',
+        'deletion']
 
     config_values = {}
 
     for option in options:
         try:
             config_values[option] = config.get('default', option)
-        except (configparser.NoSectionError, configparser.NoOptionError):
+        except (configparser.NoSectionError or configparser.NoOptionError):
+            print("Exception caught")
             config_values[option] = defaults[option]
+
 
     return config_values
 
@@ -113,6 +123,10 @@ def run():
     Function runs the controller, reads the config file
     initializes the logger
     and creates launcher object and calls the function start() on it.
+    The launcher class is responsible for launching the readers, The launcher class is initialized with following parameters
+        installed browsers (set of names of installed browsers)
+        logging object (The logging module for which launcher will log) 
+        options (The options that are read from the conf file are also to be send to launcher) 
 
     Args: None
     """

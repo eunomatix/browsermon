@@ -1,8 +1,8 @@
 import os 
+import re
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
-import re
 
 class Handler:
     def __init__(self, logger, rotation, file_path, backup_count):
@@ -14,6 +14,15 @@ class Handler:
 
     
     def rollover(self):
+        """ 
+        Function: rollover()
+            Descirption: This function is for rotation of history log files that readers generates; how it works is that 
+            if will rename the current history log files that all readers are writing to and create a new file with old name 
+            history log files. 
+
+        Args: None
+            
+        """
         rotated_files = [self.file_path] + [self.file_path + '.{}'.format(i) for i in range(1, self.backup_count + 1)]
 
         if os.path.exists(rotated_files[-1]):
@@ -27,7 +36,19 @@ class Handler:
                 os.rename(source_file, destination_file)
 
         open(self.file_path, 'a').close()
+
     def get_scheduler_info(self, scheduler, logger):
+        """ 
+        get_scheduler_info(, scheduler, logger) 
+        Description:
+            This function is to log all the details about the apscheduler.backgroundScheduler
+
+        Args: 
+            scheduler: (the object of the apscheduler that you wish to log information about
+            
+            logger: the objecct of the logging module that is responsible for logging into the log file. 
+        """
+
         logger.info("Scheduler information:")
 
         # Iterate over all jobs in the scheduler
@@ -53,6 +74,14 @@ class Handler:
             logger.info("")
 
     def schedule_background_job(self):
+        """ 
+        schedule_background_job()
+        Description: 
+            This function is to schedule the rollover job for rotating files. 
+            This function uses apscheduler library in python to schedule the job. 
+
+        Args: None
+        """
         # Extract the numeric value and unit from the input string
         match = re.match(r'^(\d+)([mhd])$', self.rotation)
         if not match:
