@@ -135,6 +135,8 @@ def run():
     Args: None
     """
     options = config_reader()
+    print(options)
+    logdir = options['logdir']
 
     handler = RotatingFileHandler(
         "../browsermon.log",
@@ -151,16 +153,13 @@ def run():
     logger = logging.getLogger()
     logger.info("Options fetched from config file")
 
-    cwd = os.getcwd()
-
     installed_browsers = get_installed_browsers()
-    print(options)
 
     launcherObj = launcher.Launcher(installed_browsers, logger, options)
     launcherObj.start()
 
-
-    with handlers.Handler(logger, options['rotation'], "../history/browsermon_history.log", 5) as handler:
+    
+    with handlers.Handler(logger, options['rotation'], f"{logdir}/browsermon_history.log", 5) as handler:
         time.sleep(300)
     
 

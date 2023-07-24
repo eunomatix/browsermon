@@ -1,8 +1,8 @@
 import atexit
 import base64
+import csv
 import ctypes
 import datetime
-import hashlib
 import json
 import logging
 import os
@@ -12,6 +12,9 @@ import sys
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 from cryptography.fernet import Fernet
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 
 def write_logs(level, message):
@@ -119,7 +122,7 @@ def get_all_profiles():
                                                     "User Data")
                     if os.path.exists(user_profile_dir):
                         write_logs("info",
-                                   f"Found Microsoft Edge profile directory for user: {username}") #noqa
+                                   f"Found Microsoft Edge profile directory for user: {username}")  # noqa
                         user_profiles = get_profiles(user_profile_dir, username)
                         profiles.update(user_profiles)
                 finally:
@@ -141,9 +144,9 @@ def get_all_profiles():
     return profiles
 
 
-def write_history_data_to_json(profile):
+def write_history_data(profile):
     """
-    Write the browsing history data for a given profile to the JSON file.
+    Write the browsing history data for a given profile.
     :param profile: Profile information
     :return: None
     """
@@ -151,6 +154,10 @@ def write_history_data_to_json(profile):
                                    profile["username"])
 
     history_file = os.path.join(profile["profile_path"], "History")
+
+    del profile["username"]
+
+    profile_name = os.path.basename(profile['profile_path'])
 
     connection = sqlite3.connect(f"file:{history_file}?immutable=1",
                                  uri=True)
@@ -174,7 +181,7 @@ def write_history_data_to_json(profile):
         """
 
     last_visit_time = last_visit_times.get(
-        profile["profile_title"])  # Get the last visit time for the profile
+        profile_name)  # Get the last visit time for the profile
 
     if last_visit_time:
         # Filter for new records based on last processed visit time
@@ -184,12 +191,28 @@ def write_history_data_to_json(profile):
         cursor.execute(query)
     rows = cursor.fetchall()
 
-    with open(output_file, "a+") as file:
+    output_file = os.path.join(logdir, f"browsermon_history.{logmode}")
 
-        num_new_records = len(
-            rows)  # Count the number of new records found
+    with open(output_file, "a+", newline='') as file:
+        if logmode == "json":
+            writer = lambda x: file.write(json.dumps(x, indent=4) + ",\n")  # noqa
+        elif logmode == "csv":
+            csv_writer = csv.DictWriter(file,
+                                        fieldnames=list(metadata.keys()) + list(profile.keys()) + ["session_id",  # noqa
+                                                                                                   "referrer",
+                                                                                                   "url",
+                                                                                                   "title",  # noqa
+                                                                                                   "visit_time",
+                                                                                                   "visit_count"])  # noqa
+            writer = csv_writer.writerow
+
+            # Check if the CSV file is empty and write header if needed
+            if file.tell() == 0:
+                csv_writer.writeheader()
+
+        num_new_records = len(rows)
         write_logs("info",
-                   f"Found {num_new_records} new records for profile '{profile['profile_title']}' user: '{profile['username']}'")  # noqa
+                   f"Found {num_new_records} new records for profile '{profile_name}' user: '{metadata['os_username']}'")  # noqa
 
         for result in rows:
             session_id = result[0]
@@ -206,10 +229,8 @@ def write_history_data_to_json(profile):
                 "%Y-%m-%d %H:%M:%S")
 
             entry = {}
-
             entry.update(metadata)
             entry.update(profile)
-            # Create a dictionary for each row of data
             entry.update({
                 "session_id": session_id,
                 "referrer": referrer,
@@ -219,18 +240,17 @@ def write_history_data_to_json(profile):
                 "visit_count": visit_count
             })
 
-            file.write(json.dumps(entry, indent=4))
-            file.write(",\n")
+            writer(entry)
 
         if rows:
             # Update the last processed visit time to the latest record's visit time
-            last_visit_times[profile["profile_title"]] = rows[-1][4]
+            last_visit_times[profile_name] = rows[-1][4]
 
     cursor.close()
     connection.close()
 
     write_logs("info",
-               f"Processed browsing history for profile '{profile['profile_title']}'")
+               f"Processed browsing history for profile '{profile_name}'")
 
 
 def process_edge_history():
@@ -241,7 +261,7 @@ def process_edge_history():
     profiles = get_all_profiles()
 
     for profile in profiles.values():
-        write_history_data_to_json(profile)
+        write_history_data(profile)
 
     write_logs("info",
                "Processed browsing history for all the profiles and users")
@@ -275,11 +295,26 @@ def parse_schedule_window(window):
         sys.exit(1)
 
 
-def gen_fernet_key(passcode: bytes) -> bytes:
-    assert isinstance(passcode, bytes)
-    hlib = hashlib.md5()
-    hlib.update(passcode)
-    return base64.urlsafe_b64encode(hlib.hexdigest().encode('latin-1'))
+def gen_fernet_key(passcode: str) -> bytes:
+    assert isinstance(passcode, str)
+
+    # Convert the password to bytes
+    passcode = passcode.encode('utf-8')
+
+    # Use a fixed salt value (you can choose any constant value here)
+    salt = b'BrowserMon'
+
+    # Use PBKDF2 to derive the key from the password and salt
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,  # Fernet key size is 32 bytes
+        salt=salt,
+        iterations=100000,  # Adjust the number of iterations as needed for security
+        backend=default_backend()
+    )
+
+    key = base64.urlsafe_b64encode(kdf.derive(passcode))
+    return key
 
 
 def encrypt_data(data, key):
@@ -379,9 +414,11 @@ if __name__ == "__main__":
 
         last_visit_times = {}
 
-        cache_file = os.path.join(logdir, "browsermon_cache.json")
+        cache_file = os.path.join(logdir, "browsermon_cache")
 
-        mode = sys.argv[2]  # Mode argument (scheduled or real-time)
+        logmode = sys.argv[2]
+
+        mode = sys.argv[3]  # Mode argument (scheduled or real-time)
 
         write_logs("info",
                    f"Reader started successfully in {mode} mode")
@@ -393,8 +430,8 @@ if __name__ == "__main__":
         atexit.register(write_cache_file)
 
         # encryption key
-        passcode = '249524.405925.606329'
-        encryption_key = gen_fernet_key(passcode.encode('utf-8'))
+        password = 'EunoMatix_BrowserMon'
+        encryption_key = gen_fernet_key(password)
 
         # Read the cache file if it exists
         read_cache_file()
@@ -402,7 +439,7 @@ if __name__ == "__main__":
         scheduler = BlockingScheduler()
 
         if mode == "scheduled":
-            schedule_window = sys.argv[3]  # Schedule window argument
+            schedule_window = sys.argv[4]  # Schedule window argument
 
             schedule_interval = parse_schedule_window(schedule_window)
             scheduler.add_job(process_edge_history, 'interval',
@@ -415,6 +452,8 @@ if __name__ == "__main__":
                               seconds=10)  # Run every 10 seconds
 
         try:
+            # Run the main function directly when the program starts
+            process_edge_history()
             scheduler.start()
         except (KeyboardInterrupt, SystemExit):
             # Gracefully exit the scheduler
@@ -423,7 +462,7 @@ if __name__ == "__main__":
     except IndexError:
         print("Invalid number of arguments!")
         print(
-            "Valid format: program [logdir] [mode](scheduled, realtime) [scheduled_window]")  # noqa
+            "Valid format: program [logdir] [logmode](csv, json) [mode](scheduled, real-time) [scheduled_window](1m, 1h, 1d)")  # noqa
         write_logs("error", "Invalid number of arguments!")
 
     except Exception as e:
