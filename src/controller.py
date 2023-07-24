@@ -13,7 +13,6 @@ SYSTEM = platform.system()
 if SYSTEM == "Windows":
     import winreg as reg
 
-config = configparser.ConfigParser()
 
 
 class ExcludeTimeZoneFilter(logging.Filter):
@@ -94,8 +93,13 @@ def config_reader(conf_file_path='../browsermon.conf'):
     """
     global config 
     global defaults
-    config.read(conf_file_path)
 
+    try: 
+        config = configparser.ConfigParser()
+        config.read(conf_file_path)
+    except Exception as config_init_exception:
+        return defaults
+        
     options = [
         'browser',
         'mode',
@@ -110,7 +114,7 @@ def config_reader(conf_file_path='../browsermon.conf'):
     for option in options:
         try:
             config_values[option] = config.get('default', option)
-        except (configparser.NoSectionError or configparser.NoOptionError):
+        except (Exception, configparser.NoOptionError):
             print("Exception caught")
             config_values[option] = defaults[option]
 
@@ -150,6 +154,7 @@ def run():
     cwd = os.getcwd()
 
     installed_browsers = get_installed_browsers()
+    print(options)
 
     launcherObj = launcher.Launcher(installed_browsers, logger, options)
     launcherObj.start()
