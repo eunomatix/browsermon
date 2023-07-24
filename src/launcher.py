@@ -42,9 +42,9 @@ class Launcher:
                 process = subprocess.Popen(['python',
                                             f'{browser}_reader.py',
                                             self.options['logdir'],
+                                            self.options['logmode'],
                                             self.options['mode'],
-                                            self.options['schedule_window'],
-                                            self.options['logmode']
+                                            self.options['schedule_window']
                                             ],
                                            stderr=subprocess.PIPE)
                 self.logger.info(
@@ -73,9 +73,9 @@ class Launcher:
         process = subprocess.Popen(['python',
                                     f'{browser}_reader.py',
                                     self.options['logdir'],
+                                    self.options['logmode'],
                                     self.options['mode'],
-                                    self.options['schedule_window'],
-                                    self.options['logmode']
+                                    self.options['schedule_window']
                                     ],
                                    stderr=subprocess.PIPE)
                                    
