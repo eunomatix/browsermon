@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 
-from utils import default_log_loc
+from src.utils import default_log_loc
 
 
 def write_logs(level, message):
