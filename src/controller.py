@@ -1,12 +1,12 @@
 import configparser
-import time
-import os
+import re 
 import subprocess
 import logging
-from logging.handlers import RotatingFileHandler
 import platform
-import launcher
-import handlers
+from logging.handlers import RotatingFileHandler
+
+from src import launcher
+from src import handlers
 
 SYSTEM = platform.system()
 
@@ -22,13 +22,6 @@ class ExcludeTimeZoneFilter(logging.Filter):
             return False
         return True
 
-defaults = {'browser': 'all',
-            'mode': 'scheduled',
-            'schedule_window': '1m',
-            'logdir': '/opt/history',
-            'logmode': 'csv',
-            'rotation': '1m',
-            'deletion': '1w'}
 
 
 def get_installed_browsers():
@@ -85,42 +78,65 @@ def get_installed_browsers():
     return browsers
 
 
-def config_reader(conf_file_path='../browsermon.conf'):
+def config_reader(logger, conf_file_path='/home/appleconda/Documents/Files/browsermon/browsermon.conf', defaults=None):
     """
     Function reads the config file and returns a dictionary of options
 
     Args: conf_file_path: path to config file
     """
-    global config 
-    global defaults
-
-    try: 
-        config = configparser.ConfigParser()
-        config.read(conf_file_path)
-    except Exception as config_init_exception:
-        return defaults
-        
-    options = [
+    def is_valid(value):
+        pattern = r'^\d+[mhd]$'
+        return re.match(pattern, value)
+    
+    options ={ 
         'browser',
         'mode',
         'schedule_window',
         'logdir',
         'logmode',
         'rotation',
-        'deletion']
+        'deletion'}
+
+
+
+    if defaults is None:
+        defaults = {'browser': 'all',
+            'mode': 'scheduled',
+            'schedule_window': '1m',
+            'logdir': '/opt/history',
+            'logmode': 'csv',
+            'rotation': '1m',
+            'deletion': '1w'}
+
+    try: 
+        config = configparser.ConfigParser()
+        logger.info("Reading config file from path: %s", conf_file_path)
+        config.read(conf_file_path)
+    except Exception as config_init_exception:
+        logger.warn(f"Exception caught during initialization: {config_init_exception}")
+        return defaults
+
 
     config_values = {}
 
     for option in options:
         try:
-            config_values[option] = config.get('default', option)
-        except (Exception, configparser.NoOptionError):
-            print("Exception caught")
-            config_values[option] = defaults[option]
+            value = config.get('default', option)
+            if not value:  
+                raise ValueError(logger.warn(f"Value for option '{option}' is empty"))
+            if option == 'schedule_window' or option == 'rotation' or option == 'deletion':
+                if not is_valid(value):
+                    raise ValueError(logger.warn(f"Value for option '{option}' is invalid"))
+            if option == 'logmode':
+                if value not in ['csv', 'json']:
+                    raise ValueError(logger.warn(f"Value for option '{option}' is invalid"))
+            config_values[option] = value
+        except (Exception, configparser.NoOptionError) as e:
+            logger.warn(f"Exception caught for option '{option}': {e}")
+            config_values[option] = defaults.get(option, None)
 
-
+    logger.info("Options fetched from config file")
     return config_values
-
 
 def run():
     """
@@ -134,10 +150,6 @@ def run():
 
     Args: None
     """
-    options = config_reader()
-    print(options)
-    logdir = options['logdir']
-
     handler = RotatingFileHandler(
         "../browsermon.log",
         maxBytes=1e+7,
@@ -151,19 +163,19 @@ def run():
         handlers=[handler])
 
     logger = logging.getLogger()
-    logger.info("Options fetched from config file")
 
+    options = config_reader(logger)
+    print(options)
+    logdir = options['logdir']
     installed_browsers = get_installed_browsers()
 
-    launcherObj = launcher.Launcher(installed_browsers, logger, options)
-    launcherObj.start()
+#    launcherObj = launcher.Launcher(installed_browsers, logger, options)
+#    launcherObj.start()
 
     
-    with handlers.Handler(logger, options['rotation'], f"{logdir}/browsermon_history.log", 5) as handler:
-        time.sleep(300)
+#    with handlers.Handler(logger, options['rotation'], f"{logdir}/browsermon_history.log", 5) as handler:
+#        time.sleep(300)
     
 
 
-if __name__ == '__main__':
-    run()
 

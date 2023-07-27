@@ -1,15 +1,15 @@
 import atexit
 import base64
+import concurrent.futures
 import csv
-import ctypes
 import datetime
-import json
 import logging
 import os
 import platform
 import sqlite3
 import sys
 
+import orjson as json
 from apscheduler.schedulers.blocking import BlockingScheduler
 from cryptography.fernet import Fernet
 from cryptography.hazmat.backends import default_backend
@@ -44,8 +44,7 @@ def get_browser_version(user_profile_dir):
     :return: Latest browser version
     """
     version = ""
-    last_version_file = os.path.join(user_profile_dir, "..",
-                                     "Last Version")
+    last_version_file = os.path.join(user_profile_dir, "..", "Last Version")
     if os.path.exists(last_version_file):
         with open(last_version_file, "r") as file:
             version = file.read().strip()
@@ -57,14 +56,10 @@ def get_static_metadata(user_profile_dir, username):
     Get the static metadata for the browser and system.
     :return: Static metadata dictionary
     """
-    metadata = {
-        "hostname": platform.node(),
-        "os": system,
-        "os_username": username,
-        "browser": "Microsoft Edge",
-        "browser_version": get_browser_version(user_profile_dir),
-        "browser_db": f"SQLite {sqlite3.sqlite_version}"
-    }
+    metadata = {"hostname": platform.node(), "os": system,
+                "os_username": username, "browser": "Microsoft Edge",
+                "browser_version": get_browser_version(user_profile_dir),
+                "browser_db": f"SQLite {sqlite3.sqlite_version}"}
     return metadata
 
 
@@ -73,26 +68,22 @@ def get_profiles(user_profile_dir, username):
     Get the profiles from the Local State file.
     :return: Dictionary of profiles
     """
-    write_logs("info",
-               f"Sniffing user profiles from user: {username}")
+    write_logs("info", f"Sniffing user profiles from user: {username}")
     local_state_file = os.path.join(user_profile_dir, "Local State")
     with open(local_state_file, "r") as file:
-        data = json.load(file)
+        data = json.loads(file.read())
 
     profile_info = data.get("profile")
     profiles = {}
     if profile_info and "info_cache" in profile_info:
-        profiles = {
-            profile_name: {
-                "profile_title": user_data.get("name"),
-                "profile_username": user_data.get("user_name"),
-                "profile_path": os.path.join(user_profile_dir,
-                                             profile_name),
-                "username": username,
-            }
-            for profile_name, user_data in
-            profile_info["info_cache"].items()
-        }
+        profiles = {profile_name: {"profile_title": user_data.get("name"),
+                                   "profile_username": user_data.get(
+                                       "user_name"),
+                                   "profile_path": os.path.join(
+                                       user_profile_dir, profile_name),
+                                   "username": username, } for
+                    profile_name, user_data in
+                    profile_info["info_cache"].items()}
 
     return profiles
 
@@ -115,15 +106,17 @@ def get_all_profiles():
                 sid = winreg.EnumKey(reg_key, i)
                 user_key = winreg.OpenKey(reg_key, sid)
                 try:
-                    profile_dir, _ = winreg.QueryValueEx(user_key, "ProfileImagePath")
+                    profile_dir, _ = winreg.QueryValueEx(user_key,
+                                                         "ProfileImagePath")
                     username = os.path.basename(profile_dir)
                     user_profile_dir = os.path.join(profile_dir, "AppData",
-                                                    "Local", "Microsoft", "Edge",
-                                                    "User Data")
+                                                    "Local", "Microsoft",
+                                                    "Edge", "User Data")
                     if os.path.exists(user_profile_dir):
                         write_logs("info",
                                    f"Found Microsoft Edge profile directory for user: {username}")  # noqa
-                        user_profiles = get_profiles(user_profile_dir, username)
+                        user_profiles = get_profiles(user_profile_dir,
+                                                     username)
                         profiles.update(user_profiles)
                 finally:
                     winreg.CloseKey(user_key)
@@ -159,8 +152,7 @@ def write_history_data(profile):
 
     profile_name = os.path.basename(profile['profile_path'])
 
-    connection = sqlite3.connect(f"file:{history_file}?immutable=1",
-                                 uri=True)
+    connection = sqlite3.connect(f"file:{history_file}?immutable=1", uri=True)
     cursor = connection.cursor()
 
     # SQLite query to retrieve the data
@@ -195,15 +187,17 @@ def write_history_data(profile):
 
     with open(output_file, "a+", newline='') as file:
         if logmode == "json":
-            writer = lambda x: file.write(json.dumps(x, indent=4) + ",\n")  # noqa
+            writer = lambda x: file.write(  # noqa
+                json.dumps(x, option=json.OPT_INDENT_2).decode() + ",\n")
         elif logmode == "csv":
-            csv_writer = csv.DictWriter(file,
-                                        fieldnames=list(metadata.keys()) + list(profile.keys()) + ["session_id",  # noqa
-                                                                                                   "referrer",
-                                                                                                   "url",
-                                                                                                   "title",  # noqa
-                                                                                                   "visit_time",
-                                                                                                   "visit_count"])  # noqa
+            csv_writer = csv.DictWriter(file, fieldnames=list(
+                metadata.keys()) + list(profile.keys()) + ["session_id",
+                                                           # noqa
+                                                           "referrer", "url",
+                                                           "title",  # noqa
+                                                           "visit_time",
+                                                           "visit_count"])  # noqa
+
             writer = csv_writer.writerow
 
             # Check if the CSV file is empty and write header if needed
@@ -225,20 +219,15 @@ def write_history_data(profile):
             visit_time_obj = datetime.datetime(1601, 1,
                                                1) + datetime.timedelta(
                 microseconds=visit_time)
-            visit_time_str = visit_time_obj.strftime(
-                "%Y-%m-%d %H:%M:%S")
+            visit_time_str = visit_time_obj.strftime("%Y-%m-%d %H:%M:%S")
 
             entry = {}
             entry.update(metadata)
             entry.update(profile)
-            entry.update({
-                "session_id": session_id,
-                "referrer": referrer,
-                "url": url,
-                "title": title,
-                "visit_time": visit_time_str,
-                "visit_count": visit_count
-            })
+            entry.update(
+                {"session_id": session_id, "referrer": referrer, "url": url,
+                 "title": title, "visit_time": visit_time_str,
+                 "visit_count": visit_count})
 
             writer(entry)
 
@@ -255,13 +244,34 @@ def write_history_data(profile):
 
 def process_edge_history():
     """
-    Process the Edge browsing history and write it to the output file.
+    Process the Edge browsing history and write it to the output file using a
+    dynamic thread pool.
     :return: None
     """
     profiles = get_all_profiles()
 
-    for profile in profiles.values():
-        write_history_data(profile)
+    num_cpu_cores = os.cpu_count()
+    num_profiles = len(profiles)
+
+    # Choose the minimum value between the number of CPU cores and the number of profiles as the thread pool size #noqa
+    max_workers = min(num_cpu_cores, num_profiles)
+
+    # Create a ThreadPoolExecutor with the dynamic thread pool size
+    with concurrent.futures.ThreadPoolExecutor(
+            max_workers=max_workers) as executor:
+        # Submit tasks for each profile to the executor
+        future_to_profile = {
+            executor.submit(write_history_data, profile): profile for profile
+            in profiles.values()}
+
+        # Wait for all tasks to complete
+        for future in concurrent.futures.as_completed(future_to_profile):
+            profile = future_to_profile[future]
+            try:
+                future.result()  # Get the result of the task (this will raise an exception if the task raised one) #noqa
+            except Exception as e:
+                write_logs("error",
+                           f"Error processing history for profile '{profile['profile_path']}': {str(e)}")  # noqa
 
     write_logs("info",
                "Processed browsing history for all the profiles and users")
@@ -305,16 +315,28 @@ def gen_fernet_key(passcode: str) -> bytes:
     salt = b'BrowserMon'
 
     # Use PBKDF2 to derive the key from the password and salt
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,  # Fernet key size is 32 bytes
-        salt=salt,
-        iterations=100000,  # Adjust the number of iterations as needed for security
-        backend=default_backend()
-    )
+    kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32,
+                     # Fernet key size is 32 bytes
+                     salt=salt, iterations=100000,
+                     # Adjust the number of iterations as needed for security
+                     backend=default_backend())
 
     key = base64.urlsafe_b64encode(kdf.derive(passcode))
     return key
+
+
+def write_cache_file():
+    """
+    Write the cache file with the last visit times in encrypted format.
+    :return: None
+    """
+    # Serialize last_visit_times dictionary to bytes using orjson
+    encrypted_data = encrypt_data(json.dumps(last_visit_times), encryption_key)
+
+    with open(cache_file, "wb") as file:
+        file.write(encrypted_data)
+
+    write_logs("info", "Cache file written with last visit times")
 
 
 def encrypt_data(data, key):
@@ -325,7 +347,7 @@ def encrypt_data(data, key):
     :return: Encrypted data
     """
     cipher = Fernet(key)
-    encrypted_data = cipher.encrypt(data.encode())
+    encrypted_data = cipher.encrypt(data)
     return encrypted_data
 
 
@@ -339,19 +361,6 @@ def decrypt_data(data, key):
     cipher = Fernet(key)
     decrypted_data = cipher.decrypt(data)
     return decrypted_data.decode()
-
-
-def write_cache_file():
-    """
-    Write the cache file with the last visit times in encrypted format.
-    :return: None
-    """
-    encrypted_data = encrypt_data(json.dumps(last_visit_times), encryption_key)
-
-    with open(cache_file, "wb") as file:
-        file.write(encrypted_data)
-
-    write_logs("info", "Cache file written with last visit times")
 
 
 def read_cache_file():
@@ -386,6 +395,8 @@ if __name__ == "__main__":
                 print("Error, Shutting Down! Only root can run this script")
                 sys.exit(1)
         elif system == 'Windows':
+            import ctypes
+
             if not ctypes.windll.shell32.IsUserAnAdmin() != 0:
                 print("Error, Shutting Down! Only root can run this script")
                 sys.exit(1)
@@ -399,8 +410,7 @@ if __name__ == "__main__":
 
         if not os.path.exists(loggingdir):
             os.makedirs(loggingdir)
-            write_logs("warning",
-                       f"{loggingdir} not found, creating new")
+            write_logs("warning", f"{loggingdir} not found, creating new")
 
         logdir = sys.argv[1]
 
@@ -409,8 +419,7 @@ if __name__ == "__main__":
                        f"Found logdir {logdir} for writing history files")
         else:
             os.makedirs(logdir)
-            write_logs("warning",
-                       f"Logdir {logdir} not found, creating new")
+            write_logs("warning", f"Logdir {logdir} not found, creating new")
 
         last_visit_times = {}
 
@@ -420,8 +429,7 @@ if __name__ == "__main__":
 
         mode = sys.argv[3]  # Mode argument (scheduled or real-time)
 
-        write_logs("info",
-                   f"Reader started successfully in {mode} mode")
+        write_logs("info", f"Reader started successfully in {mode} mode")
 
         # Path to the output file
         output_file = os.path.join(logdir, "browsermon_history.log")
@@ -444,8 +452,6 @@ if __name__ == "__main__":
             schedule_interval = parse_schedule_window(schedule_window)
             scheduler.add_job(process_edge_history, 'interval',
                               seconds=schedule_interval)
-
-            process_edge_history()  # Run immediately when the script starts
 
         elif mode == "real-time":
             scheduler.add_job(process_edge_history, 'interval',

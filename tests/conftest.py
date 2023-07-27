@@ -1,21 +1,37 @@
 import pytest
-import os 
-import configparser
+import os
+from unittest.mock import Mock
+from src import launcher
+
+
 
 @pytest.fixture
-def options(request):
+def test_config_file(request):
     options = request.param
-    config = configparser.ConfigParser()
-    if 'default' not in config.sections():
-        config.add_section('default')
+    
+    # Manually construct the configuration content
+    config_content = '[default]\n'  # Start with the section name
     for key, value in options.items():
-        config.set('default', key, value)
+        if value is None: 
+            config_content += f'{key}=\n'  # Add each key-value pair
+        else: 
+            config_content += f'{key}={value}\n'  # Add each key-value pair
 
-    config_file_path = "browsermon.conf"
+    config_file_path = "tests/browsermon.conf"
     with open(config_file_path, 'w') as configfile:
-        config.write(configfile)
-    return config_file_path
+        configfile.write(config_content)
+    
+    yield config_file_path
+    os.remove(config_file_path)
 
 
+
+
+@pytest.fixture
+def setup_launcher(request):
+    installed_browsers = ['edge']
+    logger = Mock()
+    options = request.param
+    return launcher.Launcher(installed_browsers, logger, options)
 
 

@@ -11,8 +11,7 @@ class Launcher:
         self.options = options
         self.processes = []
 
-    def monitor_subprocess(self, process, browser, mode,
-                           scheduled_window, logdir, logmode):
+    def monitor_subprocess(self, process, browser):
         """
         monitor_subprocess function:
             monitors the subprocess launched by launch_reader function
@@ -33,7 +32,7 @@ class Launcher:
         count = 0
         while (1):
             process.wait()
-            if process.returncode != 0 and count < 4:
+            if process.returncode != 0 and count < 3:
                 self.logger.error(
                     f'Subprocess: {browser}_reader.py exited with error')
                 self.logger.debug(f'Retrieved code {process.returncode}')
@@ -84,7 +83,7 @@ class Launcher:
         self.logger.info(f"Starting monitoring thread for {browser}_reader.py")
         monitorThread = threading.Thread(
             target=self.monitor_subprocess, args=(
-                process, browser, self.options['mode'], self.options['schedule_window'], self.options['logdir'], self.options['logmode']))
+                process, browser))
         monitorThread.start()
         self.logger.info(f'Started monitoring thread for {browser}_reader.py')
 
@@ -104,7 +103,7 @@ class Launcher:
         if self.options['browser'] in self.installed_browsers:
             self.launch_reader(self.options['browser'])
         else:
-            allowed_browsers = {'chrome', 'opera', 'firefox', 'edge', 'safari'}
+            allowed_browsers = {'chrome', 'opera', 'firefox'}
             readers_list = self.options['browser'].split(",")
             if all(reader in allowed_browsers for reader in readers_list):
                 readers_to_launch = [
