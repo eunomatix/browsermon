@@ -15,6 +15,7 @@ if SYSTEM == "Windows":
 
 
 
+
 class ExcludeTimeZoneFilter(logging.Filter):
     def filter(self, record):
         # Exclude log records with the specific message about the timezone configuration
@@ -30,7 +31,12 @@ def get_installed_browsers():
     'reg' library to read windows registry and fetch the installed browsers. 
     For Linux it uses a simple command of 'which'
 
+    Function returns a set of browsers installed on the system. For windows it uses 
+    'reg' library to read windows registry and fetch the installed browsers. 
+    For Linux it uses a simple command of 'which'
+
     Args: None
+
 
     Returns: set of browsers installed on the system
     """
@@ -81,6 +87,7 @@ def get_installed_browsers():
 def config_reader(logger, conf_file_path='/home/appleconda/Documents/Files/browsermon/browsermon.conf', defaults=None):
     """
     Function reads the config file and returns a dictionary of options
+
 
     Args: conf_file_path: path to config file
     """
@@ -147,6 +154,10 @@ def run():
         installed browsers (set of names of installed browsers)
         logging object (The logging module for which launcher will log) 
         options (The options that are read from the conf file are also to be send to launcher) 
+    The launcher class is responsible for launching the readers, The launcher class is initialized with following parameters
+        installed browsers (set of names of installed browsers)
+        logging object (The logging module for which launcher will log) 
+        options (The options that are read from the conf file are also to be send to launcher) 
 
     Args: None
     """
@@ -157,8 +168,11 @@ def run():
 
     handler.addFilter(ExcludeTimeZoneFilter())
 
+    handler.addFilter(ExcludeTimeZoneFilter())
+
     logging.basicConfig(
         level=logging.DEBUG,
+        format='%(asctime)s WD%(process)d:: \'CONTROLLER:\' - %(levelname)s - %(message)s',
         format='%(asctime)s WD%(process)d:: \'CONTROLLER:\' - %(levelname)s - %(message)s',
         handlers=[handler])
 
