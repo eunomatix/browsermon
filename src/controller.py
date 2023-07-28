@@ -9,12 +9,11 @@ from logging.handlers import RotatingFileHandler
 from src import launcher
 from src import handlers
 
+
 SYSTEM = platform.system()
 
 if SYSTEM == "Windows":
     import winreg as reg
-
-
 
 
 class ExcludeTimeZoneFilter(logging.Filter):
@@ -163,7 +162,7 @@ def run():
     Args: None
     """
     handler = RotatingFileHandler(
-        "../browsermon.log",
+        "/home/appleconda/Documents/Files/browsermon/browsermon.log",
         maxBytes=1e+7,
         backupCount=5)
 
@@ -186,6 +185,8 @@ def run():
     launcherObj.start()
 
     
-    with handlers.Handler(logger, options['rotation'], f"{logdir}/browsermon_history.log", 5) as handler:
+    with handlers.Handler(logger, options['rotation'], f"{logdir}/browsermon_history.{options['logmode']}", 5) as handler:
         time.sleep(300)
-        
+
+if __name__ == '__main__':
+    run() 
