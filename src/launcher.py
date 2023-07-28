@@ -1,4 +1,5 @@
 import platform
+import sys
 import os
 import subprocess
 import threading
@@ -68,19 +69,22 @@ class Launcher:
                 logdir: directory where the log file should be stored
                 logmode: mode in which the log file should be stored
         """
+        env = os.environ.copy()
+        env['PYTHONPATH'] = os.pathsep.join(sys.path)
         self.logger.info(f"Invoking {browser}_reader.py")
         process = subprocess.Popen(['python',
-                                    f'{browser}_reader.py',
+                                    f'src/{browser}_reader.py',
                                     self.options['logdir'],
                                     self.options['logmode'],
                                     self.options['mode'],
                                     self.options['schedule_window']
-                                    ],
+                                    ], env=env,
                                    stderr=subprocess.PIPE)
                                    
         self.processes.append(process)
         self.logger.info(f"Invoked {browser}_reader.py")
         self.logger.info(f"Starting monitoring thread for {browser}_reader.py")
+
         monitorThread = threading.Thread(
             target=self.monitor_subprocess, args=(
                 process, browser))
