@@ -1,6 +1,6 @@
 import pytest
 import os
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from src import launcher
 
 
@@ -33,5 +33,11 @@ def setup_launcher(request):
     logger = Mock()
     options = request.param
     return launcher.Launcher(installed_browsers, logger, options)
+
+
+@pytest.fixture
+def mock_write_logs():
+    with patch("src.edge_reader.write_logs") as mock_method:
+        yield mock_method
 
 

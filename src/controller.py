@@ -1,4 +1,5 @@
 import configparser
+import time
 import re 
 import subprocess
 import logging
@@ -168,11 +169,9 @@ def run():
 
     handler.addFilter(ExcludeTimeZoneFilter())
 
-    handler.addFilter(ExcludeTimeZoneFilter())
 
     logging.basicConfig(
         level=logging.DEBUG,
-        format='%(asctime)s WD%(process)d:: \'CONTROLLER:\' - %(levelname)s - %(message)s',
         format='%(asctime)s WD%(process)d:: \'CONTROLLER:\' - %(levelname)s - %(message)s',
         handlers=[handler])
 
@@ -183,13 +182,10 @@ def run():
     logdir = options['logdir']
     installed_browsers = get_installed_browsers()
 
-#    launcherObj = launcher.Launcher(installed_browsers, logger, options)
-#    launcherObj.start()
+    launcherObj = launcher.Launcher(installed_browsers, logger, options)
+    launcherObj.start()
 
     
-#    with handlers.Handler(logger, options['rotation'], f"{logdir}/browsermon_history.log", 5) as handler:
-#        time.sleep(300)
-    
-
-
-
+    with handlers.Handler(logger, options['rotation'], f"{logdir}/browsermon_history.log", 5) as handler:
+        time.sleep(300)
+        
