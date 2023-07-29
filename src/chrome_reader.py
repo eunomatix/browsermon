@@ -139,6 +139,8 @@ def get_Chrome_profile_folders(logdir):
     logdirec=logdir
     profile_data = get_profile_folders(logdirec);
     profile_objects = {}
+    Default_folder_path = []  # List to store additional folder paths
+
     for profile in profile_data:
         profile_name = profile['Profile Name']
         get_os_username = profile_name
@@ -148,13 +150,13 @@ def get_Chrome_profile_folders(logdir):
         
         if system == "Windows":
             folder_path = os.path.join('C:\\Users', get_os_username, 'AppData', 'Local', 'Google', 'Chrome', 'User Data')
-
+            Default_folder_path= os.path.join('C:\\Users', get_os_username, 'AppData', 'Local', 'Google', 'Chrome', 'User Data', 'Default')
         elif system == "Linux":
             folder_path = os.path.join('/home', get_os_username, '.config', 'google-chrome')
-            
+            Default_folder_path= os.path.join('/home', get_os_username, '.config', 'google-chrome', 'Default' )
 
         folder_count = sum(os.path.isdir(os.path.join(folder_path, f)) for f in os.listdir(folder_path))
-
+        
         for r in range(1, folder_count):
             profile_folder = os.path.join(folder_path, f'Profile {r}')
 
@@ -170,6 +172,13 @@ def get_Chrome_profile_folders(logdir):
             profile_objects[profile_folder] = profile_info
             if not profile_objects:
               write_logs("info", f"No Chrome user found in: {get_os_username}", logdir)
+            
+        new_profile_info = {
+        'Profile Username': get_os_username,  # Update with the desired username
+        'Profile Link': Default_folder_path,
+        'Last saved value number': 0
+        }
+        profile_objects[profile_folder] = new_profile_info
 
     json_file_for_profiles = os.path.join(logdir, 'Chrome_profiles_data.json')
     try:
@@ -188,13 +197,12 @@ def get_Chrome_profile_folders(logdir):
 
     except IOError as e:
         print(f"Error occurred while writing to JSON file: {e}")
-        
+
 class InvalidScheduleWindowFormat(Exception):
     """
     Custom exception for the InvalidScheduleWindowFormat
     """
     pass
-
 
 def parse_schedule_window(window):
 
@@ -448,21 +456,21 @@ if __name__ == '__main__':
         write_format= sys.argv[2]
             # Check the operating system
         if platform.system() == "Windows":
-           write_logs("info", "Running on Windows.", logdir)
+           write_logs("Info", "Running on Windows.", logdir)
         # Add the rest of the code for Windows operations if needed.
         elif platform.system() == "Linux":
-           write_logs("info", "Running on Linux.", logdir)
+           write_logs("Info", "Running on Linux.", logdir)
         # Check if running with root privilege on Linux
-        #    if has_root_privilege():
-        #        write_logs("Info", "Running with root privilege.", logdir)
-        #     # Add the rest of the code for root privileged operations on Linux if needed.
-        #    else:
-        #       write_logs("Info", "Not running with root privilege.", logdir)
-        #       write_logs("Info", "Exiting the program.", logdir)
-        #       exit()  # Exit the program if not running with root privilege on Linux.
+           if has_root_privilege():
+               write_logs("Info", "Running with root privilege.", logdir)
+            # Add the rest of the code for root privileged operations on Linux if needed.
+           else:
+              write_logs("Info", "Not running with root privilege.", logdir)
+              write_logs("Info", "Exiting the program.", logdir)
+              exit()  # Exit the program if not running with root privilege on Linux.
         else:
-          write_logs("error", "Unsupported operating system.", logdir)
-          write_logs("info", "Exiting the program.", logdir)
+          write_logs("Error", "Unsupported operating system.", logdir)
+          write_logs("Info", "Exiting the program.", logdir)
           exit()  # Exit the program for unsupported operating systems.        
 
         if write_format == 'json':
@@ -498,7 +506,7 @@ if __name__ == '__main__':
                 scheduler.start()
             except (KeyboardInterrupt, SystemExit):
                 # Gracefully exit the scheduler
-                write_logs("info", f"Exiting the Controller after Keyboard inturrupt", logdir)
+                write_logs("Info0", f"Exiting the Controller after Keyboard inturrupt", logdir)
 
                 scheduler.shutdown()
             

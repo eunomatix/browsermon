@@ -145,6 +145,28 @@ def config_reader(logger, conf_file_path='/home/appleconda/Documents/Files/brows
     logger.info("Options fetched from config file")
     return config_values
 
+
+def init_logger(SYSTEM):
+    if SYSTEM == "Windows":
+        handler = RotatingFileHandler(
+            "C:\\browsermon\\browsermon.log",
+            maxBytes=1e+7,
+            backupCount=5)
+    elif SYSTEM == "Linux":
+        handler = RotatingFileHandler(
+            "/home/appleconda/Documents/Files/browsermon/browsermon.log",
+            maxBytes=1e+7,
+            backupCount=5)
+    
+    logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s WD%(process)d:: \'CONTROLLER:\' - %(levelname)s - %(message)s',
+    handlers=[handler])
+
+    logger = logging.getLogger()
+    return logger
+
+
 def run():
     """
     Function runs the controller, reads the config file
@@ -161,20 +183,9 @@ def run():
 
     Args: None
     """
-    handler = RotatingFileHandler(
-        "/home/appleconda/Documents/Files/browsermon/browsermon.log",
-        maxBytes=1e+7,
-        backupCount=5)
+    
 
-    handler.addFilter(ExcludeTimeZoneFilter())
-
-
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format='%(asctime)s WD%(process)d:: \'CONTROLLER:\' - %(levelname)s - %(message)s',
-        handlers=[handler])
-
-    logger = logging.getLogger()
+    logger = init_logger(SYSTEM)
 
     options = config_reader(logger)
     print(options)

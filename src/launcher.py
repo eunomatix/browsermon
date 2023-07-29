@@ -107,7 +107,7 @@ class Launcher:
         if self.options['browser'] in self.installed_browsers:
             self.launch_reader(self.options['browser'])
         else:
-            allowed_browsers = {'chrome', 'opera', 'firefox'}
+            allowed_browsers = {'chrome', 'edge', 'firefox'}
             readers_list = self.options['browser'].split(",")
             if all(reader in allowed_browsers for reader in readers_list):
                 readers_to_launch = [
