@@ -10,13 +10,13 @@ import sys
 import orjson as json
 from apscheduler.schedulers.blocking import BlockingScheduler
 
-from src.utils.caching import write_cache_file, read_cache_file
-from src.utils.common import write_logs, parse_schedule_window
-from src.utils.encryption import gen_fernet_key
-from src.utils.metadata import get_static_metadata
+from utils.caching import write_cache_file, read_cache_file
+from utils.common import write_logs, parse_schedule_window
+from utils.encryption import gen_fernet_key
+from utils.metadata import get_static_metadata
 
 # Global variable
-last_visit_times = {}
+cache = {}
 
 
 def get_profiles(user_profile_dir, username):
@@ -108,7 +108,7 @@ def write_history_data(profile, logmode, logdir):
     :param profile: Profile information
     :return: None
     """
-    global last_visit_times
+    global cache
 
     metadata = get_static_metadata(profile["profile_path"],
                                    profile["username"], "edge")
@@ -118,6 +118,19 @@ def write_history_data(profile, logmode, logdir):
     del profile["username"]
 
     profile_name = os.path.basename(profile['profile_path'])
+
+    # Get the last modified time and last visit time for the profile
+    profile_info = cache.get(profile_name, {})
+    last_modified_time = profile_info.get("last_modified_time")
+    last_visit_time = profile_info.get("last_visit_time")
+
+    # Check if the history file has been modified since the last run
+    current_modified_time = os.path.getmtime(history_file)
+
+    if last_modified_time == current_modified_time:
+        write_logs("info",
+                   f"History file for profile '{profile_name}' has not been modified, skipping SQL query.")  # noqa
+        return
 
     connection = sqlite3.connect(f"file:{history_file}?immutable=1", uri=True)
     cursor = connection.cursor()
@@ -138,9 +151,6 @@ def write_history_data(profile, logmode, logdir):
             LEFT JOIN Visits AS v_referrer ON v.from_visit = v_referrer.id
             LEFT JOIN URLs AS u_referrer ON v_referrer.url = u_referrer.id
         """
-
-    last_visit_time = last_visit_times.get(
-        profile_name)  # Get the last visit time for the profile
 
     if last_visit_time:
         # Filter for new records based on last processed visit time
@@ -198,9 +208,10 @@ def write_history_data(profile, logmode, logdir):
             writer(entry)
 
         if rows:
-            # Update the last processed visit time to the latest record's
-            # visit time
-            last_visit_times[profile_name] = rows[-1][4]
+            # Update the last modified time and last visit time
+            profile_info["last_modified_time"] = current_modified_time
+            profile_info["last_visit_time"] = rows[-1][4]
+            cache[profile_name] = profile_info
 
     cursor.close()
     connection.close()
@@ -248,12 +259,12 @@ def process_edge_history(logmode, logdir):
 
 
 def cleanup(cache_file, encryption_key):
-    # Function to be called by atexit, ensuring correct last_visit_times
-    write_cache_file(cache_file, encryption_key, last_visit_times)
+    # Function to be called by atexit, ensuring correct cache
+    write_cache_file(cache_file, encryption_key, cache)
 
 
 def main():
-    global last_visit_times
+    global cache
 
     try:
         if platform.system() == 'Linux':
@@ -297,7 +308,7 @@ def main():
         atexit.register(cleanup, cache_file, encryption_key)
 
         # Read the cache file if it exists
-        last_visit_times = read_cache_file(cache_file, encryption_key)
+        cache = read_cache_file(cache_file, encryption_key)
 
         scheduler = BlockingScheduler()
 
@@ -329,8 +340,6 @@ def main():
     except Exception as e:
         write_logs("error", f"Error: {str(e)}")
 
-
-# Rest of the functions remain the same
 
 if __name__ == "__main__":
     main()
