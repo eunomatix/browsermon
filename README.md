@@ -23,11 +23,30 @@ BrowserMon is a straightforward Python application that monitors web browsers. T
     
 3. To start the application, run the following command:
     
-    
-    `python main.py`
+    ```
+    python main.py
+    ```
     
     This command will initiate the BrowserMon application and start monitoring web browsers.
     
+
+## Running Tests
+
+To ensure the functionality of the application, you can run the provided pytest tests:
+
+1. Ensure you are in the root directory of the BrowserMon application.
+
+2. Run the following command to execute the tests:
+    
+    ```
+    pytest
+    ```
+
+   For a more detailed view of the test results, you can use the verbose option:
+
+    ```
+    pytest -vv
+    ```
 
 ## Stopping the Application
 
@@ -35,4 +54,5 @@ To stop the BrowserMon application, simply send a keyboard interrupt signal. You
 
 Please note that you should only terminate the application when necessary, as unexpected terminations might lead to incomplete data or other issues.
 
-That's it! You have successfully set up and run the BrowserMon application to monitor web browsers. If you encounter any problems or have further questions, feel free to reach out for support. Happy monitoring
+That's it! You have successfully set up and run the BrowserMon application to monitor web browsers. If you encounter any problems or have further questions, feel free to reach out for support. Happy monitoring!
+
