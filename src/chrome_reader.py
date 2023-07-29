@@ -188,6 +188,12 @@ def get_Chrome_profile_folders(logdir):
 
     except IOError as e:
         print(f"Error occurred while writing to JSON file: {e}")
+        
+class InvalidScheduleWindowFormat(Exception):
+    """
+    Custom exception for the InvalidScheduleWindowFormat
+    """
+    pass
 
 
 def parse_schedule_window(window):
@@ -439,24 +445,24 @@ if __name__ == '__main__':
 
     try:
         logdir = sys.argv[1]
-        write_format= sys.argv[3]
+        write_format= sys.argv[2]
             # Check the operating system
         if platform.system() == "Windows":
-           write_logs("Info", "Running on Windows.", logdir)
+           write_logs("info", "Running on Windows.", logdir)
         # Add the rest of the code for Windows operations if needed.
         elif platform.system() == "Linux":
-           write_logs("Info", "Running on Linux.", logdir)
+           write_logs("info", "Running on Linux.", logdir)
         # Check if running with root privilege on Linux
-           if has_root_privilege():
-               write_logs("Info", "Running with root privilege.", logdir)
-            # Add the rest of the code for root privileged operations on Linux if needed.
-           else:
-              write_logs("Info", "Not running with root privilege.", logdir)
-              write_logs("Info", "Exiting the program.", logdir)
-              exit()  # Exit the program if not running with root privilege on Linux.
+        #    if has_root_privilege():
+        #        write_logs("Info", "Running with root privilege.", logdir)
+        #     # Add the rest of the code for root privileged operations on Linux if needed.
+        #    else:
+        #       write_logs("Info", "Not running with root privilege.", logdir)
+        #       write_logs("Info", "Exiting the program.", logdir)
+        #       exit()  # Exit the program if not running with root privilege on Linux.
         else:
-          write_logs("Error", "Unsupported operating system.", logdir)
-          write_logs("Info", "Exiting the program.", logdir)
+          write_logs("error", "Unsupported operating system.", logdir)
+          write_logs("info", "Exiting the program.", logdir)
           exit()  # Exit the program for unsupported operating systems.        
 
         if write_format == 'json':
@@ -476,13 +482,13 @@ if __name__ == '__main__':
                write_logs("Info", f"Does not find files TO write Creating A new FIle", logdir)
 
 
-        mode = sys.argv[2] 
+        mode = sys.argv[3] 
         
 
         if mode == "scheduled":
             write_logs("info", f"Validated parameters Successfully", logdir)
             write_logs("info", f"Reader started successfully in {mode} mode", logdir)
-            schedule_window = sys.argv[3]  # Schedule window argument
+            schedule_window = sys.argv[4]  # Schedule window argument
             schedule_interval = parse_schedule_window(schedule_window)
             scheduler = BlockingScheduler(max_instances= None)
 
@@ -492,7 +498,7 @@ if __name__ == '__main__':
                 scheduler.start()
             except (KeyboardInterrupt, SystemExit):
                 # Gracefully exit the scheduler
-                write_logs("Info0", f"Exiting the Controller after Keyboard inturrupt", logdir)
+                write_logs("info", f"Exiting the Controller after Keyboard inturrupt", logdir)
 
                 scheduler.shutdown()
             
