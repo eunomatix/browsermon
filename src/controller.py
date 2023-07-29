@@ -84,10 +84,11 @@ def get_installed_browsers():
     return browsers
 
 
-def config_reader(logger, conf_file_path='/home/appleconda/Documents/Files/browsermon/browsermon.conf', defaults=None):
+def config_reader(logger, conf_file_path = "C:\\browsermon\\browsermon.conf" 
+                  if SYSTEM == "Windows" else "/opt/browsermon/browsermon.conf", 
+                  defaults=None):
     """
     Function reads the config file and returns a dictionary of options
-
 
     Args: conf_file_path: path to config file
     """
@@ -154,7 +155,7 @@ def init_logger(SYSTEM):
             backupCount=5)
     elif SYSTEM == "Linux":
         handler = RotatingFileHandler(
-            "/home/appleconda/Documents/Files/browsermon/browsermon.log",
+            "/opt/browsermon/browsermon.log", 
             maxBytes=1e+7,
             backupCount=5)
     

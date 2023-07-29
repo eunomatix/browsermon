@@ -28,7 +28,8 @@ def write_logs(level, message, logdir):
         print("Error: logdir is not set.")
         return
     
-    log_file = os.path.join(logdir, "browsermon.log")
+
+    log_file = "C:\\browsermon\\browsermon.log" if platform.system() == "Windows" else "/opt/browsermon/browsermon.log"
     log_format = "%(asctime)s BM%(process)d:: 'Chrome:' - %(levelname)s %(message)s"
     logging.basicConfig(filename=log_file, level=logging.INFO, format=log_format)
 
