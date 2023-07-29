@@ -5,6 +5,11 @@ BrowserMon is a straightforward Python application that monitors web browsers. T
 ## Prerequisites
 
 - Python 3.x installed on your system.
+- Install the required packages using pip:
+    ```
+    pip install apscheduler
+    pip install orjson
+    ```
 
 ## Setup
 
