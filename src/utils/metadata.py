@@ -15,7 +15,7 @@ def get_browser_version(user_profile_dir, browser_name):
     version_file_path = None
 
     if browser_name.lower() == "edge":
-        version_file_path = os.path.join(user_profile_dir, "", "Last Version")
+        version_file_path = os.path.join(user_profile_dir, "..", "Last Version")
     elif browser_name.lower() == "firefox":
         version_file_path = os.path.join(user_profile_dir, "compatibility.ini")
 

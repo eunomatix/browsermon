@@ -1,7 +1,6 @@
 import atexit
 import concurrent.futures
 import csv
-import datetime
 import os
 import platform
 import sqlite3
@@ -11,6 +10,7 @@ import orjson as json
 from apscheduler.schedulers.blocking import BlockingScheduler
 
 from utils.caching import write_cache_file, read_cache_file
+from utils.common import prepare_entry
 from utils.common import write_logs, parse_schedule_window
 from utils.encryption import gen_fernet_key
 from utils.metadata import get_static_metadata
@@ -129,7 +129,8 @@ def write_history_data(profile, logmode, logdir):
 
     if last_modified_time == current_modified_time:
         write_logs("info",
-                   f"History file for profile '{profile_name}' has not been modified, skipping SQL query.")  # noqa
+                   f"History file for profile '{profile_name}' has not been "
+                   f"modified, skipping SQL query.")
         return
 
     connection = sqlite3.connect(f"file:{history_file}?immutable=1", uri=True)
@@ -150,7 +151,7 @@ def write_history_data(profile, logmode, logdir):
             INNER JOIN URLs AS u ON u.id = v.url
             LEFT JOIN Visits AS v_referrer ON v.from_visit = v_referrer.id
             LEFT JOIN URLs AS u_referrer ON v_referrer.url = u_referrer.id
-        """
+    """
 
     if last_visit_time:
         # Filter for new records based on last processed visit time
@@ -160,58 +161,36 @@ def write_history_data(profile, logmode, logdir):
         cursor.execute(query)
     rows = cursor.fetchall()
 
-    output_file = os.path.join(logdir, f"browsermon_history.{logmode}")
+    num_new_records = len(rows)
+    write_logs("info",
+               f"Found {num_new_records} new records for profile \
+               '{profile_name}' user: '{metadata['os_username']}'")
 
+    # Write entries to the file
+    output_file = os.path.join(logdir, f"browsermon_history.{logmode}")
     with open(output_file, "a+", newline='') as file:
         if logmode == "json":
             writer = lambda x: file.write(  # noqa
                 json.dumps(x, option=json.OPT_INDENT_2).decode() + ",\n")
         elif logmode == "csv":
-            csv_writer = csv.DictWriter(file, fieldnames=list(
-                metadata.keys()) + list(profile.keys()) + ["session_id",
-                                                           # noqa
-                                                           "referrer", "url",
-                                                           "title",  # noqa
-                                                           "visit_time",
-                                                           "visit_count"])  # noqa
+            # Prepare fieldnames dynamically from the keys of the first entry
+            fieldnames = list(prepare_entry(rows[0], metadata, profile).keys())
+            csv_writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer = csv_writer.writerow
 
             # Check if the CSV file is empty and write header if needed
             if file.tell() == 0:
                 csv_writer.writeheader()
 
-        num_new_records = len(rows)
-        write_logs("info",
-                   f"Found {num_new_records} new records for profile '{profile_name}' user: '{metadata['os_username']}'")  # noqa
-
         for result in rows:
-            session_id = result[0]
-            referrer = result[1]
-            url = result[2]
-            title = result[3]
-            visit_time = result[4]
-            visit_count = result[5]
-
-            visit_time_obj = datetime.datetime(1601, 1,
-                                               1) + datetime.timedelta(
-                microseconds=visit_time)
-            visit_time_str = visit_time_obj.strftime("%Y-%m-%d %H:%M:%S")
-
-            entry = {}
-            entry.update(metadata)
-            entry.update(profile)
-            entry.update(
-                {"session_id": session_id, "referrer": referrer, "url": url,
-                 "title": title, "visit_time": visit_time_str,
-                 "visit_count": visit_count})
-
+            entry = prepare_entry(result, metadata, profile)
             writer(entry)
 
-        if rows:
-            # Update the last modified time and last visit time
-            profile_info["last_modified_time"] = current_modified_time
-            profile_info["last_visit_time"] = rows[-1][4]
-            cache[profile_name] = profile_info
+    if rows:
+        # Update the last modified time and last visit time
+        profile_info["last_modified_time"] = current_modified_time
+        profile_info["last_visit_time"] = rows[-1][4]
+        cache[profile_name] = profile_info
 
     cursor.close()
     connection.close()
