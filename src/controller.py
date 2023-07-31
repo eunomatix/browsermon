@@ -111,7 +111,7 @@ def config_reader(logger, conf_file_path = "C:\\browsermon\\browsermon.conf"
         defaults = {'browser': 'all',
             'mode': 'scheduled',
             'schedule_window': '1m',
-            'logdir': '/opt/history',
+            'logdir': 'C:\\browsermon\\history'if SYSTEM == "Windows" else '/opt/browsermon/history',
             'logmode': 'csv',
             'rotation': '1m',
             'deletion': '1w'}
