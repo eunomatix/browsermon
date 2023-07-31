@@ -28,11 +28,9 @@ def test_config_file(request):
 
 
 @pytest.fixture
-def setup_launcher(request):
-    installed_browsers = ['edge']
-    logger = Mock()
-    options = request.param
-    return launcher.Launcher(installed_browsers, logger, options)
+def setup_launcher():
+    # This fixture is now empty, as the parameterization will be handled directly in the test function.
+    pass
 
 
 @pytest.fixture
