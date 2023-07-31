@@ -77,7 +77,7 @@ from src import controller
             'browser': 'firefox',
             'mode': 'real-time',
             'schedule_window': '1m',
-            'logdir': '/opt/history',  # default value
+            'logdir': '/opt/browsermon/history',  # default value
             'logmode': 'json',
             'rotation': '1d',
             'deletion': '1w'
@@ -109,7 +109,7 @@ from src import controller
             'browser': 'all',
             'mode': 'scheduled',
             'schedule_window': '1m',
-            'logdir': '/opt/history',
+            'logdir': '/opt/browsermon/history',
             'logmode': 'csv',
             'rotation': '1m',
             'deletion': '1w'
