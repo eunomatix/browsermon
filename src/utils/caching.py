@@ -1,8 +1,8 @@
 import json
 import os
 
-from src.utils.common import write_logs
-from src.utils.encryption import encrypt_data, decrypt_data
+from utils.common import write_logs
+from utils.encryption import encrypt_data, decrypt_data
 
 
 def write_cache_file(cache_file, encryption_key, cache):

@@ -1,14 +1,13 @@
 import configparser
-import time
-import re 
-import subprocess
 import logging
 import platform
+import re
+import subprocess
+import time
 from logging.handlers import RotatingFileHandler
 
-from src import launcher
-from src import handlers
-
+import handlers
+import launcher
 
 SYSTEM = platform.system()
 
@@ -22,7 +21,6 @@ class ExcludeTimeZoneFilter(logging.Filter):
         if record.getMessage() == "/etc/localtime is a symlink to: Asia/Karachi":
             return False
         return True
-
 
 
 def get_installed_browsers():
@@ -43,8 +41,9 @@ def get_installed_browsers():
     browsers = set()
     if SYSTEM == 'Windows':
         paths = [
-        r"SOFTWARE\Clients\StartMenuInternet",
-        r"SOFTWARE\WOW6432Node\Clients\StartMenuInternet"  # For 32-bit apps on 64-bit system
+            r"SOFTWARE\Clients\StartMenuInternet",
+            r"SOFTWARE\WOW6432Node\Clients\StartMenuInternet"
+            # For 32-bit apps on 64-bit system
         ]
 
         for path in paths:
@@ -84,19 +83,20 @@ def get_installed_browsers():
     return browsers
 
 
-def config_reader(logger, conf_file_path = "C:\\browsermon\\browsermon.conf" 
-                  if SYSTEM == "Windows" else "/opt/browsermon/browsermon.conf", 
+def config_reader(logger, conf_file_path="C:\\browsermon\\browsermon.conf"
+if SYSTEM == "Windows" else "/opt/browsermon/browsermon.conf",
                   defaults=None):
     """
     Function reads the config file and returns a dictionary of options
 
     Args: conf_file_path: path to config file
     """
+
     def is_valid(value):
         pattern = r'^\d+[mhd]$'
         return re.match(pattern, value)
-    
-    options ={ 
+
+    options = {
         'browser',
         'mode',
         'schedule_window',
@@ -105,39 +105,40 @@ def config_reader(logger, conf_file_path = "C:\\browsermon\\browsermon.conf"
         'rotation',
         'deletion'}
 
-
-
     if defaults is None:
         defaults = {'browser': 'all',
-            'mode': 'scheduled',
-            'schedule_window': '1m',
-            'logdir': 'C:\\browsermon\\history'if SYSTEM == "Windows" else '/opt/browsermon/history',
-            'logmode': 'csv',
-            'rotation': '1m',
-            'deletion': '1w'}
+                    'mode': 'scheduled',
+                    'schedule_window': '1m',
+                    'logdir': 'C:\\browsermon\\history' if SYSTEM == "Windows" else '/opt/browsermon/history',
+                    'logmode': 'csv',
+                    'rotation': '1m',
+                    'deletion': '1w'}
 
-    try: 
+    try:
         config = configparser.ConfigParser()
         logger.info("Reading config file from path: %s", conf_file_path)
         config.read(conf_file_path)
     except Exception as config_init_exception:
-        logger.warn(f"Exception caught during initialization: {config_init_exception}")
+        logger.warn(
+            f"Exception caught during initialization: {config_init_exception}")
         return defaults
-
 
     config_values = {}
 
     for option in options:
         try:
             value = config.get('default', option)
-            if not value:  
-                raise ValueError(logger.warn(f"Value for option '{option}' is empty"))
+            if not value:
+                raise ValueError(
+                    logger.warn(f"Value for option '{option}' is empty"))
             if option == 'schedule_window' or option == 'rotation' or option == 'deletion':
                 if not is_valid(value):
-                    raise ValueError(logger.warn(f"Value for option '{option}' is invalid"))
+                    raise ValueError(
+                        logger.warn(f"Value for option '{option}' is invalid"))
             if option == 'logmode':
                 if value not in ['csv', 'json']:
-                    raise ValueError(logger.warn(f"Value for option '{option}' is invalid"))
+                    raise ValueError(
+                        logger.warn(f"Value for option '{option}' is invalid"))
             config_values[option] = value
         except (Exception, configparser.NoOptionError) as e:
             logger.warn(f"Exception caught for option '{option}': {e}")
@@ -155,14 +156,14 @@ def init_logger(SYSTEM):
             backupCount=5)
     elif SYSTEM == "Linux":
         handler = RotatingFileHandler(
-            "/opt/browsermon/browsermon.log", 
+            "/opt/browsermon/browsermon.log",
             maxBytes=1e+7,
             backupCount=5)
-    
+
     logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s WD%(process)d:: \'CONTROLLER:\' - %(levelname)s - %(message)s',
-    handlers=[handler])
+        level=logging.DEBUG,
+        format='%(asctime)s WD%(process)d:: \'CONTROLLER:\' - %(levelname)s - %(message)s',
+        handlers=[handler])
 
     logger = logging.getLogger()
     return logger
@@ -184,7 +185,6 @@ def run():
 
     Args: None
     """
-    
 
     logger = init_logger(SYSTEM)
 
@@ -196,9 +196,11 @@ def run():
     launcherObj = launcher.Launcher(installed_browsers, logger, options)
     launcherObj.start()
 
-    
-    with handlers.Handler(logger, options['rotation'], f"{logdir}/browsermon_history.{options['logmode']}", 5) as handler:
+    with handlers.Handler(logger, options['rotation'],
+                          f"{logdir}/browsermon_history.{options['logmode']}",
+                          5) as handler:
         time.sleep(300)
 
+
 if __name__ == '__main__':
-    run() 
+    run()

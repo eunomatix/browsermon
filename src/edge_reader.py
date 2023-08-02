@@ -1,19 +1,20 @@
-import atexit
 import concurrent.futures
 import csv
 import os
 import platform
+import signal
 import sqlite3
 import sys
+from functools import partial
 
 import orjson as json
 from apscheduler.schedulers.blocking import BlockingScheduler
 
-from src.utils.caching import write_cache_file, read_cache_file
-from src.utils.common import prepare_entry
-from src.utils.common import write_logs, parse_schedule_window
-from src.utils.encryption import gen_fernet_key
-from src.utils.metadata import get_static_metadata
+from utils.caching import write_cache_file, read_cache_file
+from utils.common import prepare_entry
+from utils.common import write_logs, parse_schedule_window
+from utils.encryption import gen_fernet_key
+from utils.metadata import get_static_metadata
 
 # Global variable
 cache = {}
@@ -237,9 +238,10 @@ def process_edge_history(logmode, logdir):
                "Processed browsing history for all the profiles and users")
 
 
-def cleanup(cache_file, encryption_key):
+def cleanup_on_sigterm(cache_file, encryption_key, signum, frame):
     # Function to be called by atexit, ensuring correct cache
     write_cache_file(cache_file, encryption_key, cache)
+    sys.exit()
 
 
 def main():
@@ -282,9 +284,9 @@ def main():
         password = 'EunoMatix_BrowserMon'
         encryption_key = gen_fernet_key(password)
 
-        # Register the write_cache_file function to be called when the
-        # program exits
-        atexit.register(cleanup, cache_file, encryption_key)
+        # Set up the signal handler with the cleanup function
+        signal.signal(signal.SIGTERM,
+                      partial(cleanup_on_sigterm, cache_file, encryption_key))
 
         # Read the cache file if it exists
         cache = read_cache_file(cache_file, encryption_key)

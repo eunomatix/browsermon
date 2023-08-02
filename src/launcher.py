@@ -1,4 +1,3 @@
-import platform
 import sys
 import os
 import subprocess
@@ -19,7 +18,7 @@ class Launcher:
             if the subprocess exits with error it relaunches the subprocess
             if the subprocess keeps exiting with error it only retries to launch it 5 times.
             'process' argument is the process object of the launched subprocess on which this function is monitoring
-        Args: 
+        Args:
             process: process object of the launched subprocess
             browser: browser name
             mode: mode in which the reader should run
@@ -72,7 +71,7 @@ class Launcher:
         env = os.environ.copy()
         env['PYTHONPATH'] = os.pathsep.join(sys.path)
         self.logger.info(f"Invoking {browser}_reader.py")
-        process = subprocess.Popen(['python',
+        process = subprocess.Popen(['python3',
                                     f'src/{browser}_reader.py',
                                     self.options['logdir'],
                                     self.options['logmode'],
@@ -80,10 +79,13 @@ class Launcher:
                                     self.options['schedule_window']
                                     ], env=env,
                                    stderr=subprocess.PIPE)
-                                   
+
         self.processes.append(process)
         self.logger.info(f"Invoked {browser}_reader.py")
         self.logger.info(f"Starting monitoring thread for {browser}_reader.py")
+
+        # stdout, stderr = process.communicate()
+        # print(stderr)
 
         monitorThread = threading.Thread(
             target=self.monitor_subprocess, args=(

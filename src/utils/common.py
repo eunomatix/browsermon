@@ -4,7 +4,7 @@ import os
 import sys
 from collections import OrderedDict
 
-from src.utils import default_log_loc
+from utils import default_log_loc
 
 
 def write_logs(level, message):

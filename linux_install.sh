@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Exit immediately if any command exits with a non-zero status
 set -e
 
 # Function to check if a command is available
@@ -13,22 +12,11 @@ echo_step() {
     echo "Step $1: $2"
 }
 
-# Function to draw a progress bar
-draw_progress_bar() {
-    local percentage=$1
-    local bar_length=50
-    local num_bars=$(( percentage * bar_length / 100 ))
-
-    # Print the progress bar
-    printf "["
-    for ((i=0; i<num_bars; i++)); do
-        printf "="
-    done
-    for ((i=num_bars; i<bar_length; i++)); do
-        printf " "
-    done
-    printf "] %d%%\r" $percentage
-}
+# Check if the user is root
+if [ "$EUID" -ne 0 ]; then
+    echo "Error: This script must be run as root."
+    exit 1
+fi
 
 # Check if Python is installed
 if ! command_exists python3; then
@@ -113,42 +101,26 @@ prompt_delete_project() {
     done
 }
 
-# Function to perform installation steps with a progress bar
+# Function to perform installation steps
 perform_installation() {
-    total_steps=6
-    step=0
-
     create_target_directory
-    ((step++))
-    draw_progress_bar $((step * 100 / total_steps))
-
     copy_files
-    ((step++))
-    draw_progress_bar $((step * 100 / total_steps))
 
     cp "$PROJECT_DIR/README.md" "$TARGET_DIR"
     cp "$PROJECT_DIR/browsermon.conf" "$TARGET_DIR"
     cp "$PROJECT_DIR/linux_uninstall.sh" "$TARGET_DIR"
-    ((step++))
-    draw_progress_bar $((step * 100 / total_steps))
 
     install_dependencies
-    ((step++))
-    draw_progress_bar $((step * 100 / total_steps))
 
     move_service_file
-    ((step++))
-    draw_progress_bar $((step * 100 / total_steps))
 
     enable_and_start_service
-    ((step++))
-    draw_progress_bar $((step * 100 / total_steps))
 
     prompt_delete_project
-    ((step++))
-    draw_progress_bar $((step * 100 / total_steps))
+
     echo "Installation complete."
 }
 
 # Main script
 perform_installation
+
