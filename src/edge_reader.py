@@ -1,3 +1,4 @@
+import atexit
 import concurrent.futures
 import csv
 import os
@@ -5,14 +6,13 @@ import platform
 import signal
 import sqlite3
 import sys
-from functools import partial
 
 import orjson as json
 from apscheduler.schedulers.blocking import BlockingScheduler
 
+from utils import system, logger
 from utils.caching import write_cache_file, read_cache_file
-from utils.common import prepare_entry
-from utils.common import write_logs, parse_schedule_window
+from utils.common import parse_schedule_window, prepare_entry
 from utils.encryption import gen_fernet_key
 from utils.metadata import get_static_metadata
 
@@ -22,10 +22,12 @@ cache = {}
 
 def get_profiles(user_profile_dir, username):
     """
-    Get the profiles from the Local State file.
-    :return: Dictionary of profiles
+    Get all the profiles of the user
+    :param user_profile_dir:
+    :param username:
+    :return:
     """
-    write_logs("info", f"Sniffing user profiles from user: {username}")
+    logger.info(f"Sniffing user profiles from user: {username}")
     local_state_file = os.path.join(user_profile_dir, "Local State")
     with open(local_state_file, "r") as file:
         data = json.loads(file.read())
@@ -33,7 +35,8 @@ def get_profiles(user_profile_dir, username):
     profile_info = data.get("profile")
     profiles = {}
     if profile_info and "info_cache" in profile_info:
-        profiles = {profile_name: {"profile_title": user_data.get("name"),
+        profiles = {profile_name: {"profile_id": user_data.get("gaia_id"),
+                                   "profile_title": user_data.get("name"),
                                    "profile_username": user_data.get(
                                        "user_name"),
                                    "profile_path": os.path.join(
@@ -50,10 +53,10 @@ def get_all_profiles():
     Get all the profiles for all the users on the operating system.
     :return: Dictionary of profiles
     """
-    write_logs("info", f"Sniffing users from {platform.node()}")
+    logger.info(f"Sniffing users from {platform.node()}")
     profiles = {}
 
-    if platform.system() == "Windows":
+    if system == "Windows":
         import winreg
 
         reg_key = None
@@ -73,16 +76,15 @@ def get_all_profiles():
                                                     "Local", "Microsoft",
                                                     "Edge", "User Data")
                     if os.path.exists(user_profile_dir):
-                        write_logs("info",
-                                   f"Found Microsoft Edge profile directory "
-                                   f"for user: {username}")
+                        logger.info(f"Found Microsoft Edge profile directory "
+                                    f"for user: {username}")
                         user_profiles = get_profiles(user_profile_dir,
                                                      username)
                         profiles.update(user_profiles)
                 finally:
                     winreg.CloseKey(user_key)
         except Exception as e:
-            write_logs("error", f"Error: {str(e)}")
+            logger.error(f"Error: {str(e)}")
         finally:
             if reg_key is not None:
                 winreg.CloseKey(reg_key)
@@ -93,8 +95,8 @@ def get_all_profiles():
 
             # Check if the user has a Microsoft Edge profile directory
             if os.path.exists(user_profile_dir):
-                write_logs("info",
-                           f"Found Microsoft Edge profile directory for user: {user}")
+                logger.info(
+                    f"Found Microsoft Edge profile directory for user: {user}")
                 user_profiles = get_profiles(user_profile_dir, user)
                 profiles.update(user_profiles)
 
@@ -129,9 +131,8 @@ def write_history_data(profile, logmode, logdir):
     current_modified_time = os.path.getmtime(history_file)
 
     if last_modified_time == current_modified_time:
-        write_logs("info",
-                   f"History file for profile '{profile_name}' has not been "
-                   f"modified, skipping SQL query.")
+        logger.info(
+            f"History file for profile '{profile_name}' has not been modified, skipping SQL query.")  # noqa
         return
 
     connection = sqlite3.connect(f"file:{history_file}?immutable=1", uri=True)
@@ -152,7 +153,7 @@ def write_history_data(profile, logmode, logdir):
             INNER JOIN URLs AS u ON u.id = v.url
             LEFT JOIN Visits AS v_referrer ON v.from_visit = v_referrer.id
             LEFT JOIN URLs AS u_referrer ON v_referrer.url = u_referrer.id
-    """
+        """
 
     if last_visit_time:
         # Filter for new records based on last processed visit time
@@ -163,12 +164,23 @@ def write_history_data(profile, logmode, logdir):
     rows = cursor.fetchall()
 
     num_new_records = len(rows)
-    write_logs("info",
-               f"Found {num_new_records} new records for profile \
-               '{profile_name}' user: '{metadata['os_username']}'")
 
-    # Write entries to the file
+    logger.info(
+        f"Found {num_new_records} new records for profile '{profile_name}' "
+        f"user: '{metadata['os_username']}'")
+
+    # Update the last modified time and last visit time
+    profile_info["last_modified_time"] = current_modified_time
+    profile_info["last_visit_time"] = rows[-1][4] if rows else last_visit_time
+    cache[profile_name] = profile_info
+
+    if num_new_records == 0:
+        cursor.close()
+        connection.close()
+        return
+
     output_file = os.path.join(logdir, f"browsermon_history.{logmode}")
+
     with open(output_file, "a+", newline='') as file:
         if logmode == "json":
             writer = lambda x: file.write(  # noqa
@@ -187,24 +199,19 @@ def write_history_data(profile, logmode, logdir):
             entry = prepare_entry(result, metadata, profile)
             writer(entry)
 
-    if rows:
-        # Update the last modified time and last visit time
-        profile_info["last_modified_time"] = current_modified_time
-        profile_info["last_visit_time"] = rows[-1][4]
-        cache[profile_name] = profile_info
-
     cursor.close()
     connection.close()
 
-    write_logs("info",
-               f"Processed browsing history for profile '{profile_name}'")
+    logger.info(f"Processed browsing history for profile '{profile_name}'")
 
 
 def process_edge_history(logmode, logdir):
     """
     Process the Edge browsing history and write it to the output file using a
     dynamic thread pool.
-    :return: None
+    :param logmode:
+    :param logdir:
+    :return:
     """
     profiles = get_all_profiles()
 
@@ -221,106 +228,92 @@ def process_edge_history(logmode, logdir):
         # Submit tasks for each profile to the executor
         future_to_profile = {
             executor.submit(write_history_data, profile, logmode,
-                            logdir): profile for profile
-            in profiles.values()}
+                            logdir): profile for profile in profiles.values()}
 
         # Wait for all tasks to complete
         for future in concurrent.futures.as_completed(future_to_profile):
             profile = future_to_profile[future]
             try:
-                future.result()  # Get the result of the task (this will
-                # raise an exception if the task raised one) #noqa
+                future.result()  # Get the result of the task
+                # (this will raise an exception if the task raised one)
             except Exception as e:
-                write_logs("error",
-                           f"Error processing history for profile '{profile['profile_path']}': {str(e)}")  # noqa
+                logger.error(
+                    f"Error processing history for profile '{profile['profile_path']}': {str(e)}")  # noqa
 
-    write_logs("info",
-               "Processed browsing history for all the profiles and users")
+    logger.info("Processed browsing history for all the profiles and users")
 
 
-def cleanup_on_sigterm(cache_file, encryption_key, signum, frame):
-    # Function to be called by atexit, ensuring correct cache
+def cleanup_on_sigterm(signum, frame):
+    sys.exit(0)
+
+
+def cleanup(cache_file, encryption_key):
+    # Function to be called by atexit, ensuring cache is written to the file
     write_cache_file(cache_file, encryption_key, cache)
-    sys.exit()
 
 
-def main():
+def edge_reader(exit_feedback_queue, logdir, logmode, mode, schedule_window):
     global cache
+    if system == 'Linux':
+        if not os.geteuid() == 0:
+            print("Error, Shutting Down! Only root can run this script")
+            logger.error(
+                "Shutting Down! Only root can run this script")  # noqa
+            return
+    elif system == 'Windows':
+        import ctypes
+
+        if not ctypes.windll.shell32.IsUserAnAdmin() != 0:
+            print("Error, Shutting Down! Only root can run this script")
+            logger.error(
+                "Shutting Down! Only root can run this script")  # noqa
+            return
+
+    if os.path.exists(logdir):
+        logger.info(f"Found logdir {logdir} for writing history files")
+    else:
+        os.makedirs(logdir)
+        logger.warning(f"Logdir {logdir} not found, creating new")
+
+    cache_file = os.path.join(logdir, "browsermon_cache")
+
+    logger.info(f"Reader started successfully in {mode} mode")
+
+    # encryption key
+    password = 'EunoMatix_BrowserMon'
+    encryption_key = gen_fernet_key(password)
+
+    # Register the write_cache_file function to be called when the
+    # program exits
+    atexit.register(cleanup, cache_file, encryption_key)
+
+    # Set up the signal handler with the cleanup function
+    signal.signal(signal.SIGTERM, cleanup_on_sigterm)
+
+    # Read the cache file if it exists
+    cache = read_cache_file(cache_file, encryption_key)
+
+    scheduler = BlockingScheduler()
+
+    if mode == "scheduled":
+        schedule_interval = parse_schedule_window(schedule_window)
+        scheduler.add_job(process_edge_history, 'interval',
+                          seconds=schedule_interval,
+                          args=(logmode, logdir))  # noqa
+
+    elif mode == "real-time":
+        scheduler.add_job(process_edge_history, 'interval', seconds=10,
+                          args=(logmode, logdir))  # Run every 10 seconds
 
     try:
-        if platform.system() == 'Linux':
-            if not os.geteuid() == 0:
-                print("Error, Shutting Down! Only root can run this script")
-                write_logs("error",
-                           "Error, Shutting Down! Only root can run this script")  # noqa
-                return
-        elif platform.system() == 'Windows':
-            import ctypes
-
-            if not ctypes.windll.shell32.IsUserAnAdmin() != 0:
-                print("Error, Shutting Down! Only root can run this script")
-                write_logs("error",
-                           "Error, Shutting Down! Only root can run this script")  # noqa
-                return
-
-        logdir = sys.argv[1]
-
-        if os.path.exists(logdir):
-            write_logs("info",
-                       f"Found logdir {logdir} for writing history files")
-        else:
-            os.makedirs(logdir)
-            write_logs("warning", f"Logdir {logdir} not found, creating new")
-
-        cache_file = os.path.join(logdir, "browsermon_cache")
-
-        logmode = sys.argv[2]
-
-        mode = sys.argv[3]  # Mode argument (scheduled or real-time)
-
-        write_logs("info", f"Reader started successfully in {mode} mode")
-
-        # encryption key
-        password = 'EunoMatix_BrowserMon'
-        encryption_key = gen_fernet_key(password)
-
-        # Set up the signal handler with the cleanup function
-        signal.signal(signal.SIGTERM,
-                      partial(cleanup_on_sigterm, cache_file, encryption_key))
-
-        # Read the cache file if it exists
-        cache = read_cache_file(cache_file, encryption_key)
-
-        scheduler = BlockingScheduler()
-
-        if mode == "scheduled":
-            schedule_window = sys.argv[4]  # Schedule window argument
-            schedule_interval = parse_schedule_window(schedule_window)
-            scheduler.add_job(process_edge_history, 'interval',
-                              seconds=schedule_interval,
-                              args=(logmode, logdir))  # noqa
-
-        elif mode == "real-time":
-            scheduler.add_job(process_edge_history, 'interval', seconds=10,
-                              args=(logmode, logdir))  # Run every 10 seconds
-
-        try:
-            # Run the main function directly when the program starts
-            process_edge_history(logmode, logdir)
-            scheduler.start()
-        except (KeyboardInterrupt, SystemExit):
-            # Gracefully exit the scheduler
-            scheduler.shutdown()
-
-    except IndexError:
-        print("Invalid number of arguments!")
-        print(
-            "Valid format: program [logdir] [logmode](csv, json) [mode](scheduled, real-time) [scheduled_window](1m, 1h, 1d)")  # noqa
-        write_logs("error", "Invalid number of arguments!")
-
+        # Run the main function directly when the program starts
+        process_edge_history(logmode, logdir)
+        scheduler.start()
+    except (KeyboardInterrupt, SystemExit):
+        scheduler.shutdown()
+        exit_feedback_queue.put("edge exited")
     except Exception as e:
-        write_logs("error", f"Error: {str(e)}")
-
-
-if __name__ == "__main__":
-    main()
+        logger.error(f"Error: {str(e)}")
+        scheduler.shutdown()
+        exit_feedback_queue.put("edge exited")
+        sys.exit(1)

@@ -1,8 +1,7 @@
 import os 
 import re
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.schedulers.background import BackgroundScheduler
 
 class Handler:
     def __init__(self, logger, rotation, file_path, backup_count):
@@ -50,15 +49,8 @@ class Handler:
         """
 
         logger.info("Scheduler information:")
-
         # Iterate over all jobs in the scheduler
         for job in scheduler.get_jobs():
-            logger.info(f"Job ID: {job.id}")
-            logger.info(f"Job Name: {job.name}")
-            logger.info(f"Job Function: {job.func.__name__}")
-            logger.info(f"Job Arguments: {job.args}")
-            logger.info(f"Job Keyword Arguments: {job.kwargs}")
-
             # Retrieve trigger information
             if isinstance(job.trigger, CronTrigger):
                 cron_expression = job.trigger.fields
@@ -71,7 +63,6 @@ class Handler:
                 next_run_time = job.next_run_time  # Use job's next_run_time attribute
                 logger.info(f"Next Run Time: {next_run_time}")
 
-            logger.info("")
 
     def schedule_background_job(self):
         """ 

@@ -1,7 +1,4 @@
-import sys
-import os
-import subprocess
-import threading
+import multiprocessing as mp
 
 
 class Launcher:
@@ -10,53 +7,9 @@ class Launcher:
         self.logger = logger
         self.options = options
         self.processes = []
+        self.queue = None
+        mp.set_start_method('spawn')
 
-    def monitor_subprocess(self, process, browser):
-        """
-        monitor_subprocess function:
-            monitors the subprocess launched by launch_reader function
-            if the subprocess exits with error it relaunches the subprocess
-            if the subprocess keeps exiting with error it only retries to launch it 5 times.
-            'process' argument is the process object of the launched subprocess on which this function is monitoring
-        Args:
-            process: process object of the launched subprocess
-            browser: browser name
-            mode: mode in which the reader should run
-            scheduled_window: time window in which the reader should run
-            logdir: directory where the log file should be stored
-            logmode: mode in which the log file should be stored
-        """
-
-        pid = os.getpid()
-        self.logger.debug(f'Monitoring thread pid: {pid}')
-        count = 0
-        while (1):
-            process.wait()
-            if process.returncode != 0 and count < 3:
-                self.logger.error(
-                    f'Subprocess: {browser}_reader.py exited with error')
-                self.logger.debug(f'Retrieved code {process.returncode}')
-                self.logger.info(
-                    f"Relaunching the subprocess: {browser}_reader.py")
-                process = subprocess.Popen(['python',
-                                            f'{browser}_reader.py',
-                                            self.options['logdir'],
-                                            self.options['logmode'],
-                                            self.options['mode'],
-                                            self.options['schedule_window']
-                                            ],
-                                           stderr=subprocess.PIPE)
-                self.logger.info(
-                    "Relaunched the reader that exited with error")
-                count += 1
-            elif count > 3:
-                self.logger.error(f'{browser}_reader.py keeps exiting')
-                self.logger.info('Monitor thread is exiting')
-                break
-            else:
-                self.logger.info(
-                    "Subprocess completed with no errors; Monitor thread is exiting")
-                break
 
     def launch_reader(self, browser):
         """
@@ -68,30 +21,25 @@ class Launcher:
                 logdir: directory where the log file should be stored
                 logmode: mode in which the log file should be stored
         """
-        env = os.environ.copy()
-        env['PYTHONPATH'] = os.pathsep.join(sys.path)
-        self.logger.info(f"Invoking {browser}_reader.py")
-        process = subprocess.Popen(['python3',
-                                    f'src/{browser}_reader.py',
-                                    self.options['logdir'],
-                                    self.options['logmode'],
-                                    self.options['mode'],
-                                    self.options['schedule_window']
-                                    ], env=env,
-                                   stderr=subprocess.PIPE)
 
-        self.processes.append(process)
-        self.logger.info(f"Invoked {browser}_reader.py")
-        self.logger.info(f"Starting monitoring thread for {browser}_reader.py")
-
-        # stdout, stderr = process.communicate()
-        # print(stderr)
-
-        monitorThread = threading.Thread(
-            target=self.monitor_subprocess, args=(
-                process, browser))
-        monitorThread.start()
-        self.logger.info(f'Started monitoring thread for {browser}_reader.py')
+        if browser == 'edge':
+            self.logger.info("Invoking MICORSOFOT EDGE reader")
+            import edge_reader
+            self.queue = mp.Queue()
+            p = mp.Process(target=edge_reader.edge_reader, args=(self.queue, self.options['logdir'], self.options['logmode'], self.options['mode'], self.options['schedule_window']))
+            p.start()
+            print("Launched reader with pid ", p.pid)
+            self.logger.info("Invoked MICOROSOFT EDGE reader; PID: " + str(p.pid))
+            self.processes.append(p)
+        if browser == 'chrome':
+            import chrome_reader
+            self.logger.info("Invoking CHROME reader")
+            self.queue = mp.Queue()
+            p = mp.Process(target=chrome_reader.main, args=(self.queue, self.options['logdir'], self.options['logmode'], self.options['mode'], self.options['schedule_window']))
+            p.start()
+            print("Launched reader with pid ", p.pid)
+            self.logger.info("Invoked CHROME reader; PID: " + str(p.pid))
+            self.processes.append(p)
 
     def start(self):
         """

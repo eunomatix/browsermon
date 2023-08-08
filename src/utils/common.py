@@ -1,31 +1,6 @@
 import datetime
-import logging
-import os
 import sys
 from collections import OrderedDict
-
-from utils import default_log_loc
-
-
-def write_logs(level, message):
-    """
-    Write logs to the browsermon.log file
-    :param level: Log level (info, error, warning)
-    :param message: Log message
-    :return: None
-    """
-
-    log_file = os.path.join(default_log_loc, "browsermon.log")
-    log_format = "%(asctime)s WD%(process)d:: \'MICROSOFT-EDGE:\' - %(levelname)s %(message)s"  # noqa
-    logging.basicConfig(filename=log_file, level=logging.INFO,
-                        format=log_format)
-
-    if level == "info":
-        logging.info(message)
-    elif level == "error":
-        logging.error(message)
-    elif level == "warning" or level == "warn":
-        logging.warning(message)
 
 
 class InvalidScheduleWindowFormat(Exception):
@@ -75,13 +50,9 @@ def prepare_entry(result, metadata, profile):
     entry.update(profile)
 
     # Add other entry information
-    entry.update({
-        "session_id": session_id,
-        "referrer": referrer,
-        "url": url,
+    entry.update({"session_id": session_id, "referrer": referrer, "url": url,
         "title": title,
         "visit_time": visit_time_obj.strftime("%Y-%m-%d %H:%M:%S"),
-        "visit_count": visit_count,
-    })
+        "visit_count": visit_count, })
 
     return entry
