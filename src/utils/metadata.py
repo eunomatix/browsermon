@@ -2,6 +2,8 @@ import os
 import platform
 import sqlite3
 
+from utils import system
+
 
 def get_browser_version(user_profile_dir, browser_name):
     """
@@ -15,7 +17,8 @@ def get_browser_version(user_profile_dir, browser_name):
     version_file_path = None
 
     if browser_name.lower() == "edge":
-        version_file_path = os.path.join(user_profile_dir, "..", "Last Version")
+        version_file_path = os.path.join(user_profile_dir, "..",
+                                         "Last Version")
     elif browser_name.lower() == "firefox":
         version_file_path = os.path.join(user_profile_dir, "compatibility.ini")
 
@@ -39,7 +42,7 @@ def get_static_metadata(user_profile_dir, username, browser_name):
     :return: Static metadata dictionary
     """
 
-    metadata = {"hostname": platform.node(), "os": platform.system(),
+    metadata = {"hostname": platform.node(), "os": system,
                 "os_username": username, "browser": browser_name,
                 "browser_version": get_browser_version(user_profile_dir,
                                                        browser_name),

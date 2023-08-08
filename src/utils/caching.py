@@ -1,8 +1,8 @@
 import json
 import os
 
-from src.utils.common import write_logs
-from src.utils.encryption import encrypt_data, decrypt_data
+from utils import logger
+from utils.encryption import encrypt_data, decrypt_data
 
 
 def write_cache_file(cache_file, encryption_key, cache):
@@ -16,7 +16,7 @@ def write_cache_file(cache_file, encryption_key, cache):
     with open(cache_file, "wb") as file:
         file.write(encrypted_data)
 
-    write_logs("info", "Cache file written with last visit times")
+    logger.info("Cache file written with last visit times")
 
 
 def read_cache_file(cache_file, encryption_key):
@@ -34,6 +34,6 @@ def read_cache_file(cache_file, encryption_key):
 
         cache = json.loads(decrypted_data)
 
-        write_logs("info", "Cache file read and last visit times decrypted")
+        logger.info("Cache file read and last visit times decrypted")
 
     return cache
