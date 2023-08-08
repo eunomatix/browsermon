@@ -1,4 +1,3 @@
-import multiprocessing
 import os
 import glob
 import sqlite3
@@ -15,21 +14,19 @@ from apscheduler.schedulers.background import BackgroundScheduler
 entries_count = 0
 scheduler = BlockingScheduler()
 
-def write_logs(level, message, logdir):
+def write_logs(level, message, logsdir):
     """
-    
     Write logs to the log file
     :param level: Log level (info, error, warning)
     :param message: Log message
     :param logdir: Path to the log directory
     :return: None
     """
-    if logdir is None:
+    if logsdir is None:
         print("Error: logdir is not set.")
         return
-    
 
-    log_file = "C:\\browsermon\\browsermon.log" if platform.system() == "Windows" else "/opt/browsermon/browsermon.log"
+    log_file = os.path.join(logsdir, "browsermon.log")
     log_format = "%(asctime)s BM%(process)d:: 'Chrome:' - %(levelname)s %(message)s"
     logging.basicConfig(filename=log_file, level=logging.INFO, format=log_format)
 
@@ -73,12 +70,13 @@ def get_chrome_version():
     return version
 
 def fixed_data():
-    
+
     Fixed_D = {
         "hostname": platform.node(),
         "os": platform.system(),
+        "os_username":"",
         "browser": "Google Chrome",
-        "chrome_version" :get_chrome_version(),
+        "browser_version" :get_chrome_version(),
         "browser_db": f"SQLite {sqlite3.sqlite_version}"
     }
     return Fixed_D
@@ -100,6 +98,7 @@ def get_profile_info(database_path):
                     "email_id": email_id if email_id is not None else "Not Available",
                     "full_name": full_name if full_name is not None else "Not Available",
                     "Account_id": Account_id if Account_id is not None else "Not Available"
+
                 }
                 return profile_information
     except (FileNotFoundError, json.JSONDecodeError, KeyError):
@@ -107,10 +106,9 @@ def get_profile_info(database_path):
 
     return None
 
-    
 
-def get_profile_folders(logdir):
-    
+def get_profile_folders(logdir, logsdir):
+
     system = platform.system()
     base_path = ""
 
@@ -129,26 +127,26 @@ def get_profile_folders(logdir):
         if os.path.isdir(folder_path) and folder_name not in excluded_folders:
             profile_folders.append({
                 'Profile Name': folder_name,
-                'Folder Path': folder_path 
+                'Folder Path': folder_path
             })
-            
-    write_logs("Info",f"OS Users Found: {profile_folders}", logdir)
+
+    write_logs("Info",f"OS Users Found: {profile_folders}", logsdir)
     return profile_folders
 
 
-def get_Chrome_profile_folders(logdir):
+def get_Chrome_profile_folders(logdir, logsdir):
     logdirec=logdir
-    profile_data = get_profile_folders(logdirec);
+    profile_data = get_profile_folders(logdirec, logsdir);
     profile_objects = {}
     Default_folder_path = []  # List to store additional folder paths
 
     for profile in profile_data:
         profile_name = profile['Profile Name']
         get_os_username = profile_name
-        write_logs("info",f"Sniffing user profiles from user: {get_os_username}", logdir)
+        Default_folder_path= ''
+        write_logs("info",f"Sniffing user profiles from user: {get_os_username}", logsdir)
 
         system = platform.system()
-        
         if system == "Windows":
             folder_path = os.path.join('C:\\Users', get_os_username, 'AppData', 'Local', 'Google', 'Chrome', 'User Data')
             Default_folder_path= os.path.join('C:\\Users', get_os_username, 'AppData', 'Local', 'Google', 'Chrome', 'User Data', 'Default')
@@ -157,7 +155,7 @@ def get_Chrome_profile_folders(logdir):
             Default_folder_path= os.path.join('/home', get_os_username, '.config', 'google-chrome', 'Default' )
 
         folder_count = sum(os.path.isdir(os.path.join(folder_path, f)) for f in os.listdir(folder_path))
-        
+
         for r in range(1, folder_count):
             profile_folder = os.path.join(folder_path, f'Profile {r}')
 
@@ -169,11 +167,11 @@ def get_Chrome_profile_folders(logdir):
                 'Profile Link': profile_folder,
                 'Last saved value number': 0
             }
-            write_logs("info",f"Profile Found For Windows User {get_os_username} at path :{profile_info['Profile Link'] }",logdir)
+            write_logs("info",f"Profile Found For Windows User {get_os_username} at path :{profile_info['Profile Link'] }",logsdir)
             profile_objects[profile_folder] = profile_info
             if not profile_objects:
-              write_logs("info", f"No Chrome user found in: {get_os_username}", logdir)
-            
+              write_logs("info", f"No Chrome user found in: {get_os_username}", logsdir)
+
         new_profile_info = {
         'Profile Username': get_os_username,  # Update with the desired username
         'Profile Link': Default_folder_path,
@@ -221,15 +219,15 @@ def parse_schedule_window(window):
         sys.exit(1)
 
 
-def monitor_history_db(client_pipe, db_path, logdir):
+def monitor_history_db(db_path, logdir, logsdir):
+
     if not os.path.isfile(db_path):
-        return
+        return None
 
     try:
         conn = sqlite3.connect(f'file:{db_path}?mode=ro&nolock=1', uri=True)
         cursor = conn.cursor()
 
-        # Load the last saved value number for the profile from the Chroeme_profiles_data.json file
         json_file = os.path.join(logdir, 'Chrome_profiles_data.json')
 
         with open(json_file, 'r') as file:
@@ -248,7 +246,6 @@ def monitor_history_db(client_pipe, db_path, logdir):
                 last_saved_value_number = None
 
         if last_saved_value_number is not None:
-            # Modify the SQL query to fetch additional columns: visit_count, window_id (session_id), referrer
             query = """
                 SELECT
                     v.visit_time,
@@ -272,252 +269,225 @@ def monitor_history_db(client_pipe, db_path, logdir):
         else:
             history_data = None
 
-        client_pipe.send(history_data) 
+        return history_data
     except (FileNotFoundError, json.JSONDecodeError, KeyError, sqlite3.DatabaseError) as e:
         # Catch the error and log it, but do not crash the program
-        write_logs("error", f"Error while processing {db_path}: {e}", logdir)
-        client_pipe.send(None)  # Send None to indicate failure
+        write_logs("error", f"Error while processing {db_path}: {e}", logsdir)
+        return None
 
-
-
-def write_history_data_to_json(history_data, write_file, db_path, logdirec, write_format):
+def write_history_data_to_json(history_data, write_file, db_path, logdirec, write_format, logsdir):
     global entries_count
-    entries_count = 0 
-    write_logs("Info",f"writing history database:", logdirec)
-    
+    entries_count = 0
+    write_logs("Info",f"writing history database:", logsdir)
     logdir = logdirec
-    profile_path= db_path; 
-    Profile_data = get_profile_info(db_path)  
+    profile_path= db_path;
+    Profile_data = get_profile_info(db_path)
     system = platform.system()
-
-       
     if system == "Windows":
         Os_username = os.path.dirname(os.path.dirname(os.path.dirname(db_path))).split(os.path.sep)[-5]
     elif system == "Linux":
         Os_username= directory_name = os.path.basename(os.path.dirname(db_path))
 
-    entry_data=[]
-    data = []
     fix_data = fixed_data()
+    fix_data["os_username"] = Os_username
     for entry in history_data:
-        visit_time_microseconds = entry[0]
-        visit_time_obj = datetime.datetime(1601, 1, 1) + datetime.timedelta(microseconds=visit_time_microseconds)
-        entry_data = {
-            'Visit time (UTC)': visit_time_obj.strftime("%Y-%m-%d %H:%M:%S"),
-            'Url': entry[1],
-            'Title': entry[2],
-            'visit_count': entry[3],
-            'window_id': entry[4],
-            'referrer_url': entry[5]
-        }
+        entry_data= {}
+        entry_data["hostname"] = fix_data.get("hostname")
+        entry_data["os"] = fix_data.get("os")
+        entry_data["os_username"] = fix_data.get("os_username")
+        entry_data["browser"] = fix_data.get("browser")
+        entry_data["browser_version"] = fix_data.get("browser_version")
+        entry_data["browser_db"] = fix_data.get("browser_db")
         if Profile_data is not None:
             # Check each field separately and provide default value if it's None
-            entry_data["email_id"] = Profile_data.get("email_id")
-            entry_data["full_name"] = Profile_data.get("full_name")
-            entry_data["Account_id"] = Profile_data.get("Account_id")      
+            entry_data["profile_id"] = Profile_data.get("Account_id")
+            entry_data["profile_title"] = Profile_data.get("full_name")
+            entry_data["profile_username"] = Profile_data.get("email_id")
+
         else:
-            entry_data["email_id"] = "Not Available"
-            entry_data["full_name"] = "Not Available"
-            entry_data["Account_id"] = "Not Available"    
-        
-        entry_data.update(fix_data)
-        entry_data["Os_user"] = Os_username
+            entry_data["profile_id"] = "Not Available"
+            entry_data["profile_title"] = "Not Available"
+            entry_data["profile_username"] = "Not Available"
         entry_data["Database_Path"] = profile_path
-         
-        entries_count += 1
-        data.append(entry_data)
-        
-    try:
-        
-        if data:  # Check if data is not empty before writing to the file
+        visit_time_microseconds = entry[0]
+        visit_time_obj = datetime.datetime(1601, 1, 1) + datetime.timedelta(microseconds=visit_time_microseconds)
+        entry_data.update({
+            'session_id': entry[4],
+            'referrer': entry[5],
+            'Url': entry[1],
+            'Title': entry[2],
+            'visit_date': visit_time_obj.strftime("%Y-%m-%d %H:%M:%S"),
+            'visit_count': entry[3],
+        })
+        entries_count+=1
+        try:
+         if entry_data:  # Check if data is not empty before writing to the file
 
           if write_format == 'json':
-              with open(write_file, 'a') as file:
-                  json.dump(data, file, indent=4)
-                  write_logs("Info", f"Total Number of Entries found for {db_path}: are {entries_count}", logdir)
-          elif write_format == 'csv':
-                fieldnames = ['Visit time (UTC)', 'Url', 'Title', 'visit_count', 'window_id', 'referrer_url',
-                              'email_id', 'full_name', 'Account_id', 'hostname', 'os', 'browser', 'chrome_version',
-                              'browser_db', 'Os_user', 'Database_Path']
+               with open(write_file, 'a') as file:
+                  json.dump(entry_data, file, indent=4)
+                  file.write(", ")
+                  file.write("\n")
 
-                with open(write_file, 'a', newline='') as csvfile:
-                    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+          elif write_format == 'csv':
+                fieldnames = ["hostname", "os", "os_username", "browser", "browser_version", "browser_db",
+                               "profile_id", "profile_title", "profile_username", "Database_Path",
+                               "session_id", "referrer", "Url", "Title", "visit_date", "visit_count"
+                                  ]
+
+
+                for key, value in entry_data.items():
+                    if isinstance(value, str):
+                       entry_data[key] = value.encode('unicode_escape').decode()
+
+                with open(write_file, 'a', newline='', encoding='utf-8') as csvfile:
+                    writer = csv.DictWriter(csvfile, fieldnames=fieldnames, quotechar='"', quoting=csv.QUOTE_ALL)
                     if csvfile.tell() == 0:
                         writer.writeheader()
+                    writer.writerow(entry_data)
 
-                    writer.writerows(data)       
-                
-    except Exception as e:
-        write_logs("Info", f"writing history database:", logdir)  # Pass logdir as an argument
+        except Exception as e:
+          write_logs("info", f"writing history database:", logsdir)  # Pass logdir as an argument
 
+    write_logs("info", f"Total Number of Entries found for {db_path}: are {entries_count}", logsdir)
     entries_count = 0  # Reset the count for the next function call
 
 
-def server(db_path, write_file, logdir, write_format):
-    global entries_count
-    entries_count = 0
-    server_pipe, client_pipe = multiprocessing.Pipe()
-    server_process = multiprocessing.Process(target=monitor_history_db, args=(client_pipe, db_path, logdir))
-    server_process.start()
+def server(db_path, write_file, logdir, write_format, logsdir):
 
-    last_visit_time = None
-    json_file_profiles = os.path.join(logdir, 'Chrome_profiles_data.json')
-
-    data = server_pipe.recv()
+    data = monitor_history_db(db_path, logdir, logsdir)
     if data is not None:
         if data:
             last_visit_time = data[-1][0]
-        write_history_data_to_json(data, write_file, db_path, logdir, write_format)
-        print(f"Last Visit Time for {db_path}: {last_visit_time}")
+            write_history_data_to_json(data, write_file, db_path, logdir, write_format, logsdir)
+            print(f"Last Visit Time for {db_path}: {last_visit_time}")
 
-        with open(json_file_profiles, 'r') as file:
-            profiles = json.load(file)
+            json_file_profiles = os.path.join(logdir, 'Chrome_profiles_data.json')
 
-        system = platform.system()
-        if system == 'Windows':
-            path_format = '\\History'
-        elif system == 'Linux':
-            path_format = '//History'
-        else:
-            path_format = None
+            with open(json_file_profiles, 'r') as file:
+                profiles = json.load(file)
 
-        if path_format is not None:
-            for profile in profiles:
-                if profile['Profile Link'] == db_path.replace(path_format, ''):
-                    if last_visit_time is not None:
-                        profile['Last saved value number'] = last_visit_time
-                    break
+            system = platform.system()
+            if system == 'Windows':
+                path_format = '\\History'
+            elif system == 'Linux':
+                path_format = '//History'
+            else:
+                path_format = None
 
-            with open(json_file_profiles, 'w') as file:
-                json.dump(profiles, file, indent=4)
+            if path_format is not None:
+                for profile in profiles:
+                    if profile['Profile Link'] == db_path.replace(path_format, ''):
+                        if last_visit_time is not None:
+                            profile['Last saved value number'] = last_visit_time
+                        break
 
-    server_process.terminate()
+                with open(json_file_profiles, 'w') as file:
+                    json.dump(profiles, file, indent=4)
 
 
-def process_chrome_history(logdir, write_format):
+def process_chrome_history_worker(logdir, write_format, profile, logsdir):
+
+    system = platform.system()
+    if system == 'Windows':
+        db_path = profile["Profile Link"] + "\\History"
+    elif system == 'Linux':
+        db_path = profile["Profile Link"] + "//History"
+    else:
+        logging.error("Unsupported operating system.")
+        return
+
+    if write_format == 'json':
+        write_file = os.path.join(logdir, 'browsermon_history.json')
+    elif write_format == 'csv':
+        write_file = os.path.join(logdir, 'browsermon_history.csv')
+
+    server(db_path, write_file, logdir, write_format, logsdir)
+
+def process_chrome_history(logdir, write_format, logsdir):
     global entries_count
-    entries_count = 0 
-    profile_folders = get_profile_folders(logdir)
-    chrome_users_profiles = get_Chrome_profile_folders(logdir)
+    entries_count = 0
+    profile_folders = get_profile_folders(logdir ,logsdir)
+    chrome_users_profiles = get_Chrome_profile_folders(logdir ,logsdir)
     json_file_path = os.path.join(logdir, 'Chrome_profiles_data.json')
 
-    with open(json_file_path, 'r') as file:
-        json_data = json.load(file)
+    try:
+        with open(json_file_path, 'r') as file:
+            json_data = json.load(file)
 
-    processes = []
-    last_visit_times = {}
+        for profile in json_data:
 
-    for profile in json_data:
-        system = platform.system()
-        if system == 'Windows':
-            db_path = profile["Profile Link"] + "\\History"
-        elif system == 'Linux':
-            db_path = profile["Profile Link"] + "//History"
-        else:
-            print("Unsupported operating system.")
-            continue
-        
-        if write_format == 'json':
-           write_file = os.path.join(logdir, 'browsermon_history.json')
-        elif write_format == 'csv':
-           write_file = os.path.join(logdir, 'browsermon_history.csv')
+            process_chrome_history_worker(logdir, write_format, profile, logsdir)
 
-        process = multiprocessing.Process(target=server, args=(db_path, write_file, logdir, write_format))
-        processes.append(process)
-        process.start()
-
-    for process in processes:
-        process.join()
-        
-def real_time_execution(logdir , write_format):
-    # Add the job to the scheduler
-    scheduler.add_job(process_chrome_history, 'interval', args=[logdir, write_format], seconds=5)
-
-    while True:
-        try:
-            # Start the scheduler (only once)
-            scheduler.start()
-        except (KeyboardInterrupt, SystemExit):
-            # Gracefully exit the scheduler
-            scheduler.shutdown()
-            break
-        except Exception as e:
-            # Handle any unexpected exceptions, log them, and retry
-            write_logs("error", f"An unexpected error occurred: {e}", logdir)
-            time.sleep(5)  # Wait for a while before retrying
-
-        # If the scheduler has stopped, wait for a while before retrying
-        time.sleep(5)
+    except Exception as e:
+        write_logs("error", f"An error occurred: {e}", logsdir)
 
 
 if __name__ == '__main__':
-
+    logsdir= ""
     try:
         logdir = sys.argv[1]
         write_format= sys.argv[2]
             # Check the operating system
         if platform.system() == "Windows":
-           write_logs("Info", "Running on Windows.", logdir)
+           logsdir= r"C:\browsermon\logs"
+           write_logs("info", "Running on Windows.", logsdir)
         # Add the rest of the code for Windows operations if needed.
         elif platform.system() == "Linux":
-           write_logs("Info", "Running on Linux.", logdir)
+           logsdir= "/opt/browsermon"
+           write_logs("info", "Running on Linux.", logsdir)
         # Check if running with root privilege on Linux
            if has_root_privilege():
-               write_logs("Info", "Running with root privilege.", logdir)
+               write_logs("info", "Running with root privilege.", logsdir)
             # Add the rest of the code for root privileged operations on Linux if needed.
            else:
-              write_logs("Info", "Not running with root privilege.", logdir)
-              write_logs("Info", "Exiting the program.", logdir)
+              write_logs("info", "Not running with root privilege.", logsdir)
+              write_logs("info", "Exiting the program.", logsdir)
               exit()  # Exit the program if not running with root privilege on Linux.
         else:
-          write_logs("Error", "Unsupported operating system.", logdir)
-          write_logs("Info", "Exiting the program.", logdir)
-          exit()  # Exit the program for unsupported operating systems.        
+          write_logs("Error", "Unsupported operating system.", logsdir)
+          write_logs("info", "Exiting the program.", logsdir)
+          exit()  # Exit the program for unsupported operating systems.
 
         if write_format == 'json':
             json_file =os.path.join(logdir, 'browsermon_history.json')
 
             if os.path.exists(json_file):
-                write_logs("info", f"Found History File {json_file} for writing history files", logdir)
-            else:       
-               write_logs("Info", f"Does not find files TO write Creating A new FIle", logdir)
+                write_logs("info", f"Found History File {json_file} for writing history files", logsdir)
+            else:
+               write_logs("info", f"Does not find files TO write Creating A new FIle", logsdir)
 
         elif write_format == 'csv':
 
             csv_file =os.path.join(logdir, 'browsermon_history.csv')
             if os.path.exists(csv_file):
-                write_logs("info", f"Found History File {csv_file} for writing history files", logdir)
-            else:       
-               write_logs("Info", f"Does not find files TO write Creating A new FIle", logdir)
+                write_logs("info", f"Found History File {csv_file} for writing history files", logsdir)
+            else:
+               write_logs("info", f"Does not find files TO write Creating A new FIle", logsdir)
 
 
-        mode = sys.argv[3] 
-        
+        mode = sys.argv[3]
+        scheduler = BlockingScheduler(max_instances= None)
 
-        if mode == "scheduled":
-            write_logs("info", f"Validated parameters Successfully", logdir)
-            write_logs("info", f"Reader started successfully in {mode} mode", logdir)
-            schedule_window = sys.argv[4]  # Schedule window argument
-            schedule_interval = parse_schedule_window(schedule_window)
-            scheduler = BlockingScheduler(max_instances= None)
 
-            scheduler.add_job(process_chrome_history, 'interval', args=[logdir, write_format], seconds=schedule_interval)
-
-            try:
-                scheduler.start()
-            except (KeyboardInterrupt, SystemExit):
-                # Gracefully exit the scheduler
-                write_logs("Info0", f"Exiting the Controller after Keyboard inturrupt", logdir)
-
-                scheduler.shutdown()
-            
-        elif mode == "real-time":
-            write_logs("info", f"Validated parameters Successfully", logdir)
-            write_logs("info", f"Reader started successfully in {mode} mode", logdir)
-
-            # Call the real_time_execution function to start the scheduler
-            real_time_execution(logdir, write_format)
-
+        try:
+            if mode == "scheduled":
+                write_logs("info", f"Validated parameters Successfully", logsdir)
+                write_logs("info", f"Reader started successfully in {mode} mode", logsdir)
+                schedule_window = sys.argv[4]  # Schedule window argument
+                schedule_interval = parse_schedule_window(schedule_window)
+                scheduler.add_job(process_chrome_history, 'interval', args=[logdir, write_format, logsdir], seconds=schedule_interval)
+            elif mode == "real-time":
+               process_chrome_history(logdir, write_format, logsdir)
+               scheduler.add_job(process_chrome_history, 'interval', args=[logdir, write_format, logsdir], seconds=5)
+            else:
+                print("Invalid mode specified.")
+                write_logs("error", "Invalid mode specified.", logsdir)
+                exit()
+            scheduler.start()
+        except (KeyboardInterrupt, SystemExit):
+    # Gracefully exit the scheduler
+            scheduler.shutdown()
     except IndexError:
         print("Invalid number of arguments!")
         print("Valid format: program [logdir] [mode](scheduled, realtime) [scheduled_window]")
