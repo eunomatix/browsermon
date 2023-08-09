@@ -1,14 +1,18 @@
 import multiprocessing as mp 
 
+def set_multiprocessing_start_method():
+    try:
+        mp.set_start_method('spawn')
+    except RuntimeError as e:
+        pass
 
 class Launcher:
     def __init__(self, installed_browsers, logger, options):
         self.installed_browsers = installed_browsers
         self.logger = logger
         self.options = options
-        self.processes = []
-        self.queue = None
-        mp.set_start_method('spawn')
+        self.processes = {}
+        self.queue = mp.Queue()
         
 
     def launch_reader(self, browser):
@@ -25,21 +29,19 @@ class Launcher:
         if browser == 'edge':
             self.logger.info("Invoking MICORSOFOT EDGE reader")
             import edge_reader
-            self.queue = mp.Queue()
-            p = mp.Process(target=edge_reader.main, args=(self.queue, self.options['logdir'], self.options['logmode'], self.options['mode'], self.options['schedule_window']))
-            p.start()
-            print("Launched reader with pid ", p.pid)
-            self.logger.info("Invoked MICOROSOFT EDGE reader; PID: " + str(p.pid))
-            self.processes.append(p)
+            process_edge = mp.Process(target=edge_reader.main, args=(self.queue, self.options['logdir'], self.options['logmode'], self.options['mode'], self.options['schedule_window']))
+            process_edge.start()
+            print("Launched reader with pid ", process_edge.pid)
+            self.logger.info("Invoked MICOROSOFT EDGE reader; PID: " + str(process_edge.pid))
+            self.processes['edge'] = process_edge
         if browser == 'chrome':
             import chrome_reader
             self.logger.info("Invoking CHROME reader")
-            self.queue = mp.Queue()
-            p = mp.Process(target=chrome_reader.main, args=(self.queue, self.options['logdir'], self.options['logmode'], self.options['mode'], self.options['schedule_window']))
-            p.start()
-            print("Launched reader with pid ", p.pid)
-            self.logger.info("Invoked CHROME reader; PID: " + str(p.pid))
-            self.processes.append(p)
+            process_chrome = mp.Process(target=chrome_reader.main, args=(self.queue, self.options['logdir'], self.options['logmode'], self.options['mode'], self.options['schedule_window']))
+            process_chrome.start()
+            print("Launched reader with pid ", process_chrome.pid)
+            self.logger.info("Invoked CHROME reader; PID: " + str(process_chrome.pid))
+            self.processes['chrome'] = process_chrome
 
 
     def start(self):

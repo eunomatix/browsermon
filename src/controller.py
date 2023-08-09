@@ -51,8 +51,6 @@ def get_installed_browsers():
                             browsers.add("chrome")
                         elif browser[:14] == "Microsoft Edge":
                             browsers.add("edge")
-                        elif browser[:7] == "Firefox":
-                            browsers.add("firefox")
 
                         i += 1
                     except WindowsError:
@@ -62,7 +60,7 @@ def get_installed_browsers():
                 pass  # If key doesn't exist, move on to next one
 
     elif SYSTEM == 'Linux':
-        command = 'which -a google-chrome firefox chromium-browser microsoft-edge brave-browser 2>/dev/null'
+        command = 'which -a google-chrome microsoft-edge 2>/dev/null'
         output = subprocess.getoutput(command)
         for line in output.split('\n'):
             line = line.strip().replace('/usr/bin/', '')
@@ -176,6 +174,7 @@ def init_logger(SYSTEM):
     return logger
 
 
+
 def run():
     """
     Function: Is the driver function of controller. 
@@ -198,10 +197,10 @@ def run():
 
     Args: None
     """
-
+    launcher.set_multiprocessing_start_method()
     logger = init_logger(SYSTEM)
 
-    options = config_reader(logger, "/home/appleconda/Documents/Files/browsermon/browsermon.conf")
+    options = config_reader(logger)
 
     logdir = options['logdir']
     installed_browsers = get_installed_browsers()
@@ -215,13 +214,15 @@ def run():
         while True:
             logger.info("Controller waiting (blocked) on exit_feedback_queue")
             return_str = launcherObj.queue.get()
-            if (return_str == "edge Exited"):
+            if (return_str == "edge exited"):
+                launcherObj.processes['edge'].join()
                 logger.info("exit_feedback_queue received enqueue from edge")
                 logger.error("edge reader has exited")
                 logger.info("Relaunching edge reader")
                 launcherObj.launch_reader("edge")
                 
-            elif (return_str == "chrome Exited"):
+            elif (return_str == "chrome exited"):
+                launcherObj.processes['chrome'].join()
                 logger.info("exit_feedback_queue received enqueue from chrome")
                 logger.error("chrome reader has exited")
                 logger.info("Relaunching chrome reader")

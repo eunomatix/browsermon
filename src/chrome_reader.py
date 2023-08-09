@@ -416,89 +416,69 @@ def process_chrome_history(logdir, write_format):
 
 
 def handle_signal(exit_feedback_queue, signum, frame):
-    logger.info("Exiting Program By Inturrupt")
-    exit_feedback_queue.put("CHROME Reader: SystemExit")
-    sys.exit()
+    logger.info("Exiting Program By Signal Handle")
+    sys.exit(0)
 
 
 def main(exit_feedback_queue, logdir, write_format, mode, schedule_window):
+
     signal_handler = partial(handle_signal, exit_feedback_queue)
     signal.signal(signal.SIGTERM, signal_handler)
 
-    try:
-            # Check the operating system
-        if platform.system() == "Windows":
-           logger.info("Running on Windows.")
-        # Add the rest of the code for Windows operations if needed.
-        elif platform.system() == "Linux":
-           logger.info(f"Running on Linux.")
-        # Check if running with root privilege on Linux
-           if has_root_privilege():
-               logger.info(f"Running with root privilege.")
-            # Add the rest of the code for root privileged operations on Linux if needed.
-           else:
-              logger.info(f"Not running with root privilege.")
-              logger.info(f"Exiting the program.")
-              exit()  # Exit the program if not running with root privilege on Linux.
+    if platform.system() == "Windows":
+        logger.info("Running on Windows.")
+    # Add the rest of the code for Windows operations if needed.
+    elif platform.system() == "Linux":
+        logger.info(f"Running on Linux.")
+    # Check if running with root privilege on Linux
+        if has_root_privilege():
+            logger.info(f"Running with root privilege.")
+        # Add the rest of the code for root privileged operations on Linux if needed.
         else:
-          logger.error(f"Unsupported operating system.")
-          logger.info(f"Exiting the program Due to Unsupported OS.")
-          exit()  # Exit the program for unsupported operating systems.        
+            logger.info(f"Not running with root privilege.")
+            logger.info(f"Exiting the program.")
+            exit()  # Exit the program if not running with root privilege on Linux.
+    else:
+        logger.error(f"Unsupported operating system.")
+        logger.info(f"Exiting the program Due to Unsupported OS.")
+        exit()  # Exit the program for unsupported operating systems.        
 
-        if write_format == 'json':
-            json_file =os.path.join(logdir, 'browsermon_history.json')
+    if write_format == 'json':
+        json_file =os.path.join(logdir, 'browsermon_history.json')
 
-            if os.path.exists(json_file):
-                logger.info(f"Found History File {json_file} for writing history files")
-            else:       
-               logger.info(f"Does not find files TO write Creating A new FIle")
+        if os.path.exists(json_file):
+            logger.info(f"Found History File {json_file} for writing history files")
+        else:       
+            logger.info(f"Does not find files TO write Creating A new FIle")
 
-        elif write_format == 'csv':
+    elif write_format == 'csv':
 
-            csv_file =os.path.join(logdir, 'browsermon_history.csv')
-            if os.path.exists(csv_file):
-                logger.info(f"Found History File {csv_file} for writing history files")
-            else:       
-               logger.info(f"Does not find files TO write Creating A new FIle")
+        csv_file =os.path.join(logdir, 'browsermon_history.csv')
+        if os.path.exists(csv_file):
+            logger.info(f"Found History File {csv_file} for writing history files")
+        else:       
+            logger.info(f"Does not find files TO write Creating A new FIle")
 
+    scheduler = BlockingScheduler(max_instances= None)
 
-        scheduler = BlockingScheduler(max_instances= None)
-
-
-        try: 
-            if mode == "scheduled":
-                logger.info(f"Validated parameters Successfully")
-                logger.info(f"Reader started successfully in {mode} mode")
-                schedule_interval = parse_schedule_window(schedule_window)
-                scheduler.add_job(process_chrome_history, 'interval', args=[logdir, write_format],seconds=schedule_interval)    
-            elif mode == "real-time":
-               process_chrome_history(logdir, write_format)
-               scheduler.add_job(process_chrome_history, 'interval', args=[logdir, write_format],seconds=5)    
-            else:
-                logger.info(f"Invalid mode specified.")
-                exit()
-            scheduler.start()
-        except (KeyboardInterrupt, SystemExit):
-            exit_feedback_queue.put("chrome exited")
-            scheduler.shutdown()
-    except IndexError:
-        logger.info(f"Invalid number of arguments!")
-        logger.info(f"Valid format: program [logdir] [mode](scheduled, realtime) [scheduled_window]")
-        logger.info(f"Error: Error with input parameters")
-        exit()  # Exiting the program
-
-if __name__ == '__main__':
-    try: 
-
-    # Provide the actual values for the function arguments
-      exit_feedback_queue = None  # Replace with the appropriate value
-      logdir = r"E:\PYHTON JOB\Project\Test projects\09 08 2023"
-      write_format = "csv"  # Replace with the appropriate value
-      mode = "real-time"  # Replace with the appropriate value
-      schedule_window = "1m"  # Replace with the appropriate value
+    if mode == "scheduled":
+        logger.info(f"Validated parameters Successfully")
+        logger.info(f"Reader started successfully in {mode} mode")
+        schedule_interval = parse_schedule_window(schedule_window)
+        scheduler.add_job(process_chrome_history, 'interval', args=[logdir, write_format],seconds=schedule_interval)    
+    elif mode == "real-time":
+        scheduler.add_job(process_chrome_history, 'interval', args=[logdir, write_format],seconds=5)    
+    else:
+        logger.info(f"Invalid mode specified.")
     
-    # Call the main function with the provided values
-      main(exit_feedback_queue, logdir, write_format, mode, schedule_window)
+
+    try:
+        process_chrome_history(logdir, write_format)
+        scheduler.start()
     except (KeyboardInterrupt, SystemExit):
-    # Gracefully exit the scheduler
-            scheduler.shutdown()
+        exit_feedback_queue.put("chrome exited")
+        scheduler.shutdown()
+    except Exception as e:
+        print("Came here Exception e")
+        exit_feedback_queue.put("chrome exited")
+        sys.exit(1)
