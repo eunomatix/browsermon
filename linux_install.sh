@@ -2,6 +2,12 @@
 
 set -e
 
+# Check if the user is root
+if [ "$EUID" -ne 0 ]; then
+    echo "Error: This script must be run as root."
+    exit 1
+fi
+
 # Function to check if a command is available
 command_exists() {
     command -v "$1" >/dev/null 2>&1
@@ -12,22 +18,23 @@ echo_step() {
     echo "Step $1: $2"
 }
 
-# Check if the user is root
-if [ "$EUID" -ne 0 ]; then
-    echo "Error: This script must be run as root."
-    exit 1
-fi
-
-# Check if Python is installed
-if ! command_exists python3; then
-    echo "Error: Python is not installed. Please install Python 3 to proceed."
-    exit 1
-fi
-
-# Check if pip is installed
-if ! command_exists pip3; then
-    echo "Error: pip is not installed. Please install pip for Python 3 to proceed."
-    exit 1
+# Install Python and pip if not installed
+if ! command_exists python3 || ! command_exists pip3; then
+    if command_exists apt-get; then
+        apt-get update
+        apt-get install -y python3 python3-pip
+    elif command_exists yum; then
+        yum install -y python3 python3-pip
+    elif command_exists dnf; then
+        dnf install -y python3 python3-pip
+    elif command_exists zypper; then
+        zypper install -y python3 python3-pip
+    elif command_exists pacman; then
+        pacman -S --noconfirm python python-pip
+    else
+        echo "Error: Unsupported Linux distribution. Please install Python and pip manually."
+        exit 1
+    fi
 fi
 
 # Get the current directory
@@ -71,56 +78,51 @@ enable_and_start_service() {
 install_dependencies() {
     echo_step 5 "Installing Python dependencies"
     REQUIREMENTS_FILE="$PROJECT_DIR/requirements.txt"
-    # Redirect output to /dev/null to hide the installation details
-    if ! pip3 install -r "$REQUIREMENTS_FILE" >/dev/null 2>&1; then
-        echo "Error: Failed to install dependencies."
+
+    # Check Python version
+    PYTHON_VERSION=$(python3 -c "import sys; print('{}.{}'.format(sys.version_info.major, sys.version_info.minor))")
+
+    # Compare Python version using bash comparison
+    if [[ "$PYTHON_VERSION" == 3.* ]]; then
+        MAJOR=$(echo "$PYTHON_VERSION" | cut -d'.' -f1)
+        MINOR=$(echo "$PYTHON_VERSION" | cut -d'.' -f2)
+        if (( MAJOR >= 3 && MINOR >= 3 )); then
+            # Create and activate a virtual environment
+            python3 -m venv "$TARGET_DIR/venv"
+            source "$TARGET_DIR/venv/bin/activate"
+
+            # Install dependencies using pip
+            if ! pip install -r "$REQUIREMENTS_FILE"; then
+                echo "Error: Failed to install dependencies."
+                deactivate
+                exit 1
+            fi
+
+            # Deactivate the virtual environment
+            deactivate
+        else
+            echo "Error: Python 3.3 or newer is required. Please install a compatible version."
+            exit 1
+        fi
+    else
+        echo "Error: Python 3.3 or newer is required. Please install a compatible version."
         exit 1
     fi
 }
 
-# Function to delete the project directory
-delete_project_directory() {
-    echo_step 6 "Deleting the project directory"
-    rm -rf "$PROJECT_DIR"
-}
-
-# Function to prompt the user for deleting the project directory
-prompt_delete_project() {
-    while true; do
-        read -p "Do you want to delete the project directory? (y/n): " choice
-        case "$choice" in
-            [Yy]* )
-                delete_project_directory
-                break;;
-            [Nn]* )
-                echo "Project directory will not be deleted."
-                break;;
-            * )
-                echo "Please enter 'y' for Yes or 'n' for No."
-        esac
-    done
-}
-
-# Function to perform installation steps
-perform_installation() {
-    create_target_directory
-    copy_files
-
-    cp "$PROJECT_DIR/README.md" "$TARGET_DIR"
-    cp "$PROJECT_DIR/browsermon.conf" "$TARGET_DIR"
-    cp "$PROJECT_DIR/linux_uninstall.sh" "$TARGET_DIR"
-
-    install_dependencies
-
-    move_service_file
-
-    enable_and_start_service
-
-    prompt_delete_project
-
-    echo "Installation complete."
-}
-
 # Main script
-perform_installation
+create_target_directory
+copy_files
+
+cp "$PROJECT_DIR/README.md" "$TARGET_DIR"
+cp "$PROJECT_DIR/browsermon.conf" "$TARGET_DIR"
+cp "$PROJECT_DIR/linux_uninstall.sh" "$TARGET_DIR"
+
+install_dependencies
+
+move_service_file
+
+enable_and_start_service
+
+echo "Installation complete."
 
