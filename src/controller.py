@@ -3,7 +3,7 @@ import logging
 import platform
 import subprocess
 import configparser
-import multiprocessing as mp
+import multiprocessing as mp 
 from logging.handlers import RotatingFileHandler
 
 import handlers
@@ -17,12 +17,12 @@ if SYSTEM == "Windows":
 
 def get_installed_browsers():
     """
-    Function returns a set of browsers installed on the system. For windows it uses
-    'reg' library to read windows registry and fetch the installed browsers.
+    Function returns a set of browsers installed on the system. For windows it uses 
+    'reg' library to read windows registry and fetch the installed browsers. 
     For Linux it uses a simple command of 'which'
 
-    Function returns a set of browsers installed on the system. For windows it uses
-    'reg' library to read windows registry and fetch the installed browsers.
+    Function returns a set of browsers installed on the system. For windows it uses 
+    'reg' library to read windows registry and fetch the installed browsers. 
     For Linux it uses a simple command of 'which'
 
     Args: None
@@ -51,8 +51,6 @@ def get_installed_browsers():
                             browsers.add("chrome")
                         elif browser[:14] == "Microsoft Edge":
                             browsers.add("edge")
-                        elif browser[:7] == "Firefox":
-                            browsers.add("firefox")
 
                         i += 1
                     except WindowsError:
@@ -62,7 +60,7 @@ def get_installed_browsers():
                 pass  # If key doesn't exist, move on to next one
 
     elif SYSTEM == 'Linux':
-        command = 'which -a google-chrome firefox chromium-browser microsoft-edge brave-browser 2>/dev/null'
+        command = 'which -a google-chrome microsoft-edge 2>/dev/null'
         output = subprocess.getoutput(command)
         for line in output.split('\n'):
             line = line.strip().replace('/usr/bin/', '')
@@ -78,7 +76,7 @@ def get_installed_browsers():
 def config_reader(logger, conf_file_path="C:\\browsermon\\browsermon.conf"
 if SYSTEM == "Windows" else "/opt/browsermon/browsermon.conf",
                   defaults=None):
-
+    
     """
     Function reads the config file and returns a dictionary of options
     if the platform is windows then the default directory is C:\browsermon\brwosermon.conf
@@ -145,13 +143,13 @@ if SYSTEM == "Windows" else "/opt/browsermon/browsermon.conf",
 
 def init_logger(SYSTEM):
     """
-    Function:
-        The function initializes the logger object on the log file if the system is windows it will attach to
+    Function: 
+        The function initializes the logger object on the log file if the system is windows it will attach to 
         C:\\browsermon\\browsermon.log
-        otherwise for linux
+        otherwise for linux 
         /opt/browsermon/browsermon.log
-    Args:
-        SYSTEM
+    Args: 
+        SYSTEM 
             Which could be either Windows or Linux
             Initialize SYSTEM with os.platform()
     """
@@ -176,29 +174,30 @@ def init_logger(SYSTEM):
     return logger
 
 
+
 def run():
     """
-    Function: Is the driver function of controller.
-        Step 1: Initialize the logger by calling init_logger the Logger object returned by the function will be stored
+    Function: Is the driver function of controller. 
+        Step 1: Initialize the logger by calling init_logger the Logger object returned by the function will be stored 
                 in "logger" variable
-        Step 2: Fetch options from configuration file by called 'config_reader'
-        Step 3: Get set of installed browsers by calling 'get_installed_browser()' function
-        step 4: Create Launcher object
+        Step 2: Fetch options from configuration file by called 'config_reader' 
+        Step 3: Get set of installed browsers by calling 'get_installed_browser()' function 
+        step 4: Create Launcher object 
                     The Launcher object is passed
                         -> set of installed browsers
-                        -> logger object
+                        -> logger object 
                         -> options fetched from configuration file
                     The Launcher class is responsible for launching readers
         Step 5: Create Handler object through context Manager to ensure proper shutdown of this scheduled operation
-                    The handler class's constructor takes the following
-                        -> logger object
-                        -> file to rotate with it's extension either csv or json
-        Step 6: Wait on LauncherObject's queue (which is a multirpocessing.queue), The reader will write in this queue
-                it's identity when exiting so controller can relaunch it again.
+                    The handler class's constructor takes the following 
+                        -> logger object 
+                        -> file to rotate with it's extension either csv or json      
+        Step 6: Wait on LauncherObject's queue (which is a multirpocessing.queue), The reader will write in this queue 
+                it's identity when exiting so controller can relaunch it again. 
 
     Args: None
     """
-
+    launcher.set_multiprocessing_start_method()
     logger = init_logger(SYSTEM)
 
     options = config_reader(logger)
@@ -215,18 +214,20 @@ def run():
         while True:
             logger.info("Controller waiting (blocked) on exit_feedback_queue")
             return_str = launcherObj.queue.get()
-            if (return_str == "edge Exited"):
+            if (return_str == "edge exited"):
+                launcherObj.processes['edge'].join()
                 logger.info("exit_feedback_queue received enqueue from edge")
                 logger.error("edge reader has exited")
                 logger.info("Relaunching edge reader")
                 launcherObj.launch_reader("edge")
-
-            elif (return_str == "chrome Exited"):
+                
+            elif (return_str == "chrome exited"):
+                launcherObj.processes['chrome'].join()
                 logger.info("exit_feedback_queue received enqueue from chrome")
                 logger.error("chrome reader has exited")
                 logger.info("Relaunching chrome reader")
                 launcherObj.launch_reader("chrome")
-
+                            
 
 if __name__ == '__main__':
     run()

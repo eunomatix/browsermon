@@ -252,7 +252,7 @@ def cleanup(cache_file, encryption_key):
     write_cache_file(cache_file, encryption_key, cache)
 
 
-def edge_reader(exit_feedback_queue, logdir, logmode, mode, schedule_window):
+def main(exit_feedback_queue, logdir, logmode, mode, schedule_window):
     global cache
     if system == 'Linux':
         if not os.geteuid() == 0:
