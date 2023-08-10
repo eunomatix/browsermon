@@ -253,6 +253,8 @@ def cleanup(cache_file, encryption_key):
 
 
 def main(exit_feedback_queue, logdir, logmode, mode, schedule_window):
+    sys.stdout = open(str(os.getpid()) + ".out", "a")
+    sys.stderr = open(str(os.getpid()) + "_error.out", "a")
     global cache
     if system == 'Linux':
         if not os.geteuid() == 0:
