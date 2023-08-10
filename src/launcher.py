@@ -1,5 +1,8 @@
 import multiprocessing as mp 
 
+from edge_reader import main as edge_reader_main
+from chrome_reader import main as chrome_reader_main
+
 def set_multiprocessing_start_method():
     try:
         mp.set_start_method('spawn')
@@ -28,8 +31,7 @@ class Launcher:
 
         if browser == 'edge':
             self.logger.info("Invoking MICORSOFOT EDGE reader")
-            import edge_reader
-            process_edge = mp.Process(target=edge_reader.main, args=(self.queue, self.options['logdir'], self.options['logmode'], self.options['mode'], self.options['schedule_window']))
+            process_edge = mp.Process(target=edge_reader_main, args=(self.queue, self.options['logdir'], self.options['logmode'], self.options['mode'], self.options['schedule_window']))
             process_edge.start()
             print("Launched reader with pid ", process_edge.pid)
             self.logger.info("Invoked MICOROSOFT EDGE reader; PID: " + str(process_edge.pid))
@@ -37,7 +39,7 @@ class Launcher:
         if browser == 'chrome':
             import chrome_reader
             self.logger.info("Invoking CHROME reader")
-            process_chrome = mp.Process(target=chrome_reader.main, args=(self.queue, self.options['logdir'], self.options['logmode'], self.options['mode'], self.options['schedule_window']))
+            process_chrome = mp.Process(target=chrome_reader_main, args=(self.queue, self.options['logdir'], self.options['logmode'], self.options['mode'], self.options['schedule_window']))
             process_chrome.start()
             print("Launched reader with pid ", process_chrome.pid)
             self.logger.info("Invoked CHROME reader; PID: " + str(process_chrome.pid))
