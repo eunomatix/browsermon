@@ -240,4 +240,6 @@ def run():
                             
 
 if __name__ == '__main__':
+    if SYSTEM == "Windows":
+        mp.freeze_support()
     run()
