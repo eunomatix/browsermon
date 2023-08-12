@@ -95,8 +95,10 @@ if SYSTEM == "Windows" else "/opt/browsermon/browsermon.conf",
         'schedule_window',
         'logdir',
         'logmode',
-        'rotation',
-        'deletion'}
+        'rotation_type',
+        'rotation_window', 
+        'rotation_maxBytes', 
+        'backup_count'}
 
     if defaults is None:
         defaults = {'browser': 'all',
@@ -104,8 +106,9 @@ if SYSTEM == "Windows" else "/opt/browsermon/browsermon.conf",
                     'schedule_window': '1m',
                     'logdir': 'C:\\browsermon\\history' if SYSTEM == "Windows" else '/opt/browsermon/history',
                     'logmode': 'csv',
+                    'rotation_type': 'by_size', 
                     'rotation': '1m',
-                    'deletion': '1w'}
+                    'backup_count': '5'}
 
     try:
         config = configparser.ConfigParser()
@@ -124,14 +127,18 @@ if SYSTEM == "Windows" else "/opt/browsermon/browsermon.conf",
             if not value:
                 raise ValueError(
                     logger.warning(f"Value for option '{option}' is empty"))
-            if option == 'schedule_window' or option == 'rotation' or option == 'deletion':
+            if option == 'schedule_window' or option == 'rotation_window':
                 if not is_valid(value):
                     raise ValueError(
                         logger.warning(f"Value for option '{option}' is invalid"))
             if option == 'logmode':
-                if value not in ['csv', 'json']:
+                if value not in {'csv', 'json'}:
                     raise ValueError(
                         logger.warning(f"Value for option '{option}' is invalid"))
+            if option == 'rotation_type':
+                if value not in {'by_size', 'by_time'}:
+                    raise ValueError(
+                        logger.warning(f"Value for option '{options}' is invalid"))
             config_values[option] = value
         except (Exception, configparser.NoOptionError) as e:
             logger.warning(f"Exception caught for option '{option}': {e}")
@@ -200,7 +207,7 @@ def run():
     launcher.set_multiprocessing_start_method()
     logger = init_logger(SYSTEM)
 
-    options = config_reader(logger)
+    options = config_reader(logger, "/home/appleconda/Documents/Files/browsermon/browsermon.conf")
 
     logdir = options['logdir']
     installed_browsers = get_installed_browsers()
@@ -208,9 +215,12 @@ def run():
     launcherObj = launcher.Launcher(installed_browsers, logger, options)
     launcherObj.start()
 
-    with handlers.Handler(logger, options['rotation'],
+    with handlers.Handler(logger, 
+                          options['rotation_type'],
+                          options['rotation_window'], 
+                          options['rotation_maxBytes'],
                           f"{logdir}/browsermon_history.{options['logmode']}",
-                          5) as handler:
+                          options['backup_count']) as handler:
         while True:
             logger.info("Controller waiting (blocked) on exit_feedback_queue")
             return_str = launcherObj.queue.get()
