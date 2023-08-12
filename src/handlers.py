@@ -1,28 +1,48 @@
 import os 
 import re
+from watchdog.observers import Observer
 from apscheduler.triggers.cron import CronTrigger
+from watchdog.events import FileSystemEventHandler
 from apscheduler.schedulers.background import BackgroundScheduler
 
 class Handler:
-    def __init__(self, logger, rotation, file_path, backup_count):
+    def __init__(self, logger, rotationType, rotation_window, rotation_maxBytes, file_path, backup_count):
+
         self.logger = logger
-        self.rotation = rotation
-        self.backup_count = backup_count
+        self.rotation_type = rotationType
+        self.rotation_window = rotation_window
+        self.rotation_maxBytes = rotation_maxBytes
         self.file_path = file_path
+        self.backup_count = int(backup_count)
+
+        self.observer = Observer()
         self.scheduler = BackgroundScheduler()
 
+    class FileSizeHandler(FileSystemEventHandler):
+        def __init__(self, outer_instance, file_path, rotation_maxBytes):
+            self.file_path = file_path
+            self.rotation_maxBytes = rotation_maxBytes
+            self.outer_instance = outer_instance
+
+        def on_modified(self, event):
+            if event.src_path == self.file_path:
+                if os.path.getsize(self.file_path) >= int(self.rotation_maxBytes):
+                    self.outer_instance.rollover()
     
     def rollover(self):
         """ 
         Function: rollover()
-            Descirption: This function is for rotation of history log files that readers generates; how it works is that 
+            Descirption: This function is for rotationThreshold of history log files that readers generates; how it works is that 
             if will rename the current history log files that all readers are writing to and create a new file with old name 
             history log files. 
 
         Args: None
             
         """
-        rotated_files = [self.file_path] + [self.file_path + '.{}'.format(i) for i in range(1, self.backup_count + 1)]
+        MIN_THRESHOLD = 0
+        if not os.path.exists(self.file_path) or os.path.getsize(self.file_path) == MIN_THRESHOLD:
+            return
+        rotated_files = [self.file_path] + [self.file_path + '.{}'.format(str(i)) for i in range(1, self.backup_count + 1)]
 
         if os.path.exists(rotated_files[-1]):
             os.remove(rotated_files[-1])
@@ -74,7 +94,7 @@ class Handler:
         Args: None
         """
         # Extract the numeric value and unit from the input string
-        match = re.match(r'^(\d+)([mhd])$', self.rotation)
+        match = re.match(r'^(\d+)([mhd])$', self.rotation_window)
         if not match:
             raise ValueError("Invalid interval format")
 
@@ -96,10 +116,22 @@ class Handler:
                 
     def __enter__(self):   
         self.logger.info("Handler class invoked")
-        self.logger.info(f"Running the scheduled job: rollover (funciton) for duration: {self.rotation}")
-        self.schedule_background_job()
-        self.get_scheduler_info(self.scheduler, self.logger)
+
+        if self.rotation_type == 'by_time':
+            self.logger.info(f"Running the scheduled job: rollover (funciton) for duration: {self.rotation_window}")
+            self.schedule_background_job()
+            self.get_scheduler_info(self.scheduler, self.logger)
+        elif self.rotation_type == 'by_size':
+            event_handler = self.FileSizeHandler(self, self.file_path, self.rotation_maxBytes)
+            self.observer.schedule(event_handler, path=os.path.dirname(self.file_path), recursive=False)
+            self.observer.start()
+
     def __exit__(self, exc_type, exc_value, traceback):
-        self.logger.info("Cleanup of Handler class")
-        self.scheduler.shutdown()
-        self.scheduler.remove_all_jobs()
+        if (self.rotation_type == 'by_time'):
+            self.logger.info("Cleanup of Handler class")
+            self.scheduler.shutdown()
+            self.scheduler.remove_all_jobs()
+        elif (self.rotation_type == 'by_size'):
+            self.observer.stop()
+            self.observer.join()
+
