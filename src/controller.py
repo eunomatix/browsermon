@@ -95,9 +95,7 @@ if SYSTEM == "Windows" else "/opt/browsermon/browsermon.conf",
         'schedule_window',
         'logdir',
         'logmode',
-        'rotation_type',
-        'rotation_window', 
-        'rotation_maxBytes', 
+        'rotation',
         'backup_count'}
 
     if defaults is None:
@@ -106,7 +104,6 @@ if SYSTEM == "Windows" else "/opt/browsermon/browsermon.conf",
                     'schedule_window': '1m',
                     'logdir': 'C:\\browsermon\\history' if SYSTEM == "Windows" else '/opt/browsermon/history',
                     'logmode': 'csv',
-                    'rotation_type': 'by_size', 
                     'rotation': '1m',
                     'backup_count': '5'}
 
@@ -127,7 +124,7 @@ if SYSTEM == "Windows" else "/opt/browsermon/browsermon.conf",
             if not value:
                 raise ValueError(
                     logger.warning(f"Value for option '{option}' is empty"))
-            if option == 'schedule_window' or option == 'rotation_window':
+            if option == 'schedule_window' or option == 'rotation':
                 if not is_valid(value):
                     raise ValueError(
                         logger.warning(f"Value for option '{option}' is invalid"))
@@ -135,10 +132,6 @@ if SYSTEM == "Windows" else "/opt/browsermon/browsermon.conf",
                 if value not in {'csv', 'json'}:
                     raise ValueError(
                         logger.warning(f"Value for option '{option}' is invalid"))
-            if option == 'rotation_type':
-                if value not in {'by_size', 'by_time'}:
-                    raise ValueError(
-                        logger.warning(f"Value for option '{options}' is invalid"))
             config_values[option] = value
         except (Exception, configparser.NoOptionError) as e:
             logger.warning(f"Exception caught for option '{option}': {e}")
@@ -216,9 +209,7 @@ def run():
     launcherObj.start()
 
     with handlers.Handler(logger, 
-                          options['rotation_type'],
-                          options['rotation_window'], 
-                          options['rotation_maxBytes'],
+                          options['rotation'], 
                           f"{logdir}/browsermon_history.{options['logmode']}",
                           options['backup_count']) as handler:
         while True:
