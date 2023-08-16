@@ -1,8 +1,6 @@
 import os 
 import re
-from watchdog.observers import Observer
 from apscheduler.triggers.cron import CronTrigger
-from watchdog.events import FileSystemEventHandler
 from apscheduler.schedulers.background import BackgroundScheduler
 
 class Handler:
@@ -61,7 +59,7 @@ class Handler:
             if isinstance(job.trigger, CronTrigger):
                 cron_expression = job.trigger.fields
                 logger.info(f"Job Trigger Type: CronTrigger")
-                logger.info(f"Cron Expression: {cron_expression}")
+                #logger.info(f"Cron Expression: {cron_expression}")
                 next_run_time = job.next_run_time  # Use job's next_run_time attribute
                 logger.info(f"Next Run Time: {next_run_time}")
             else:

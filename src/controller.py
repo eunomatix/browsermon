@@ -1,31 +1,16 @@
 import re
-import logging
+import os
+import time
+import logging 
 import platform
 import subprocess
 import configparser
-import multiprocessing as mp 
 from logging.handlers import RotatingFileHandler
 
-import handlers
 import launcher
-
-SYSTEM = platform.system()
-
-if SYSTEM == "Windows":
-    import winreg as reg
-
-import re
-import logging
-import platform
-import subprocess
-import configparser
-import multiprocessing as mp 
-from logging.handlers import RotatingFileHandler
-
 import handlers
-import launcher
 
-class BrowserMonitorController:
+class BrowsermonController:
     def __init__(self):
         self.SYSTEM = platform.system()
         self.logger = self.init_logger()
@@ -63,7 +48,8 @@ class BrowserMonitorController:
         Returns: set of browsers installed on the system
         """
         browsers = set()
-        if SYSTEM == 'Windows':
+        if self.SYSTEM == 'Windows':
+            import winreg as reg
             paths = [
                 r"SOFTWARE\Clients\StartMenuInternet",
                 r"SOFTWARE\WOW6432Node\Clients\StartMenuInternet"
@@ -91,7 +77,7 @@ class BrowserMonitorController:
                 except WindowsError:
                     pass  # If key doesn't exist, move on to next one
 
-        elif SYSTEM == 'Linux':
+        elif self.SYSTEM == 'Linux':
             command = 'which -a google-chrome microsoft-edge 2>/dev/null'
             output = subprocess.getoutput(command)
             for line in output.split('\n'):
@@ -106,7 +92,7 @@ class BrowserMonitorController:
 
 
     def config_reader(self, conf_file_path="C:\\browsermon\\browsermon.conf"
-    if SYSTEM == "Windows" else "/opt/browsermon/browsermon.conf",
+    if platform.system() == "Windows" else "/opt/browsermon/browsermon.conf",
                     defaults=None):
         
         """
@@ -134,7 +120,7 @@ class BrowserMonitorController:
             defaults = {'browser': 'all',
                         'mode': 'scheduled',
                         'schedule_window': '1m',
-                        'logdir': 'C:\\browsermon\\history' if SYSTEM == "Windows" else '/opt/browsermon/history',
+                        'logdir': 'C:\\browsermon\\history' if self.SYSTEM == "Windows" else '/opt/browsermon/history',
                         'logmode': 'csv',
                         'rotation': '1m',
                         'backup_count': '5'}
@@ -174,9 +160,16 @@ class BrowserMonitorController:
 
     def run(self):
         launcher.set_multiprocessing_start_method()
-        options = self.config_reader("/home/appleconda/Documents/Files/browsermon/browsermon.conf")
+        pid = os.getpid()
+        self.logger.info(f"Main process id: {pid}")
+
+        options = self.config_reader()
+        self.logger.info(f"options fetched {options}")
         logdir = options['logdir']
+
         installed_browsers = self.get_installed_browsers()
+        self.logger.info(f"Installed browsers: {installed_browsers}")
+
 
         self.launcherObj = launcher.Launcher(installed_browsers, self.logger, options)
         self.launcherObj.start()
@@ -197,7 +190,9 @@ class BrowserMonitorController:
                     self.logger.error("chrome reader has exited")
                     self.logger.info("Relaunching chrome reader")
                     self.launcherObj.launch_reader("chrome")
-
-if __name__ == '__main__':
-    controller = BrowserMonitorController()
-    controller.run()
+                else:
+                    self.logger.info("Recieved no relaunch feedback in queue")
+                    self.logger.info("Exiting controller; breaking infinite loop in run")
+                    time.sleep(2)
+                    break
+                            

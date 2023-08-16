@@ -16,7 +16,8 @@ class Launcher:
         self.options = options
         self.processes = {}
         self.queue = mp.Queue()
-        
+        self.shared_lock = mp.Lock()
+        self.shared_lock.acquire(block=True)
 
     def launch_reader(self, browser):
         """
@@ -29,17 +30,17 @@ class Launcher:
                 logmode: mode in which the log file should be stored
         """
 
+        self.logger.info("Controller: accquiring Lock")
         if browser == 'edge':
             self.logger.info("Invoking MICORSOFOT EDGE reader")
-            process_edge = mp.Process(target=edge_reader_main, args=(self.queue, self.options['logdir'], self.options['logmode'], self.options['mode'], self.options['schedule_window']))
+            process_edge = mp.Process(target=edge_reader_main, args=(self.queue, self.shared_lock, self.options['logdir'], self.options['logmode'], self.options['mode'], self.options['schedule_window']))
             process_edge.start()
             print("Launched reader with pid ", process_edge.pid)
             self.logger.info("Invoked MICOROSOFT EDGE reader; PID: " + str(process_edge.pid))
             self.processes['edge'] = process_edge
         if browser == 'chrome':
-            import chrome_reader
             self.logger.info("Invoking CHROME reader")
-            process_chrome = mp.Process(target=chrome_reader_main, args=(self.queue, self.options['logdir'], self.options['logmode'], self.options['mode'], self.options['schedule_window']))
+            process_chrome = mp.Process(target=chrome_reader_main, args=(self.queue, self.shared_lock, self.options['logdir'], self.options['logmode'], self.options['mode'], self.options['schedule_window']))
             process_chrome.start()
             print("Launched reader with pid ", process_chrome.pid)
             self.logger.info("Invoked CHROME reader; PID: " + str(process_chrome.pid))
