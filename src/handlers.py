@@ -1,33 +1,17 @@
 import os 
 import re
-from watchdog.observers import Observer
 from apscheduler.triggers.cron import CronTrigger
-from watchdog.events import FileSystemEventHandler
 from apscheduler.schedulers.background import BackgroundScheduler
 
 class Handler:
-    def __init__(self, logger, rotationType, rotation_window, rotation_maxBytes, file_path, backup_count):
+    def __init__(self, logger, rotation, file_path, backup_count):
 
         self.logger = logger
-        self.rotation_type = rotationType
-        self.rotation_window = rotation_window
-        self.rotation_maxBytes = rotation_maxBytes
+        self.rotation = rotation
         self.file_path = file_path
         self.backup_count = int(backup_count)
-
-        self.observer = Observer()
         self.scheduler = BackgroundScheduler()
 
-    class FileSizeHandler(FileSystemEventHandler):
-        def __init__(self, outer_instance, file_path, rotation_maxBytes):
-            self.file_path = file_path
-            self.rotation_maxBytes = rotation_maxBytes
-            self.outer_instance = outer_instance
-
-        def on_modified(self, event):
-            if event.src_path == self.file_path:
-                if os.path.getsize(self.file_path) >= int(self.rotation_maxBytes):
-                    self.outer_instance.rollover()
     
     def rollover(self):
         """ 
@@ -75,7 +59,7 @@ class Handler:
             if isinstance(job.trigger, CronTrigger):
                 cron_expression = job.trigger.fields
                 logger.info(f"Job Trigger Type: CronTrigger")
-                logger.info(f"Cron Expression: {cron_expression}")
+                #logger.info(f"Cron Expression: {cron_expression}")
                 next_run_time = job.next_run_time  # Use job's next_run_time attribute
                 logger.info(f"Next Run Time: {next_run_time}")
             else:
@@ -94,7 +78,7 @@ class Handler:
         Args: None
         """
         # Extract the numeric value and unit from the input string
-        match = re.match(r'^(\d+)([mhd])$', self.rotation_window)
+        match = re.match(r'^(\d+)([mhd])$', self.rotation)
         if not match:
             raise ValueError("Invalid interval format")
 
@@ -116,22 +100,12 @@ class Handler:
                 
     def __enter__(self):   
         self.logger.info("Handler class invoked")
-
-        if self.rotation_type == 'by_time':
-            self.logger.info(f"Running the scheduled job: rollover (funciton) for duration: {self.rotation_window}")
-            self.schedule_background_job()
-            self.get_scheduler_info(self.scheduler, self.logger)
-        elif self.rotation_type == 'by_size':
-            event_handler = self.FileSizeHandler(self, self.file_path, self.rotation_maxBytes)
-            self.observer.schedule(event_handler, path=os.path.dirname(self.file_path), recursive=False)
-            self.observer.start()
+        self.logger.info(f"Running the scheduled job: rollover (funciton) for duration: {self.rotation}")
+        self.schedule_background_job()
+        self.get_scheduler_info(self.scheduler, self.logger)
 
     def __exit__(self, exc_type, exc_value, traceback):
-        if (self.rotation_type == 'by_time'):
-            self.logger.info("Cleanup of Handler class")
-            self.scheduler.shutdown()
-            self.scheduler.remove_all_jobs()
-        elif (self.rotation_type == 'by_size'):
-            self.observer.stop()
-            self.observer.join()
+        self.logger.info("Cleanup of Handler class")
+        self.scheduler.shutdown()
+        self.scheduler.remove_all_jobs()
 

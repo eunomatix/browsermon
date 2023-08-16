@@ -6,7 +6,7 @@ After=multi-user.target
 Type=simple
 Restart=always
 WorkingDirectory=/opt/browsermon
-ExecStart=/opt/browsermon/venv/bin/python3 src/controller.py
+ExecStart=/opt/browsermon/venv/bin/python3 src/browsermon.py
 KillSignal=SIGTERM
 
 [Install]

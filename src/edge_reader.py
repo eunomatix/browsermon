@@ -9,6 +9,7 @@ import sys
 
 import orjson as json
 from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from utils import system, logger
 from utils.caching import write_cache_file, read_cache_file
@@ -252,8 +253,10 @@ def cleanup(cache_file, encryption_key):
     write_cache_file(cache_file, encryption_key, cache)
 
 
-def main(exit_feedback_queue, logdir, logmode, mode, schedule_window):
+def main(exit_feedback_queue, shared_lock, logdir, logmode, mode, schedule_window):
     global cache
+
+
     if system == 'Linux':
         if not os.geteuid() == 0:
             print("Error, Shutting Down! Only root can run this script")
@@ -293,7 +296,7 @@ def main(exit_feedback_queue, logdir, logmode, mode, schedule_window):
     # Read the cache file if it exists
     cache = read_cache_file(cache_file, encryption_key)
 
-    scheduler = BlockingScheduler()
+    scheduler = BackgroundScheduler()
 
     if mode == "scheduled":
         schedule_interval = parse_schedule_window(schedule_window)
@@ -309,11 +312,25 @@ def main(exit_feedback_queue, logdir, logmode, mode, schedule_window):
         # Run the main function directly when the program starts
         process_edge_history(logmode, logdir)
         scheduler.start()
+        logger.info("accquiring lock ... ")
+        shared_lock.acquire() #This will go into a blocking call if the lock is already accquired, which it will be by the controller  
+        logger.info("accquired lock")
     except (KeyboardInterrupt, SystemExit):
         scheduler.shutdown()
         exit_feedback_queue.put("edge exited")
+        sys.exit(1)
     except Exception as e:
         logger.error(f"Error: {str(e)}")
         scheduler.shutdown()
         exit_feedback_queue.put("edge exited")
         sys.exit(1)
+     
+    logger.info("Exiting Edge Reader; shutting down scheduler") 
+    scheduler.shutdown()
+    scheduler.remove_all_jobs()
+    logger.info("Releasing lock")
+    shared_lock.release()
+    logger.info("Sending no error in exit feedback queue; so that controller doesn't relaunch")
+    exit_feedback_queue.put_nowait("no error")
+    logger.info("Sending sys.exit(0)")
+    sys.exit(0)

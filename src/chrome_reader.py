@@ -13,8 +13,9 @@ import time
 import platform
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
+
 entries_count = 0
-scheduler = BlockingScheduler()
+scheduler = BackgroundScheduler()
 
 system = platform.system()
 default_log_loc = None
@@ -420,7 +421,7 @@ def handle_signal(exit_feedback_queue, signum, frame):
     sys.exit(0)
 
 
-def main(exit_feedback_queue, logdir, write_format, mode, schedule_window):
+def main(exit_feedback_queue, shared_lock, logdir, write_format, mode, schedule_window):
 
     signal_handler = partial(handle_signal, exit_feedback_queue)
     signal.signal(signal.SIGTERM, signal_handler)
@@ -459,7 +460,7 @@ def main(exit_feedback_queue, logdir, write_format, mode, schedule_window):
         else:       
             logger.info(f"Does not find files TO write Creating A new FIle")
 
-    scheduler = BlockingScheduler(max_instances= None)
+    scheduler = BackgroundScheduler()
 
     if mode == "scheduled":
         logger.info(f"Validated parameters Successfully")
@@ -474,11 +475,26 @@ def main(exit_feedback_queue, logdir, write_format, mode, schedule_window):
 
     try:
         process_chrome_history(logdir, write_format)
+        logger.info("chrome acquiring shared_lock ... ")
         scheduler.start()
+        shared_lock.acquire()
+        logger.info("chrome accquired shared_lock")
     except (KeyboardInterrupt, SystemExit):
+        logger.info("chrome exception caught")
         exit_feedback_queue.put("chrome exited")
         scheduler.shutdown()
+        sys.exit(1)
     except Exception as e:
         print("Came here Exception e")
         exit_feedback_queue.put("chrome exited")
         sys.exit(1)
+    
+    logger.info("chrome; shutting down scheduler")
+    scheduler.shutdown()
+    scheduler.remove_all_jobs()
+    
+    logger.info("releasing shared_lock in chrome")
+    shared_lock.release()
+    exit_feedback_queue.put_nowait("no error")
+    logger.info("Sending sys.exit(0)")
+    sys.exit(0)
