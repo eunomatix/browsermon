@@ -4,6 +4,7 @@ import time
 import logging 
 import platform
 import subprocess
+import multiprocessing
 import configparser
 from logging.handlers import RotatingFileHandler
 
@@ -17,20 +18,27 @@ class BrowsermonController:
         self.launcherObj = None
 
     def init_logger(self):
+       
         if self.SYSTEM == "Windows":
             log_file = "C:\\browsermon\\browsermon.log"
-        else:
+        elif self.SYSTEM == "Linux":
             log_file = "/opt/browsermon/browsermon.log"
 
-        handler = RotatingFileHandler(log_file, maxBytes=1e+7, backupCount=5)
+        handler = RotatingFileHandler(
+            log_file,
+            maxBytes=1e+7,
+            backupCount=5)
 
-        logging.basicConfig(
-            level=logging.DEBUG,
-            format='%(asctime)s WD%(process)d:: \'CONTROLLER:\' - %(levelname)s - %(message)s',
-            handlers=[handler])
+        formatter = logging.Formatter('%(asctime)s WD%(process)d:: \'CONTROLLER:\' - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
 
-        self.logger = logging.getLogger()
-        return self.logger
+        # Set up multiprocessing-safe logger
+        logger = multiprocessing.get_logger()
+        logger.setLevel(logging.INFO)
+        logger.addHandler(handler)
+
+        return logger
+
 
     def get_installed_browsers(self):
         """
@@ -163,7 +171,7 @@ class BrowsermonController:
         pid = os.getpid()
         self.logger.info(f"Main process id: {pid}")
 
-        options = self.config_reader()
+        options = self.config_reader("/home/appleconda/Documents/Files/browsermon/browsermon.conf")
         self.logger.info(f"options fetched {options}")
         logdir = options['logdir']
 
