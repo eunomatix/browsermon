@@ -1,10 +1,11 @@
 import re
 import os
 import time
-import logging 
+import logging
 import platform
 import subprocess
 import configparser
+import multiprocessing
 from logging.handlers import RotatingFileHandler
 
 import launcher
@@ -19,27 +20,32 @@ class BrowsermonController:
     def init_logger(self):
         if self.SYSTEM == "Windows":
             log_file = "C:\\browsermon\\browsermon.log"
-        else:
+        elif self.SYSTEM == "Linux":
             log_file = "/opt/browsermon/browsermon.log"
 
-        handler = RotatingFileHandler(log_file, maxBytes=1e+7, backupCount=5)
+        handler = RotatingFileHandler(
+            log_file,
+            maxBytes=1e+7,
+            backupCount=5)
 
-        logging.basicConfig(
-            level=logging.DEBUG,
-            format='%(asctime)s WD%(process)d:: \'CONTROLLER:\' - %(levelname)s - %(message)s',
-            handlers=[handler])
+        formatter = logging.Formatter('%(asctime)s WD%(process)d:: \'CONTROLLER:\' - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
 
-        self.logger = logging.getLogger()
-        return self.logger
+        # Set up multiprocessing-safe logger
+        logger = multiprocessing.get_logger()
+        logger.setLevel(logging.INFO)
+        logger.addHandler(handler)
+
+        return logger
 
     def get_installed_browsers(self):
         """
-        Function returns a set of browsers installed on the system. For windows it uses 
-        'reg' library to read windows registry and fetch the installed browsers. 
+        Function returns a set of browsers installed on the system. For windows it uses
+        'reg' library to read windows registry and fetch the installed browsers.
         For Linux it uses a simple command of 'which'
 
-        Function returns a set of browsers installed on the system. For windows it uses 
-        'reg' library to read windows registry and fetch the installed browsers. 
+        Function returns a set of browsers installed on the system. For windows it uses
+        'reg' library to read windows registry and fetch the installed browsers.
         For Linux it uses a simple command of 'which'
 
         Args: None
@@ -94,7 +100,7 @@ class BrowsermonController:
     def config_reader(self, conf_file_path="C:\\browsermon\\browsermon.conf"
     if platform.system() == "Windows" else "/opt/browsermon/browsermon.conf",
                     defaults=None):
-        
+
         """
         Function reads the config file and returns a dictionary of options
         if the platform is windows then the default directory is C:\browsermon\brwosermon.conf
@@ -195,4 +201,4 @@ class BrowsermonController:
                     self.logger.info("Exiting controller; breaking infinite loop in run")
                     time.sleep(2)
                     break
-                            
+
