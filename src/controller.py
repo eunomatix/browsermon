@@ -194,15 +194,16 @@ class BrowsermonController:
                     self.logger.info("Checking if child processes are still alive")
                     for processes in self.launcherObj.processes:
                         if not self.launcherObj.processes[processes].is_alive():
+                            self.launcherObj.processes[processes].join() #join before relaunching the process 
                             self.logger.info("Process %s is not alive", processes)
                             self.logger.info("Relaunching process %s", processes)
                             self.launcherObj.launch_reader(processes)
                 if (return_str == "edge exited"):
-                    self.launcherObj.processes['edge'].join()
+                    self.launcherObj.processes['edge'].join() #join before relaunching to avoid zombie processes
                     self.logger.info("exit_feedback_queue received enqueue from edge")
                     self.logger.error("edge reader has exited")
                     self.logger.info("Relaunching edge reader")
-                    self.launcherObj.launch_reader("edge")
+                    self.launcherObj.launch_reader("edge") #relaunch edge
                 elif (return_str == "chrome exited"):
                     self.launcherObj.processes['chrome'].join()
                     self.logger.info("exit_feedback_queue received enqueue from chrome")
