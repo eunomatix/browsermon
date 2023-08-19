@@ -171,7 +171,7 @@ class BrowsermonController:
         pid = os.getpid()
         self.logger.info(f"Main process id: {pid}")
 
-        options = self.config_reader("/home/appleconda/Documents/Files/browsermon/browsermon.conf")
+        options = self.config_reader()
         self.logger.info(f"options fetched {options}")
         logdir = options['logdir']
 
@@ -184,8 +184,19 @@ class BrowsermonController:
 
         with handlers.Handler(self.logger, options['rotation'], f"{logdir}/browsermon_history.{options['logmode']}", options['backup_count']) as handler:
             while True:
+                return_str = None
                 self.logger.info("Controller waiting (blocked) on exit_feedback_queue")
-                return_str = self.launcherObj.queue.get()
+                try: 
+                    return_str = self.launcherObj.queue.get(timeout=15)
+                except multiprocessing.queue.Empty:
+                    self.logger.info("Controller timed out waiting on exit_feedback_queue")
+                    #checking if the processes are alive
+                    self.logger.info("Checking if child processes are still alive")
+                    for processes in self.launcherObj.processes:
+                        if not self.launcherObj.processes[processes].is_alive():
+                            self.logger.info("Process %s is not alive", processes)
+                            self.logger.info("Relaunching process %s", processes)
+                            self.launcherObj.launch_reader(processes)
                 if (return_str == "edge exited"):
                     self.launcherObj.processes['edge'].join()
                     self.logger.info("exit_feedback_queue received enqueue from edge")
@@ -198,9 +209,9 @@ class BrowsermonController:
                     self.logger.error("chrome reader has exited")
                     self.logger.info("Relaunching chrome reader")
                     self.launcherObj.launch_reader("chrome")
-                else:
+                elif return_str != None:
                     self.logger.info("Recieved no relaunch feedback in queue")
                     self.logger.info("Exiting controller; breaking infinite loop in run")
-                    time.sleep(2)
+                    time.sleep(2) #waiting for all child processes to exit before exiting controller
                     break
                             
