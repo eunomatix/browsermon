@@ -99,12 +99,17 @@ class Handler:
         self.scheduler.start() 
                 
     def __enter__(self):   
+        if (self.backup_count == 0):
+            self.logger.info("Backup count is set to 0, so no rotation will be performed")
+            return
         self.logger.info("Handler class invoked")
         self.logger.info(f"Running the scheduled job: rollover (funciton) for duration: {self.rotation}")
         self.schedule_background_job()
         self.get_scheduler_info(self.scheduler, self.logger)
 
     def __exit__(self, exc_type, exc_value, traceback):
+        if (self.backup_count == 0):
+            return
         self.logger.info("Cleanup of Handler class")
         self.scheduler.shutdown()
         self.scheduler.remove_all_jobs()
