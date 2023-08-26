@@ -2,6 +2,7 @@ import re
 import os
 import time
 import logging 
+import queue
 import platform
 import subprocess
 import multiprocessing
@@ -188,9 +189,27 @@ class BrowsermonController:
                 self.logger.info("Controller waiting (blocked) on exit_feedback_queue")
                 try: 
                     return_str = self.launcherObj.queue.get(timeout=15)
-                except multiprocessing.queue.Empty:
                     self.logger.info("Controller timed out waiting on exit_feedback_queue")
+                    if (return_str == "edge exited"):
+                        self.launcherObj.processes['edge'].join() #join before relaunching to avoid zombie processes
+                        self.logger.info("exit_feedback_queue received enqueue from edge")
+                        self.logger.error("edge reader has exited")
+                        self.logger.info("Relaunching edge reader")
+                        self.launcherObj.launch_reader("edge") #relaunch edge
+                    elif (return_str == "chrome exited"):
+                        self.launcherObj.processes['chrome'].join()
+                        self.logger.info("exit_feedback_queue received enqueue from chrome")
+                        self.logger.error("chrome reader has exited")
+                        self.logger.info("Relaunching chrome reader")
+                        self.launcherObj.launch_reader("chrome")
+                    elif return_str != None:
+                        self.logger.info("Recieved no relaunch feedback in queue")
+                        self.logger.info("Exiting controller; breaking infinite loop in run")
+                        time.sleep(2) #waiting for all child processes to exit before exiting controller
+                        break
+                except queue.Empty:
                     #checking if the processes are alive
+                    self.logger.info("exit_feedback_queue is empty")
                     self.logger.info("Checking if child processes are still alive")
                     for processes in self.launcherObj.processes:
                         if not self.launcherObj.processes[processes].is_alive():
@@ -198,21 +217,6 @@ class BrowsermonController:
                             self.logger.info("Process %s is not alive", processes)
                             self.logger.info("Relaunching process %s", processes)
                             self.launcherObj.launch_reader(processes)
-                if (return_str == "edge exited"):
-                    self.launcherObj.processes['edge'].join() #join before relaunching to avoid zombie processes
-                    self.logger.info("exit_feedback_queue received enqueue from edge")
-                    self.logger.error("edge reader has exited")
-                    self.logger.info("Relaunching edge reader")
-                    self.launcherObj.launch_reader("edge") #relaunch edge
-                elif (return_str == "chrome exited"):
-                    self.launcherObj.processes['chrome'].join()
-                    self.logger.info("exit_feedback_queue received enqueue from chrome")
-                    self.logger.error("chrome reader has exited")
-                    self.logger.info("Relaunching chrome reader")
-                    self.launcherObj.launch_reader("chrome")
-                elif return_str != None:
-                    self.logger.info("Recieved no relaunch feedback in queue")
-                    self.logger.info("Exiting controller; breaking infinite loop in run")
-                    time.sleep(2) #waiting for all child processes to exit before exiting controller
-                    break
+                        else: 
+                            self.logger.info("Process %s is alive, no need to relaunch", processes)
                             
