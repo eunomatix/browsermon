@@ -8,7 +8,6 @@ import sqlite3
 import sys
 
 import orjson as json
-from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from utils import system, logger
@@ -28,7 +27,8 @@ def get_profiles(user_profile_dir, username):
     :param username:
     :return:
     """
-    logger.info(f"Sniffing user profiles from user: {username}")
+    logger.info(f"Sniffing user profiles from user: {username}",
+                extra={"log_id": 4004})
     local_state_file = os.path.join(user_profile_dir, "Local State")
     with open(local_state_file, "r") as file:
         data = json.loads(file.read())
@@ -54,7 +54,8 @@ def get_all_profiles():
     Get all the profiles for all the users on the operating system.
     :return: Dictionary of profiles
     """
-    logger.info(f"Sniffing users from {platform.node()}")
+    logger.info(f"Sniffing users from {platform.node()}",
+                extra={"log_id": 4001})
     profiles = {}
 
     if system == "Windows":
@@ -78,14 +79,15 @@ def get_all_profiles():
                                                     "Edge", "User Data")
                     if os.path.exists(user_profile_dir):
                         logger.info(f"Found Microsoft Edge profile directory "
-                                    f"for user: {username}")
+                                    f"for user: {username}",
+                                    extra={"log_id": 4002})
                         user_profiles = get_profiles(user_profile_dir,
                                                      username)
                         profiles.update(user_profiles)
                 finally:
                     winreg.CloseKey(user_key)
         except Exception as e:
-            logger.error(f"Error: {str(e)}")
+            logger.error(f"Error: {str(e)}", extra={"log_id": 9001})
         finally:
             if reg_key is not None:
                 winreg.CloseKey(reg_key)
@@ -97,7 +99,8 @@ def get_all_profiles():
             # Check if the user has a Microsoft Edge profile directory
             if os.path.exists(user_profile_dir):
                 logger.info(
-                    f"Found Microsoft Edge profile directory for user: {user}")
+                    f"Found Microsoft Edge profile directory for user: {user}",
+                    extra={"log_id": 4003})
                 user_profiles = get_profiles(user_profile_dir, user)
                 profiles.update(user_profiles)
 
@@ -133,7 +136,8 @@ def write_history_data(profile, logmode, logdir):
 
     if last_modified_time == current_modified_time:
         logger.info(
-            f"History file for profile '{profile_name}' has not been modified, skipping SQL query.")  # noqa
+            f"History file for profile '{profile_name}' has not been modified, skipping SQL query.",
+            extra={"log_id": 5001})  # noqa
         return
 
     connection = sqlite3.connect(f"file:{history_file}?immutable=1", uri=True)
@@ -168,7 +172,7 @@ def write_history_data(profile, logmode, logdir):
 
     logger.info(
         f"Found {num_new_records} new records for profile '{profile_name}' "
-        f"user: '{metadata['os_username']}'")
+        f"user: '{metadata['os_username']}'", extra={"log_id": 5002})
 
     # Update the last modified time and last visit time
     profile_info["last_modified_time"] = current_modified_time
@@ -203,7 +207,8 @@ def write_history_data(profile, logmode, logdir):
     cursor.close()
     connection.close()
 
-    logger.info(f"Processed browsing history for profile '{profile_name}'")
+    logger.info(f"Processed browsing history for profile '{profile_name}'",
+                extra={"log_id": 5003})
 
 
 def process_edge_history(logmode, logdir):
@@ -239,9 +244,11 @@ def process_edge_history(logmode, logdir):
                 # (this will raise an exception if the task raised one)
             except Exception as e:
                 logger.error(
-                    f"Error processing history for profile '{profile['profile_path']}': {str(e)}")  # noqa
+                    f"Error processing history for profile '{profile['profile_path']}': {str(e)}",
+                    extra={"log_id": 5001})  # noqa
 
-    logger.info("Processed browsing history for all the profiles and users")
+    logger.info("Processed browsing history for all the profiles and users",
+                extra={"log_id": 5004})
 
 
 def cleanup_on_sigterm(signum, frame):
@@ -253,15 +260,16 @@ def cleanup(cache_file, encryption_key):
     write_cache_file(cache_file, encryption_key, cache)
 
 
-def main(exit_feedback_queue, shared_lock, logdir, logmode, mode, schedule_window):
+def main(exit_feedback_queue, shared_lock, logdir, logmode, mode,
+         schedule_window):
     global cache
-
 
     if system == 'Linux':
         if not os.geteuid() == 0:
             print("Error, Shutting Down! Only root can run this script")
             logger.error(
-                "Shutting Down! Only root can run this script")  # noqa
+                "Shutting Down! Only root can run this script",
+                extra={"log_id": 9001})  # noqa
             return
     elif system == 'Windows':
         import ctypes
@@ -269,18 +277,22 @@ def main(exit_feedback_queue, shared_lock, logdir, logmode, mode, schedule_windo
         if not ctypes.windll.shell32.IsUserAnAdmin() != 0:
             print("Error, Shutting Down! Only root can run this script")
             logger.error(
-                "Shutting Down! Only root can run this script")  # noqa
+                "Shutting Down! Only root can run this script",
+                extra={"log_id": 9001})  # noqa
             return
 
     if os.path.exists(logdir):
-        logger.info(f"Found logdir {logdir} for writing history files")
+        logger.info(f"Found logdir {logdir} for writing history files",
+                    extra={"log_id": 3001})
     else:
         os.makedirs(logdir)
-        logger.warning(f"Logdir {logdir} not found, creating new")
+        logger.warning(f"Logdir {logdir} not found, creating new",
+                       extra={"log_id": 3002})
 
     cache_file = os.path.join(logdir, "browsermon_cache")
 
-    logger.info(f"Reader started successfully in {mode} mode")
+    logger.info(f"Reader started successfully in {mode} mode",
+                extra={"log_id": 1001})
 
     # encryption key
     password = 'EunoMatix_BrowserMon'
@@ -312,25 +324,28 @@ def main(exit_feedback_queue, shared_lock, logdir, logmode, mode, schedule_windo
         # Run the main function directly when the program starts
         process_edge_history(logmode, logdir)
         scheduler.start()
-        logger.info("accquiring lock ... ")
-        shared_lock.acquire() #This will go into a blocking call if the lock is already accquired, which it will be by the controller  
-        logger.info("accquired lock")
+        logger.info("accquiring lock ... ", extra={"log_id": 8001})
+        shared_lock.acquire()  # This will go into a blocking call if the lock is already accquired, which it will be by the controller
+        logger.info("accquired lock", extra={"log_id": 8002})
     except (KeyboardInterrupt, SystemExit):
         scheduler.shutdown()
-        exit_feedback_queue.put("edge exited")
+        exit_feedback_queue.put("edge exited", extra={"log_id": 8003})
         sys.exit(1)
     except Exception as e:
-        logger.error(f"Error: {str(e)}")
+        logger.error(f"Error: {str(e)}", extra={"log_id": 9001})
         scheduler.shutdown()
         exit_feedback_queue.put("edge exited")
         sys.exit(1)
-     
-    logger.info("Exiting Edge Reader; shutting down scheduler") 
+
+    logger.info("Exiting Edge Reader; shutting down scheduler",
+                extra={"log_id": 7001})
     scheduler.shutdown()
     scheduler.remove_all_jobs()
-    logger.info("Releasing lock")
+    logger.info("Releasing lock", extra={"log_id": 7002})
     shared_lock.release()
-    logger.info("Sending no error in exit feedback queue; so that controller doesn't relaunch")
+    logger.info(
+        "Sending no error in exit feedback queue; so that controller doesn't relaunch",
+        extra={"log_id": 7003})
     exit_feedback_queue.put_nowait("no error")
-    logger.info("Sending sys.exit(0)")
+    logger.info("Sending sys.exit(0)", extra={"log_id": 7004})
     sys.exit(0)

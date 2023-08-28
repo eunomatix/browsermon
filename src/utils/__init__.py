@@ -14,7 +14,11 @@ if default_log_loc is None:
         os.makedirs(default_log_loc)
 
 log_file = os.path.join(default_log_loc, "browsermon.log")
-log_format = "%(asctime)s WD%(process)d:: \'MICROSOFT-EDGE:\' - %(levelname)s %(message)s"  # noqa
+# Define a custom log format with the ID
+log_format = "%(asctime)s BM%(log_id)s:: EDGE-READER: %(levelname)s %(message)s"
+
+# Set up the logging configuration
 logging.basicConfig(filename=log_file, level=logging.INFO,
                     format=log_format)
+
 logger = logging.getLogger(__name__)
