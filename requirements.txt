@@ -1,4 +1,3 @@
 orjson
 APScheduler
 cryptography
-pywin32

@@ -2,62 +2,41 @@
 
 BrowserMon is a straightforward Python application that monitors web browsers. To run this application, follow the instructions below:
 
-## Prerequisites
+# Setup
+## For linux	
+1) ```git clone -b release https://github.com/eunomatix/browsermon.git```
+In order to run BrowserMon you must switch to Super User/root User
+2) ```su```
+3) ```chmod +x linux_install.sh```
+4) ```./linux_install.sh```
 
-- Python 3.x installed on your system.
-- Install the required packages using pip:
-    ```
-    pip install apscheduler
-    pip install orjson
-    ```
+To verify that the service is up and running: 
+	```systemctl status browsermon.service```
 
-## Setup
+To stop the service temporarily 
+	```systemctl stop browsermon.service```
 
-1. Clone or download the BrowserMon repository from GitHub.
-    
-2. Navigate to the root folder of the application.
-    
-3. **Important:** Ensure that the `browsermon.conf` file is properly set up before running the application. This file contains configuration settings, especially the `logdir` directory path.
-    
+To Uninstall: 
+	Run the ```./linux_uninstall.sh``` as root
 
-## Running the Application
+binaries for Linux coming soon ... 
+## For Windows x64
+1) Go to browsermon repository > Actions > Latest Version > Download the ```browsermon.exe```
+2) After downloading extract the folder in ```C:\browsermon```
+3) To install the service open powershell as admin in the ```C:\browsermon```  and run the following commands <br>
+	```.\browsermon.exe --startup=auto install```
+    <br>
+	```.\browsermon.exe start```
+4) ```browsermon.conf``` file should be located in ```C:\browsersmon``` otherwise service will run with defaults configurations. 
 
-1. Open your terminal or command prompt.
-    
-2. Change the working directory to the root folder of the BrowserMon application.
-    
-3. To start the application, run the following command:
-    
-    ```
-    python main.py
-    ```
-    
-    This command will initiate the BrowserMon application and start monitoring web browsers.
-    
+You can verify that service is running by opening **Services** through search and checking for ```browsermon``` 
 
-## Running Tests
+To stop the service: 
+	You can do that through the **Services** app in windows or you could run ```browsermon.exe stop``` 
+To remove the service 
+		Make sure to first stop the service. 
+	```browsermon.exe remove```
 
-To ensure the functionality of the application, you can run the provided pytest tests:
-
-1. Ensure you are in the root directory of the BrowserMon application.
-
-2. Run the following command to execute the tests:
-    
-    ```
-    pytest
-    ```
-
-   For a more detailed view of the test results, you can use the verbose option:
-
-    ```
-    pytest -vv
-    ```
-
-## Stopping the Application
-
-To stop the BrowserMon application, simply send a keyboard interrupt signal. You can do this by pressing `Ctrl + C` in the terminal or command prompt where the application is running. This will gracefully terminate the controller and all spawned processes.
-
-Please note that you should only terminate the application when necessary, as unexpected terminations might lead to incomplete data or other issues.
-
-That's it! You have successfully set up and run the BrowserMon application to monitor web browsers. If you encounter any problems or have further questions, feel free to reach out for support. Happy monitoring!
-
+You can also clone the repository and install browsermon in fewer steps
+1) ```git clone -b release https://github.com/eunomatix/browsermon.git```
+2) Run the ```win_install.ps1``` as administrator 
