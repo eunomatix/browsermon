@@ -1,15 +1,15 @@
 # PowerShell script for uninstalling browsermon on Windows
 
-# Check if the script is running from the target directory
-$TARGET_DIR = "C:\browsermon"
-$scriptPath = $MyInvocation.MyCommand.Path
-$scriptDirectory = Split-Path -Parent $scriptPath
-
-if ($scriptDirectory -eq $TARGET_DIR) {
-    Write-Host "Please move this script to a different directory before running it."
-    Write-Host "The target directory ($TARGET_DIR) is in use and can't be deleted."
+# Check if running with administrative privileges
+$isAdmin = ([System.Security.Principal.WindowsIdentity]::GetCurrent()).Groups -match "S-1-5-32-544"
+if (-not $isAdmin) {
+    Write-Host "Please run this script with administrative privileges."
+    Read-Host "Press Enter to close this window..."
     Exit
 }
+
+# Define the target directory
+$TARGET_DIR = "C:\browsermon"
 
 # Stop the browsermon service if it's running
 if (Get-Service -Name "browsermon" -ErrorAction SilentlyContinue) {
@@ -48,12 +48,18 @@ do {
 } while ($true)
 
 # Forcefully delete the browsermon.exe file
-$browsermonExePath = Join-Path $TARGET_DIR "browsermon.exe"
-Remove-Item -Path $browsermonExePath -Force -ErrorAction SilentlyContinue
+try {
+    Remove-Item -Path $browsermonExePath -Force -ErrorAction Stop
+} catch {
+    Write-Host "Error: Unable to delete $browsermonExePath. Please delete this file manually."
+}
 
 # Delete the installation directory
-if (Test-Path $TARGET_DIR) {
-    Remove-Item -Recurse -Force $TARGET_DIR
+try {
+    Remove-Item -Path $TARGET_DIR -Recurse -Force -ErrorAction Stop
+} catch {
+    Write-Host "Error: Unable to delete $TARGET_DIR. Please delete this directory manually."
 }
 
 Write-Host "Uninstallation complete."
+Read-Host "Press Enter to close this window..."

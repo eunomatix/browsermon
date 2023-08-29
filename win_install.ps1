@@ -1,5 +1,13 @@
 # PowerShell script for installing browsermon on Windows
 
+# Check if running with administrative privileges
+$isAdmin = ([System.Security.Principal.WindowsIdentity]::GetCurrent()).Groups -match "S-1-5-32-544"
+if (-not $isAdmin) {
+    Write-Host "Please run this script with administrative privileges."
+    Read-Host "Press Enter to close this window..."
+    Exit
+}
+
 # Define the target directory
 $TARGET_DIR = "C:\browsermon"
 
@@ -30,3 +38,5 @@ do {
     Start-Sleep -Seconds 2
 } while ($true)
 
+# Wait for user input before closing the PowerShell window
+Read-Host "Press Enter to close this window..."
