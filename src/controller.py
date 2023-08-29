@@ -7,6 +7,7 @@ import platform
 import subprocess
 import multiprocessing
 import configparser
+import multiprocessing
 from logging.handlers import RotatingFileHandler
 
 import launcher
@@ -43,12 +44,12 @@ class BrowsermonController:
 
     def get_installed_browsers(self):
         """
-        Function returns a set of browsers installed on the system. For windows it uses 
-        'reg' library to read windows registry and fetch the installed browsers. 
+        Function returns a set of browsers installed on the system. For windows it uses
+        'reg' library to read windows registry and fetch the installed browsers.
         For Linux it uses a simple command of 'which'
 
-        Function returns a set of browsers installed on the system. For windows it uses 
-        'reg' library to read windows registry and fetch the installed browsers. 
+        Function returns a set of browsers installed on the system. For windows it uses
+        'reg' library to read windows registry and fetch the installed browsers.
         For Linux it uses a simple command of 'which'
 
         Args: None
@@ -103,7 +104,7 @@ class BrowsermonController:
     def config_reader(self, conf_file_path="C:\\browsermon\\browsermon.conf"
     if platform.system() == "Windows" else "/opt/browsermon/browsermon.conf",
                     defaults=None):
-        
+
         """
         Function reads the config file and returns a dictionary of options
         if the platform is windows then the default directory is C:\browsermon\brwosermon.conf

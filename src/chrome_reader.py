@@ -20,6 +20,7 @@ scheduler = BackgroundScheduler()
 system = platform.system()
 default_log_loc = None
 
+
 if default_log_loc is None:
     if system == "Linux":
         default_log_loc = "/opt/browsermon"
@@ -38,7 +39,22 @@ class CustomFormatter(logging.Formatter):
         record.log_code = ''  # Set an empty log code if not present
         return super().format(record)
 
+log_format = "%(asctime)s %(log_code)s:: 'Google Chrome:' - %(levelname)s %(message)s"  # noqa
+
+class CustomFormatter(logging.Formatter):
+    def format(self, record):
+        if hasattr(record, 'log_code'):
+            return super().format(record)
+        record.log_code = ''  # Set an empty log code if not present
+        return super().format(record)
+
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)  # Set the logger level to INFO
+
+formatter = CustomFormatter(log_format)
+handler = logging.FileHandler(log_file)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 logger.setLevel(logging.INFO)  # Set the logger level to INFO
 
 formatter = CustomFormatter(log_format)
@@ -68,6 +84,7 @@ def get_chrome_version():
             version, _ = winreg.QueryValueEx(reg_key, "version")
         except Exception as e:
             logger.error(f"ERROR Exception Found While Finding Chrome Version ", e ,extra= {'log_code': 'BM9001'})
+            logger.error(f"ERROR Exception Found While Finding Chrome Version ", e ,extra= {'log_code': 'BM9001'})
 
     elif system == "Linux":
         try:
@@ -76,11 +93,12 @@ def get_chrome_version():
             version = output.decode().strip().split()[-1]
         except Exception as e:
             logger.error(f"ERROR Exception Found while finding Chrome version ", e ,extra={'log_code': 'BM9001'} )
+            logger.error(f"ERROR Exception Found while finding Chrome version ", e ,extra={'log_code': 'BM9001'} )
 
     return version
 
 def fixed_data():
-    
+
     Fixed_D = {
         "hostname": platform.node(),
         "os": platform.system(),
@@ -92,7 +110,7 @@ def fixed_data():
     return Fixed_D
 
 def get_profile_info(database_path):
-    
+
     logger.info(f"database path: {database_path}")
     db_path = database_path.replace("History", "Preferences")
     try:
@@ -109,7 +127,7 @@ def get_profile_info(database_path):
                     "email_id": email_id if email_id is not None else "Not Available",
                     "full_name": full_name if full_name is not None else "Not Available",
                     "Account_id": Account_id if Account_id is not None else "Not Available"
-                
+
                 }
                 return profile_information
     except (FileNotFoundError, json.JSONDecodeError, KeyError):
@@ -119,7 +137,7 @@ def get_profile_info(database_path):
 
 
 def get_profile_folders(logdir):
-    
+
     system = platform.system()
     base_path = ""
 
@@ -132,15 +150,15 @@ def get_profile_folders(logdir):
         excluded_folders = ['root']
 
     profile_folders = []
-    
+
     for folder_path in glob.glob(os.path.join(base_path, '*')):
         folder_name = os.path.basename(folder_path)
         if os.path.isdir(folder_path) and folder_name not in excluded_folders:
             profile_folders.append({
                 'Profile Name': folder_name,
-                'Folder Path': folder_path 
+                'Folder Path': folder_path
             })
-            
+
     logger.info( f"OS Users Found: {profile_folders}")
     return profile_folders
 
@@ -156,6 +174,7 @@ def get_Chrome_profile_folders(logdir):
         get_os_username = profile_name
         Default_folder_path= ''
         logger.info(f"Sniffing user profiles from {get_os_username}", extra={'log_code': 'BM4001'})
+        logger.info(f"Sniffing user profiles from {get_os_username}", extra={'log_code': 'BM4001'})
         system = platform.system()
         if system == "Windows":
             folder_path = os.path.join('C:\\Users', get_os_username, 'AppData', 'Local', 'Google', 'Chrome', 'User Data')
@@ -165,7 +184,7 @@ def get_Chrome_profile_folders(logdir):
             Default_folder_path= os.path.join('/home', get_os_username, '.config', 'google-chrome', 'Default' )
 
         folder_count = sum(os.path.isdir(os.path.join(folder_path, f)) for f in os.listdir(folder_path))
-        
+
         for r in range(1, folder_count):
             profile_folder = os.path.join(folder_path, f'Profile {r}')
 
@@ -178,14 +197,15 @@ def get_Chrome_profile_folders(logdir):
                 'Last saved value number': 0
             }
             logger.info(f"Profile found for {get_os_username}  at {profile_info['Profile Link'] }", extra={'log_code': 'BM4002'})
+            logger.info(f"Profile found for {get_os_username}  at {profile_info['Profile Link'] }", extra={'log_code': 'BM4002'})
             profile_objects[profile_folder] = profile_info
             if not profile_objects:
               logger.info(f"No user profiles found in {get_os_username}, exiting", extra={'log_code': 'BM4003'})
             
         new_profile_info = {
-        'Profile Username': get_os_username,  # Update with the desired username
-        'Profile Link': Default_folder_path,
-        'Last saved value number': 0
+            'Profile Username': get_os_username,  # Update with the desired username
+            'Profile Link': Default_folder_path,
+            'Last saved value number': 0
         }
         profile_objects[profile_folder] = new_profile_info
 
@@ -206,6 +226,7 @@ def get_Chrome_profile_folders(logdir):
 
     except IOError as e:
         logger.info(f"ERROR Exception Found while writing Profies data to JSON file: {e}", extra={'log_code': 'BM9001'})
+        logger.info(f"ERROR Exception Found while writing Profies data to JSON file: {e}", extra={'log_code': 'BM9001'})
 
 class InvalidScheduleWindowFormat(Exception):
     """
@@ -225,6 +246,7 @@ def parse_schedule_window(window):
         else:
             raise InvalidScheduleWindowFormat
     except InvalidScheduleWindowFormat:
+        logger.error(f"Invalid schedule window format. Please use the valid format (e.g., 1m, 1h, 1d)")
         logger.error(f"Invalid schedule window format. Please use the valid format (e.g., 1m, 1h, 1d)")
         sys.exit(1)
 
@@ -287,6 +309,11 @@ def monitor_history_db(db_path, logdir):
 
     except PermissionError as pe:
         logger.warning(f"CHROME-READER: WARN Permission error while reading the {db_path}: {pe}", extra={'log_code': 'BM4003'})
+        logger.error(f"ERROR Exception Found while processing {db_path}: {e}", extra={'log_code': 'BM9001'})
+        return None
+
+    except PermissionError as pe:
+        logger.warning(f"CHROME-READER: WARN Permission error while reading the {db_path}: {pe}", extra={'log_code': 'BM4003'})
         return None
 
 def write_history_data_to_json(history_data, write_file, db_path, logdirec, write_format):
@@ -294,8 +321,8 @@ def write_history_data_to_json(history_data, write_file, db_path, logdirec, writ
     entries_count = 0 
     logger.info(f"Writing logs to browsermon_history.log in {write_format}", extra={'log_code': 'BM5001'})
     logdir = logdirec
-    profile_path= db_path; 
-    Profile_data = get_profile_info(db_path)  
+    profile_path= db_path;
+    Profile_data = get_profile_info(db_path)
     system = platform.system()
     if system == "Windows":
         Os_username = os.path.dirname(os.path.dirname(os.path.dirname(db_path))).split(os.path.sep)[-5]
@@ -306,20 +333,20 @@ def write_history_data_to_json(history_data, write_file, db_path, logdirec, writ
     fix_data["os_username"] = Os_username
     for entry in history_data:
         entry_data= {}
-        entry_data["hostname"] = fix_data.get("hostname")      
+        entry_data["hostname"] = fix_data.get("hostname")
         entry_data["os"] = fix_data.get("os")
         entry_data["os_username"] = fix_data.get("os_username")
-        entry_data["browser"] = fix_data.get("browser")      
+        entry_data["browser"] = fix_data.get("browser")
         entry_data["browser_version"] = fix_data.get("browser_version")
         entry_data["browser_db"] = fix_data.get("browser_db")
         if Profile_data is not None:
             # Check each field separately and provide default value if it's None
-            entry_data["profile_id"] = Profile_data.get("Account_id")      
+            entry_data["profile_id"] = Profile_data.get("Account_id")
             entry_data["profile_title"] = Profile_data.get("full_name")
             entry_data["profile_username"] = Profile_data.get("email_id")
 
         else:
-            entry_data["profile_id"] = "Not Available" 
+            entry_data["profile_id"] = "Not Available"
             entry_data["profile_title"] = "Not Available"
             entry_data["profile_username"] = "Not Available"
         entry_data["Database_Path"] = profile_path
@@ -334,32 +361,32 @@ def write_history_data_to_json(history_data, write_file, db_path, logdirec, writ
             'visit_count': entry[3],
         })
         entries_count+=1
-        try:  
-         if entry_data:  # Check if data is not empty before writing to the file
+        try:
+            if entry_data:  # Check if data is not empty before writing to the file
 
-          if write_format == 'json':
-               with open(write_file, 'a') as file:
-                  json.dump(entry_data, file, indent=4)
-                  file.write(", ")   
-                  file.write("\n")
+                if write_format == 'json':
+                    with open(write_file, 'a') as file:
+                        json.dump(entry_data, file, indent=4)
+                        file.write(", ")
+                        file.write("\n")
 
-          elif write_format == 'csv':
-                fieldnames = ["hostname", "os", "os_username", "browser", "browser_version", "browser_db",
-                               "profile_id", "profile_title", "profile_username", "Database_Path",
-                               "session_id", "referrer", "Url", "Title", "visit_date", "visit_count"
-                                  ] 
-                
-                
-                for key, value in entry_data.items():
-                    if isinstance(value, str):
-                       entry_data[key] = value.encode('unicode_escape').decode()
-    
-                with open(write_file, 'a', newline='', encoding='utf-8') as csvfile:
-                    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                    if csvfile.tell() == 0:
-                        writer.writeheader()
-                    writer.writerow(entry_data)
-            
+                elif write_format == 'csv':
+                    fieldnames = ["hostname", "os", "os_username", "browser", "browser_version", "browser_db",
+                                  "profile_id", "profile_title", "profile_username", "Database_Path",
+                                  "session_id", "referrer", "Url", "Title", "visit_date", "visit_count"
+                                  ]
+
+
+                    for key, value in entry_data.items():
+                        if isinstance(value, str):
+                            entry_data[key] = value.encode('unicode_escape').decode()
+
+                    with open(write_file, 'a', newline='', encoding='utf-8') as csvfile:
+                        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                        if csvfile.tell() == 0:
+                            writer.writeheader()
+                        writer.writerow(entry_data)
+
         except Exception as e:
           logger.info(f"ERROR Exception Found while writing browsermon_history.log :" , extra={'log_code': 'BM9001'})  
                 
@@ -401,7 +428,7 @@ def server(db_path, write_file, logdir, write_format):
 
 def process_chrome_history(logdir, write_format):
     global entries_count
-    entries_count = 0 
+    entries_count = 0
 
     system = platform.system()
     profile_folders = get_profile_folders(logdir)
@@ -433,6 +460,7 @@ def process_chrome_history(logdir, write_format):
 
 def handle_signal(exit_feedback_queue, signum, frame):
     logger.info("Gracefully Exiting Writing funtion after reading all profiles", extra={'log_code': 'BM5003'})
+    logger.info("Gracefully Exiting Writing funtion after reading all profiles", extra={'log_code': 'BM5003'})
     sys.exit(0)
 
 
@@ -446,11 +474,13 @@ def main(exit_feedback_queue, shared_lock, logdir, write_format, mode, schedule_
     # Add the rest of the code for Windows operations if needed.
     elif platform.system() == "Linux":
         logger.info(f"Running on Linux.")
-    # Check if running with root privilege on Linux
+        # Check if running with root privilege on Linux
         if has_root_privilege():
             logger.info(f"Running with root privilege.")
         # Add the rest of the code for root privileged operations on Linux if needed.
         else:
+            logger.info("Not running with root privilege.")
+            logger.info("Exiting the program.")
             logger.info("Not running with root privilege.")
             logger.info("Exiting the program.")
             exit()  # Exit the program if not running with root privilege on Linux.
@@ -480,8 +510,10 @@ def main(exit_feedback_queue, shared_lock, logdir, write_format, mode, schedule_
     if mode == "scheduled":
         logger.info(f"Reader Started successfully in {mode} mode", extra={'log_code': 'BM1001'})
         logger.info(f"Validated parameters Successfully",extra={'log_code': 'BM2001'})
+        logger.info(f"Reader Started successfully in {mode} mode", extra={'log_code': 'BM1001'})
+        logger.info(f"Validated parameters Successfully",extra={'log_code': 'BM2001'})
         schedule_interval = parse_schedule_window(schedule_window)
-        scheduler.add_job(process_chrome_history, 'interval', args=[logdir, write_format],seconds=schedule_interval)    
+        scheduler.add_job(process_chrome_history, 'interval', args=[logdir, write_format],seconds=schedule_interval)
     elif mode == "real-time":
         logger.info(f"Reader Started successfully in {mode} mode", extra={'log_code': 'BM1001'})
         logger.info(f"Validated parameters Successfully",extra={'log_code': 'BM2001'})
@@ -505,11 +537,11 @@ def main(exit_feedback_queue, shared_lock, logdir, write_format, mode, schedule_
         print("Came here Exception e")
         exit_feedback_queue.put("chrome exited")
         sys.exit(1)
-    
+
     logger.info("chrome; shutting down scheduler")
     scheduler.shutdown()
     scheduler.remove_all_jobs()
-    
+
     logger.info("releasing shared_lock in chrome")
     shared_lock.release()
     exit_feedback_queue.put_nowait("no error")
