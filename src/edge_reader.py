@@ -136,7 +136,8 @@ def write_history_data(profile, logmode, logdir):
 
     if last_modified_time == current_modified_time:
         logger.info(
-            f"History file for profile '{profile_name}' has not been modified, skipping SQL query.",
+            f"History file for profile '{profile_name}' has not been "
+            f"modified, skipping SQL query.",
             extra={"log_id": 5001})  # noqa
         return
 
@@ -325,7 +326,8 @@ def main(exit_feedback_queue, shared_lock, logdir, logmode, mode,
         process_edge_history(logmode, logdir)
         scheduler.start()
         logger.info("accquiring lock ... ", extra={"log_id": 8001})
-        shared_lock.acquire()  # This will go into a blocking call if the lock is already accquired, which it will be by the controller
+        shared_lock.acquire()  # This will go into a blocking call if the
+        # lock is already accquired, which it will be by the controller
         logger.info("accquired lock", extra={"log_id": 8002})
     except (KeyboardInterrupt, SystemExit):
         scheduler.shutdown()
@@ -344,8 +346,13 @@ def main(exit_feedback_queue, shared_lock, logdir, logmode, mode,
     logger.info("Releasing lock", extra={"log_id": 7002})
     shared_lock.release()
     logger.info(
-        "Sending no error in exit feedback queue; so that controller doesn't relaunch",
+        "Sending no error in exit feedback queue; so that controller doesn't "
+        "relaunch",
         extra={"log_id": 7003})
     exit_feedback_queue.put_nowait("no error")
     logger.info("Sending sys.exit(0)", extra={"log_id": 7004})
     sys.exit(0)
+
+# if __name__ == '__main__': main(exit_feedback_queue=None,
+# shared_lock=None, logdir="/opt/browsermon/history", logmode="csv",
+# mode="real-time", schedule_window="1m")
