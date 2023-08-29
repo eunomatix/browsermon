@@ -16,5 +16,6 @@ if __name__ == '__main__':
             browsermon_service.win32serviceutil.HandleCommandLine(browsermon_service.browserMonService)
     elif SYSTEM == "Linux": 
         import controller
+        mp.freeze_support()
         controller = controller.BrowsermonController()
         controller.run()
