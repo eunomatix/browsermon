@@ -112,13 +112,13 @@ install_dependencies() {
 
 # Main script
 create_target_directory
-copy_files
-
+#copy_files
+cp "$PROJECT_DIR/browsermon" "$TARGET_DIR"
 cp "$PROJECT_DIR/README.md" "$TARGET_DIR"
 cp "$PROJECT_DIR/browsermon.conf" "$TARGET_DIR"
 cp "$PROJECT_DIR/linux_uninstall.sh" "$TARGET_DIR"
 
-install_dependencies
+#install_dependencies
 
 move_service_file
 
