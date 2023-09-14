@@ -8,6 +8,7 @@ import sqlite3
 import logging
 import platform
 import datetime
+import traceback
 import subprocess
 
 from functools import partial
@@ -126,7 +127,7 @@ def get_profile_folders(logdir):
 
     if system == "Windows":
         base_path = r'C:\Users'
-        excluded_folders = ['Default', 'Public', 'All Users', 'Default User']
+        excluded_folders = ['Default', 'Public', 'All Users', 'Default User', 'defautluser0']
 
     elif system == "Linux":
         base_path = '/home'
@@ -514,7 +515,7 @@ def main(exit_feedback_queue, shared_lock, logdir, write_format, mode, schedule_
         scheduler.shutdown()
         sys.exit(1)
     except Exception as e:
-        print("Came here Exception e")
+        traceback.print_exc()
         exit_feedback_queue.put("chrome exited")
         sys.exit(1)
 
