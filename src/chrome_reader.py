@@ -1,17 +1,16 @@
 import os
-import glob
-import sqlite3
-import json
-from functools import partial
-import logging
-import csv
-import signal
-import datetime
 import sys
-import subprocess
-import time
+import csv
+import json
+import glob
+import signal
+import sqlite3
+import logging
 import platform
-from apscheduler.schedulers.blocking import BlockingScheduler
+import datetime
+import subprocess
+
+from functools import partial
 from apscheduler.schedulers.background import BackgroundScheduler
 
 entries_count = 0
@@ -39,29 +38,13 @@ class CustomFormatter(logging.Formatter):
         record.log_code = ''  # Set an empty log code if not present
         return super().format(record)
 
-log_format = "%(asctime)s %(log_code)s:: 'Google Chrome:' - %(levelname)s %(message)s"  # noqa
-
-class CustomFormatter(logging.Formatter):
-    def format(self, record):
-        if hasattr(record, 'log_code'):
-            return super().format(record)
-        record.log_code = ''  # Set an empty log code if not present
-        return super().format(record)
-
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)  # Set the logger level to INFO
 
 formatter = CustomFormatter(log_format)
 handler = logging.FileHandler(log_file)
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)  # Set the logger level to INFO
-
-formatter = CustomFormatter(log_format)
-handler = logging.FileHandler(log_file)
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
 
 def has_root_privilege():
     """
@@ -173,7 +156,6 @@ def get_Chrome_profile_folders(logdir):
         profile_name = profile['Profile Name']
         get_os_username = profile_name
         Default_folder_path= ''
-        logger.info(f"Sniffing user profiles from {get_os_username}", extra={'log_code': 'BM4001'})
         logger.info(f"Sniffing user profiles from {get_os_username}", extra={'log_code': 'BM4001'})
         system = platform.system()
         if system == "Windows":
@@ -508,8 +490,6 @@ def main(exit_feedback_queue, shared_lock, logdir, write_format, mode, schedule_
     scheduler = BackgroundScheduler()
 
     if mode == "scheduled":
-        logger.info(f"Reader Started successfully in {mode} mode", extra={'log_code': 'BM1001'})
-        logger.info(f"Validated parameters Successfully",extra={'log_code': 'BM2001'})
         logger.info(f"Reader Started successfully in {mode} mode", extra={'log_code': 'BM1001'})
         logger.info(f"Validated parameters Successfully",extra={'log_code': 'BM2001'})
         schedule_interval = parse_schedule_window(schedule_window)
