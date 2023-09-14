@@ -5,11 +5,11 @@ block_cipher = None
 
 
 a = Analysis(
-    ['src\\browsermon.py'],
+    ['src/browsermon.py'],
     pathex=[],
     binaries=[],
     datas=[],
-    hiddenimports=['win32timezone'],
+    hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
