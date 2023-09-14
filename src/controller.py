@@ -185,19 +185,22 @@ class BrowsermonController:
         self.launcherObj.start()
 
         with handlers.Handler(self.logger, options['rotation'], f"{logdir}/browsermon_history.{options['logmode']}", options['backup_count']) as handler:
+            relaunch_count = 0
             while True:
                 return_str = None
                 self.logger.info("Controller waiting (blocked) on exit_feedback_queue")
                 try: 
                     return_str = self.launcherObj.queue.get(timeout=15)
                     self.logger.info("Controller timed out waiting on exit_feedback_queue")
-                    if (return_str == "edge exited"):
+                    if (return_str == "edge exited" and relaunch_count <= 3):
+                        relaunch_count += 1
                         self.launcherObj.processes['edge'].join() #join before relaunching to avoid zombie processes
                         self.logger.info("exit_feedback_queue received enqueue from edge")
                         self.logger.error("edge reader has exited")
                         self.logger.info("Relaunching edge reader")
                         self.launcherObj.launch_reader("edge") #relaunch edge
-                    elif (return_str == "chrome exited"):
+                    elif (return_str == "chrome exited" and relaunch_count <= 3):
+                        relaunch_count += 1
                         self.launcherObj.processes['chrome'].join()
                         self.logger.info("exit_feedback_queue received enqueue from chrome")
                         self.logger.error("chrome reader has exited")
