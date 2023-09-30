@@ -1,63 +1,79 @@
 # BrowserMon - Simple Python Application
 
-BrowserMon is a straightforward Python application that monitors web browsers. To run this application, follow the instructions below:
+Welcome to BrowserMon, the revolutionary browser monitoring tool designed to provide unparalleled insights into browsing activities. With seamless compatibility with Chrome and Edge browsers, BrowserMon stands as a unique solution in the realm of browser monitoring. Whether operating in real-time mode or scheduled mode, this tool meticulously records browsing histories, capturing a comprehensive range of 17 distinct parameters.
 
-## Prerequisites
+## Features
 
-- Python 3.x installed on your system.
-- Install the required packages using pip:
+- **Comprehensive Monitoring**: BrowserMon captures a rich set of 17 browsing parameters, providing a comprehensive view of browsing activities. This depth of data enables accurate analysis and informed decision-making.
+
+- **Data Privacy**: BrowserMon focuses solely on browser history and does not infringe upon broader internet activity or compromise user privacy beyond the scope of browsing data.
+
+- **Non-Intrusive Monitoring**: One of the standout benefits of BrowserMon is its non-intrusive monitoring capability. Regardless of the operating system you’re using, BrowserMon operates seamlessly behind the scenes without causing disruptions or interfering with other data on your system.
+
+## Get Started
+
+### Installation
+
+To install using freeze executable/binaries, download the .zip file and follow the instructions mentioned in the release for your specific operating system.
+
+To build the project:
+
+1. Get the source code:
     ```
-    pip install apscheduler
-    pip install orjson
-    ```
-
-## Setup
-
-1. Clone or download the BrowserMon repository from GitHub.
-    
-2. Navigate to the root folder of the application.
-    
-3. **Important:** Ensure that the `browsermon.conf` file is properly set up before running the application. This file contains configuration settings, especially the `logdir` directory path.
-    
-
-## Running the Application
-
-1. Open your terminal or command prompt.
-    
-2. Change the working directory to the root folder of the BrowserMon application.
-    
-3. To start the application, run the following command:
-    
-    ```
-    python main.py
-    ```
-    
-    This command will initiate the BrowserMon application and start monitoring web browsers.
-    
-
-## Running Tests
-
-To ensure the functionality of the application, you can run the provided pytest tests:
-
-1. Ensure you are in the root directory of the BrowserMon application.
-
-2. Run the following command to execute the tests:
-    
-    ```
-    pytest
+    git clone https://github.com/eunomatix/browsermon
     ```
 
-   For a more detailed view of the test results, you can use the verbose option:
-
+2. Create a Python environment:
     ```
-    pytest -vv
+    python -m venv venv
+    ```
+    Install dependencies in the environment:
+    ```
+    pip install -r requirements.txt
+    ```
+    **Note**: For Windows, you will also have to install *pywin32*, which is not present in the requirement.txt file:
+    ```
+    pip install pywin32
     ```
 
-## Stopping the Application
+3. Create executable using PyInstaller:
+    ```
+    pyinstaller -F src/browsermon.py
+    ```
+    For Windows:
+    ```
+    pyinstaller --hiddenimport win32timezone -F src/browsermon.py
+    ```
 
-To stop the BrowserMon application, simply send a keyboard interrupt signal. You can do this by pressing `Ctrl + C` in the terminal or command prompt where the application is running. This will gracefully terminate the controller and all spawned processes.
+4. Run service install scripts:
+    ```
+    ./linux_install.sh
+    ```
+    or
+    ```
+    Set-ExecutionPolicy RemoteSigned -Force ; .\win_install.ps1
+    ```
 
-Please note that you should only terminate the application when necessary, as unexpected terminations might lead to incomplete data or other issues.
+## License
 
-That's it! You have successfully set up and run the BrowserMon application to monitor web browsers. If you encounter any problems or have further questions, feel free to reach out for support. Happy monitoring!
+MIT License
 
+Copyright (c) 2023 Eunomatix
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sub-license, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+**THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

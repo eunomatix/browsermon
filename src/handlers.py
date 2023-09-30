@@ -1,3 +1,23 @@
+""""/****************************************************************************
+ **
+ ** Copyright (C) 2023 EUNOMATIX
+ ** This program is free software: you can redistribute it and/or modify
+ ** it under the terms of the GNU General Public License as published by
+ ** the Free Software Foundation, either version 3 of the License, or
+ ** any later version.
+ **
+ ** This program is distributed in the hope that it will be useful,
+ ** but WITHOUT ANY WARRANTY; without even the implied warranty of
+ ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ ** GNU General Public License for more details.
+ **
+ ** You should have received a copy of the GNU General Public License
+ ** along with this program. If not, see <https://www.gnu.org/licenses/>.
+ **
+ ** Contact: info@eunomatix.com
+ **
+ **************************************************************************/
+"""
 import os 
 import re
 from apscheduler.triggers.cron import CronTrigger
@@ -99,13 +119,17 @@ class Handler:
         self.scheduler.start() 
                 
     def __enter__(self):   
+        if (self.backup_count == 0):
+            self.logger.info("Backup count is set to 0, so no rotation will be performed")
+            return
         self.logger.info("Handler class invoked")
         self.logger.info(f"Running the scheduled job: rollover (funciton) for duration: {self.rotation}")
         self.schedule_background_job()
         self.get_scheduler_info(self.scheduler, self.logger)
 
     def __exit__(self, exc_type, exc_value, traceback):
+        if (self.backup_count == 0):
+            return
         self.logger.info("Cleanup of Handler class")
         self.scheduler.shutdown()
         self.scheduler.remove_all_jobs()
-
