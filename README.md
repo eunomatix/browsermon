@@ -1,42 +1,79 @@
 # BrowserMon - Simple Python Application
 
-BrowserMon is a straightforward Python application that monitors web browsers. To run this application, follow the instructions below:
+Welcome to BrowserMon, the revolutionary browser monitoring tool designed to provide unparalleled insights into browsing activities. With seamless compatibility with Chrome and Edge browsers, BrowserMon stands as a unique solution in the realm of browser monitoring. Whether operating in real-time mode or scheduled mode, this tool meticulously records browsing histories, capturing a comprehensive range of 17 distinct parameters.
 
-# Setup
-## For linux	
-1) ```git clone -b release https://github.com/eunomatix/browsermon.git```
-In order to run BrowserMon you must switch to Super User/root User
-2) ```su```
-3) ```chmod +x linux_install.sh```
-4) ```./linux_install.sh```
+## Features
 
-To verify that the service is up and running: 
-	```systemctl status browsermon.service```
+- **Comprehensive Monitoring**: BrowserMon captures a rich set of 17 browsing parameters, providing a comprehensive view of browsing activities. This depth of data enables accurate analysis and informed decision-making.
 
-To stop the service temporarily 
-	```systemctl stop browsermon.service```
+- **Data Privacy**: BrowserMon focuses solely on browser history and does not infringe upon broader internet activity or compromise user privacy beyond the scope of browsing data.
 
-To Uninstall: 
-	Run the ```./linux_uninstall.sh``` as root
+- **Non-Intrusive Monitoring**: One of the standout benefits of BrowserMon is its non-intrusive monitoring capability. Regardless of the operating system you’re using, BrowserMon operates seamlessly behind the scenes without causing disruptions or interfering with other data on your system.
 
-binaries for Linux coming soon ... 
-## For Windows x64
-1) Go to browsermon repository > Actions > Latest Version > Download the ```browsermon.exe```
-2) After downloading extract the folder in ```C:\browsermon```
-3) To install the service open powershell as admin in the ```C:\browsermon```  and run the following commands <br>
-	```.\browsermon.exe --startup=auto install```
-    <br>
-	```.\browsermon.exe start```
-4) ```browsermon.conf``` file should be located in ```C:\browsersmon``` otherwise service will run with defaults configurations. 
+## Get Started
 
-You can verify that service is running by opening **Services** through search and checking for ```browsermon``` 
+### Installation
 
-To stop the service: 
-	You can do that through the **Services** app in windows or you could run ```browsermon.exe stop``` 
-To remove the service 
-		Make sure to first stop the service. 
-	```browsermon.exe remove```
+To install using freeze executable/binaries, download the .zip file and follow the instructions mentioned in the release for your specific operating system.
 
-You can also clone the repository and install browsermon in fewer steps
-1) ```git clone -b release https://github.com/eunomatix/browsermon.git```
-2) Run the ```win_install.ps1``` as administrator 
+To build the project:
+
+1. Get the source code:
+    ```
+    git clone https://github.com/eunomatix/browsermon
+    ```
+
+2. Create a Python environment:
+    ```
+    python -m venv venv
+    ```
+    Install dependencies in the environment:
+    ```
+    pip install -r requirements.txt
+    ```
+    **Note**: For Windows, you will also have to install *pywin32*, which is not present in the requirement.txt file:
+    ```
+    pip install pywin32
+    ```
+
+3. Create executable using PyInstaller:
+    ```
+    pyinstaller -F src/browsermon.py
+    ```
+    For Windows:
+    ```
+    pyinstaller --hiddenimport win32timezone -F src/browsermon.py
+    ```
+
+4. Run service install scripts:
+    ```
+    ./linux_install.sh
+    ```
+    or
+    ```
+    Set-ExecutionPolicy RemoteSigned -Force ; .\win_install.ps1
+    ```
+
+## License
+
+MIT License
+
+Copyright (c) 2023 Eunomatix
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sub-license, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+**THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
