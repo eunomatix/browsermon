@@ -1,27 +1,27 @@
-""""/****************************************************************************
- **
- ** Copyright (C) 2023 EUNOMATIX
- ** This program is free software: you can redistribute it and/or modify
- ** it under the terms of the GNU General Public License as published by
- ** the Free Software Foundation, either version 3 of the License, or
- ** any later version.
- **
- ** This program is distributed in the hope that it will be useful,
- ** but WITHOUT ANY WARRANTY; without even the implied warranty of
- ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- ** GNU General Public License for more details.
- **
- ** You should have received a copy of the GNU General Public License
- ** along with this program. If not, see <https://www.gnu.org/licenses/>.
- **
- ** Contact: info@eunomatix.com
- **
- **************************************************************************/
-"""
+# ****************************************************************************
+# **
+# ** Copyright (C) 2023 EUNOMATIX
+# ** This program is free software: you can redistribute it and/or modify
+# ** it under the terms of the GNU General Public License as published by
+# ** the Free Software Foundation, either version 3 of the License, or
+# ** any later version.
+# **
+# ** This program is distributed in the hope that it will be useful,
+# ** but WITHOUT ANY WARRANTY; without even the implied warranty of
+# ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# ** GNU General Public License for more details.
+# **
+# ** You should have received a copy of the GNU General Public License
+# ** along with this program. If not, see <https://www.gnu.org/licenses/>.
+# **
+# ** Contact: info@eunomatix.com
+# **
+# **************************************************************************/
 import multiprocessing as mp 
 
-from edge_reader import main as edge_reader_main
-from chrome_reader import main as chrome_reader_main
+from readers.edge_reader import main as edge_reader_main
+from readers.chrome_reader import main as chrome_reader_main
+from readers.firefox_reader import main as firefox_reader_main
 
 def set_multiprocessing_start_method():
     try:
@@ -65,6 +65,14 @@ class Launcher:
             print("Launched reader with pid ", process_chrome.pid)
             self.logger.info("Invoked CHROME reader; PID: " + str(process_chrome.pid))
             self.processes['chrome'] = process_chrome
+        if browser == 'firefox':
+            self.logger.info("Invoking FIREFOX reader")
+            process_firefox = mp.Process(target=firefox_reader_main, args=(self.queue, self.shared_lock, self.options['logdir'], self.options['logmode'], self.options['mode'], self.options['schedule_window']))
+            process_firefox.start()
+            print("Launched reader with pid ", process_firefox.pid)
+            self.logger.info("Invoked FIREFOX reader; PID: " + str(process_firefox.pid))
+            self.processes['firefox'] = process_firefox
+
 
 
     def start(self):

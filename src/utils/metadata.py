@@ -1,23 +1,3 @@
-""""/****************************************************************************
- **
- ** Copyright (C) 2023 EUNOMATIX
- ** This program is free software: you can redistribute it and/or modify
- ** it under the terms of the GNU General Public License as published by
- ** the Free Software Foundation, either version 3 of the License, or
- ** any later version.
- **
- ** This program is distributed in the hope that it will be useful,
- ** but WITHOUT ANY WARRANTY; without even the implied warranty of
- ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- ** GNU General Public License for more details.
- **
- ** You should have received a copy of the GNU General Public License
- ** along with this program. If not, see <https://www.gnu.org/licenses/>.
- **
- ** Contact: info@eunomatix.com
- **
- **************************************************************************/
-"""
 import os
 import platform
 import sqlite3
@@ -68,3 +48,12 @@ def get_static_metadata(user_profile_dir, username, browser_name):
                                                        browser_name),
                 "browser_db": f"SQLite {sqlite3.sqlite_version}"}
     return metadata
+
+def has_root_privilege():
+    """
+    Check if the script has root privilege in Linux.
+    :return: True if running with root privilege, False otherwise.
+    """
+    if platform.system() == "Linux":
+        return os.geteuid() == 0
+    return False

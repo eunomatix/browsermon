@@ -1,38 +1,37 @@
-""""/****************************************************************************
- **
- ** Copyright (C) 2023 EUNOMATIX
- ** This program is free software: you can redistribute it and/or modify
- ** it under the terms of the GNU General Public License as published by
- ** the Free Software Foundation, either version 3 of the License, or
- ** any later version.
- **
- ** This program is distributed in the hope that it will be useful,
- ** but WITHOUT ANY WARRANTY; without even the implied warranty of
- ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- ** GNU General Public License for more details.
- **
- ** You should have received a copy of the GNU General Public License
- ** along with this program. If not, see <https://www.gnu.org/licenses/>.
- **
- ** Contact: info@eunomatix.com
- **
- **************************************************************************/
-"""
+# ****************************************************************************
+# **
+# ** Copyright (C) 2023 EUNOMATIX
+# ** This program is free software: you can redistribute it and/or modify
+# ** it under the terms of the GNU General Public License as published by
+# ** the Free Software Foundation, either version 3 of the License, or
+# ** any later version.
+# **
+# ** This program is distributed in the hope that it will be useful,
+# ** but WITHOUT ANY WARRANTY; without even the implied warranty of
+# ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# ** GNU General Public License for more details.
+# **
+# ** You should have received a copy of the GNU General Public License
+# ** along with this program. If not, see <https://www.gnu.org/licenses/>.
+# **
+# ** Contact: info@eunomatix.com
+# **
+# **************************************************************************/
 import re
 import os
 import time
-import logging 
 import queue
+import logging 
 import platform
-import multiprocessing
 import subprocess
-import multiprocessing
 import configparser
+import multiprocessing
 import multiprocessing
 from logging.handlers import RotatingFileHandler
 
-import launcher
-import handlers
+from utils.launcher import Launcher
+from utils.launcher import set_multiprocessing_start_method
+from utils.handlers import Handler
 
 class BrowsermonController:
     def __init__(self):
@@ -96,11 +95,12 @@ class BrowsermonController:
                         try:
                             # Enumerating subkeys
                             browser = reg.EnumKey(key, i)
-                            if (browser[:13] == "Google Chrome"):
+                            if "Google Chrome" in browser:
                                 browsers.add("chrome")
-                            elif browser[:14] == "Microsoft Edge":
+                            elif "Microsoft Edge" in browser:
                                 browsers.add("edge")
-
+                            elif "Firefox" in browser:
+                                browsers.add("firefox") 
                             i += 1
                         except WindowsError:
                             # If no more subkey, break the loop
@@ -109,7 +109,7 @@ class BrowsermonController:
                     pass  # If key doesn't exist, move on to next one
 
         elif self.SYSTEM == 'Linux':
-            command = 'which -a google-chrome microsoft-edge 2>/dev/null'
+            command = 'which -a google-chrome microsoft-edge firefox 2>/dev/null'
             output = subprocess.getoutput(command)
             for line in output.split('\n'):
                 line = line.strip().replace('/usr/bin/', '')
@@ -190,7 +190,7 @@ class BrowsermonController:
         return config_values
 
     def run(self):
-        launcher.set_multiprocessing_start_method()
+        set_multiprocessing_start_method()
         pid = os.getpid()
         self.logger.info(f"Main process id: {pid}")
 
@@ -202,10 +202,10 @@ class BrowsermonController:
         self.logger.info(f"Installed browsers: {installed_browsers}")
 
 
-        self.launcherObj = launcher.Launcher(installed_browsers, self.logger, options)
+        self.launcherObj = Launcher(installed_browsers, self.logger, options)
         self.launcherObj.start()
 
-        with handlers.Handler(self.logger, options['rotation'], f"{logdir}/browsermon_history.{options['logmode']}", options['backup_count']) as handler:
+        with Handler(self.logger, options['rotation'], f"{logdir}/browsermon_history.{options['logmode']}", options['backup_count']) as handler:
             relaunch_count = 0
             while True:
                 return_str = None
@@ -227,6 +227,13 @@ class BrowsermonController:
                         self.logger.error("chrome reader has exited")
                         self.logger.info("Relaunching chrome reader")
                         self.launcherObj.launch_reader("chrome")
+                    elif (return_str == "firefox exited" and relaunch_count <= 3):
+                        relaunch_count += 1
+                        self.launcherObj.processes['firefox'].join()
+                        self.logger.info("exit_feedback_queue received enqueue from firefox")
+                        self.logger.error("firefox reader has exited")
+                        self.logger.info("Relaunching firefox reader")
+                        self.launcherObj.launch_reader("firefox")
                     elif return_str != None:
                         self.logger.info("Recieved no relaunch feedback in queue")
                         self.logger.info("Exiting controller; breaking infinite loop in run")
