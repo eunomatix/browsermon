@@ -30,11 +30,11 @@ import sys
 import orjson as json
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from utils import system, logger
-from utils.caching import write_cache_file, read_cache_file
-from utils.common import parse_schedule_window, prepare_entry
-from utils.encryption import gen_fernet_key
-from utils.metadata import get_static_metadata
+from src.utils import system, logger
+from src.utils.caching import write_cache_file, read_cache_file
+from src.utils.common import parse_schedule_window, prepare_entry
+from src.utils.encryption import gen_fernet_key
+from src.utils.metadata import get_static_metadata
 
 # Global variable
 cache = {}
@@ -127,109 +127,113 @@ def get_all_profiles():
     return profiles
 
 
-def write_history_data(profile, logmode, logdir):
+def write_history_data(profiles, username, logmode, logdir):
     """
     Write the browsing history data for a given profile.
     :param logdir:
     :param logmode:
-    :param profile: Profile information
+    :param profiles: Profiles information
+    :param username: Username
     :return: None
     """
     global cache
 
-    metadata = get_static_metadata(profile["profile_path"],
-                                   profile["username"], "edge")
+    metadata = get_static_metadata(
+        profiles[username][next(iter(profiles[username]))]["profile_path"],
+        username, "edge")
 
-    history_file = os.path.join(profile["profile_path"], "History")
+    # Loop through the profiles for the given username
+    for profile_name, profile_info in profiles[username].items():
+        history_file = os.path.join(profile_info["profile_path"], "History")
 
-    del profile["username"]
+        # Get the last modified time and last visit time for the profile
+        profile_cache = cache.get(username, {}).get(profile_name, {})
+        last_modified_time = profile_cache.get("last_modified_time")
+        last_visit_time = profile_cache.get("last_visit_time")
 
-    profile_name = os.path.basename(profile['profile_path'])
+        # Check if the history file has been modified since the last run
+        current_modified_time = os.path.getmtime(history_file)
 
-    # Get the last modified time and last visit time for the profile
-    profile_info = cache.get(profile_name, {})
-    last_modified_time = profile_info.get("last_modified_time")
-    last_visit_time = profile_info.get("last_visit_time")
+        if last_modified_time == current_modified_time:
+            logger.info(
+                f"History file for profile '{profile_name}' has not been "
+                f"modified, skipping SQL query.",
+                extra={"log_id": 5001})  # noqa
+            return
 
-    # Check if the history file has been modified since the last run
-    current_modified_time = os.path.getmtime(history_file)
+        connection = sqlite3.connect(f"file:{history_file}?immutable=1",
+                                     uri=True)
+        cursor = connection.cursor()
 
-    if last_modified_time == current_modified_time:
+        # SQLite query to retrieve the data
+        query = """
+            SELECT
+                ca.window_id AS session_id,
+                u_referrer.url AS referrer,
+                u.url,
+                u.title,
+                v.visit_time,
+                u.visit_count
+            FROM
+                Context_annotations AS ca
+                INNER JOIN Visits AS v ON ca.visit_id = v.id
+                INNER JOIN URLs AS u ON u.id = v.url
+                LEFT JOIN Visits AS v_referrer ON v.from_visit = v_referrer.id
+                LEFT JOIN URLs AS u_referrer ON v_referrer.url = u_referrer.id
+            """
+
+        if last_visit_time:
+            # Filter for new records based on last processed visit time
+            query += " WHERE v.visit_time > ?"
+            cursor.execute(query, (last_visit_time,))
+        else:
+            cursor.execute(query)
+        rows = cursor.fetchall()
+
+        num_new_records = len(rows)
+
         logger.info(
-            f"History file for profile '{profile_name}' has not been "
-            f"modified, skipping SQL query.",
-            extra={"log_id": 5001})  # noqa
-        return
+            f"Found {num_new_records} new records for profile '{profile_name}' "
+            f"user: '{metadata['os_username']}'", extra={"log_id": 5002})
 
-    connection = sqlite3.connect(f"file:{history_file}?immutable=1", uri=True)
-    cursor = connection.cursor()
+        # Update the last modified time and last visit time in the cache
+        profile_cache["last_modified_time"] = current_modified_time
+        profile_cache["last_visit_time"] = rows[-1][
+            4] if rows else last_visit_time
+        cache.setdefault(username, {})[profile_name] = profile_cache
 
-    # SQLite query to retrieve the data
-    query = """
-        SELECT
-            ca.window_id AS session_id,
-            u_referrer.url AS referrer,
-            u.url,
-            u.title,
-            v.visit_time,
-            u.visit_count
-        FROM
-            Context_annotations AS ca
-            INNER JOIN Visits AS v ON ca.visit_id = v.id
-            INNER JOIN URLs AS u ON u.id = v.url
-            LEFT JOIN Visits AS v_referrer ON v.from_visit = v_referrer.id
-            LEFT JOIN URLs AS u_referrer ON v_referrer.url = u_referrer.id
-        """
+        if num_new_records == 0:
+            cursor.close()
+            connection.close()
+            return
 
-    if last_visit_time:
-        # Filter for new records based on last processed visit time
-        query += " WHERE v.visit_time > ?"
-        cursor.execute(query, (last_visit_time,))
-    else:
-        cursor.execute(query)
-    rows = cursor.fetchall()
+        output_file = os.path.join(logdir, f"browsermon_history.{logmode}")
 
-    num_new_records = len(rows)
+        with open(output_file, "a+", newline='') as file:
+            if logmode == "json":
+                writer = lambda x: file.write(  # noqa
+                    json.dumps(x, option=json.OPT_INDENT_2).decode() + ",\n")
+            elif logmode == "csv":
+                # Prepare fieldnames dynamically from the keys of the first
+                # entry
+                fieldnames = list(
+                    prepare_entry(rows[0], metadata, profile_info).keys())
+                csv_writer = csv.DictWriter(file, fieldnames=fieldnames)
+                writer = csv_writer.writerow
 
-    logger.info(
-        f"Found {num_new_records} new records for profile '{profile_name}' "
-        f"user: '{metadata['os_username']}'", extra={"log_id": 5002})
+                # Check if the CSV file is empty and write header if needed
+                if file.tell() == 0:
+                    csv_writer.writeheader()
 
-    # Update the last modified time and last visit time
-    profile_info["last_modified_time"] = current_modified_time
-    profile_info["last_visit_time"] = rows[-1][4] if rows else last_visit_time
-    cache[profile_name] = profile_info
+            for result in rows:
+                entry = prepare_entry(result, metadata, profile_info)
+                writer(entry)
 
-    if num_new_records == 0:
         cursor.close()
         connection.close()
-        return
 
-    output_file = os.path.join(logdir, f"browsermon_history.{logmode}")
-
-    with open(output_file, "a+", newline='') as file:
-        if logmode == "json":
-            writer = lambda x: file.write(  # noqa
-                json.dumps(x, option=json.OPT_INDENT_2).decode() + ",\n")
-        elif logmode == "csv":
-            # Prepare fieldnames dynamically from the keys of the first entry
-            fieldnames = list(prepare_entry(rows[0], metadata, profile).keys())
-            csv_writer = csv.DictWriter(file, fieldnames=fieldnames)
-            writer = csv_writer.writerow
-
-            # Check if the CSV file is empty and write header if needed
-            if file.tell() == 0:
-                csv_writer.writeheader()
-
-        for result in rows:
-            entry = prepare_entry(result, metadata, profile)
-            writer(entry)
-
-    cursor.close()
-    connection.close()
-
-    logger.info(f"Processed browsing history for profile '{profile_name}'",
-                extra={"log_id": 5003})
+        logger.info(f"Processed browsing history for profile '{profile_name}'",
+                    extra={"log_id": 5003})
 
 
 def process_edge_history(logmode, logdir):
@@ -243,30 +247,21 @@ def process_edge_history(logmode, logdir):
     profiles = get_all_profiles()
 
     num_cpu_cores = os.cpu_count()
-    num_profiles = len(profiles)
 
-    # Choose the minimum value between the number of CPU cores and the
-    # number of profiles as the thread pool size #noqa
-    max_workers = min(num_cpu_cores, num_profiles)
-
-    # Create a ThreadPoolExecutor with the dynamic thread pool size
+    # Create a ThreadPoolExecutor with a fixed thread pool size
     with concurrent.futures.ThreadPoolExecutor(
-            max_workers=max_workers) as executor:
-        # Submit tasks for each profile to the executor
-        future_to_profile = {
-            executor.submit(write_history_data, profile, logmode,
-                            logdir): profile for profile in profiles.values()}
-
-        # Wait for all tasks to complete
-        for future in concurrent.futures.as_completed(future_to_profile):
-            profile = future_to_profile[future]
+            max_workers=num_cpu_cores) as executor:
+        # Submit tasks for each username to the executor
+        for username in profiles:
             try:
-                future.result()  # Get the result of the task
-                # (this will raise an exception if the task raised one)
+                future = executor.submit(write_history_data, profiles,
+                                         username, logmode, logdir)
+                future.result()  # Get the result of the task (this will
+                # raise an exception if the task raised one)
             except Exception as e:
                 logger.error(
-                    f"Error processing history for profile '{profile['profile_path']}': {str(e)}",
-                    extra={"log_id": 5001})  # noqa
+                    f"Error processing history for username '{username}': {str(e)}",
+                    extra={"log_id": 5001})  # Log with a specific log ID
 
     logger.info("Processed browsing history for all the profiles and users",
                 extra={"log_id": 5004})
