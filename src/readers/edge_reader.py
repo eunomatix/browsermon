@@ -30,11 +30,11 @@ import sys
 import orjson as json
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from src.utils import system, logger
-from src.utils.caching import write_cache_file, read_cache_file
-from src.utils.common import parse_schedule_window, prepare_entry
-from src.utils.encryption import gen_fernet_key
-from src.utils.metadata import get_static_metadata
+from utils import system, logger
+from utils.caching import write_cache_file, read_cache_file
+from utils.common import parse_schedule_window, prepare_entry
+from utils.encryption import gen_fernet_key
+from utils.metadata import get_static_metadata
 
 # Global variable
 cache = {}
