@@ -1,5 +1,5 @@
 [Unit]
-Description=Browsermon Service
+Description=Browsermon Service 1.2.1
 After=multi-user.target
 
 [Service]

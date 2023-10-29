@@ -103,7 +103,7 @@ def get_all_profiles():
                                     extra={"log_id": 4002})
                         user_profiles = get_profiles(user_profile_dir,
                                                      username)
-                        profiles.update(user_profiles)
+                        profiles[username] = user_profiles
                 finally:
                     winreg.CloseKey(user_key)
         except Exception as e:
@@ -122,7 +122,7 @@ def get_all_profiles():
                     f"Found Microsoft Edge profile directory for user: {user}",
                     extra={"log_id": 4003})
                 user_profiles = get_profiles(user_profile_dir, user)
-                profiles.update(user_profiles)
+                profiles[username] = user_profiles
 
     return profiles
 
