@@ -1,6 +1,6 @@
 [![BrowserMon][repo_logo_img]][repo_url]
 
-![Static Badge](https://img.shields.io/badge/Version-1.2.0--alpha-brightgreen)
+![Static Badge](https://img.shields.io/badge/Version-1.2.1--alpha-brightgreen)
 ![Static Badge](https://img.shields.io/badge/License-MIT-blue)
 
 # BrowserMon - Revolutionary Browser Monitoring Tool
@@ -76,7 +76,13 @@ If you suspect configuration issues:
 - Ensure that the paths to browsermon and other required files are correctly specified in the configuration file.
 
 ### Running Troubleshooting Script (Linux Only)
-If the above steps didn't work, and you're using Linux, consider running the browsermon troubleshooting script.
+You can find the troubleshooting script in the `src/utils` folder. The script is named `troubleshooting_script.sh`.
+
+To run the script, open your terminal and navigate to the `src/utils` directory and use the following command:
+```bash
+python troubleshooting_script.py
+```
+
 ## License
 
 MIT License
