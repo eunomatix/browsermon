@@ -1,4 +1,9 @@
-# BrowserMon - Simple Python Application
+[![BrowserMon][repo_logo_img]][repo_url]
+
+![Static Badge](https://img.shields.io/badge/Version-1.2.0--alpha-brightgreen)
+![Static Badge](https://img.shields.io/badge/License-MIT-blue)
+
+# BrowserMon - Revolutionary Browser Monitoring Tool
 
 Welcome to BrowserMon, the revolutionary browser monitoring tool designed to provide unparalleled insights into browsing activities. With seamless compatibility with Chrome and Edge browsers, BrowserMon stands as a unique solution in the realm of browser monitoring. Whether operating in real-time mode or scheduled mode, this tool meticulously records browsing histories, capturing a comprehensive range of 17 distinct parameters.
 
@@ -54,6 +59,24 @@ To build the project:
     Set-ExecutionPolicy RemoteSigned -Force ; .\win_install.ps1
     ```
 
+## Troubleshooting Guide
+If you encounter issues while using browsermon, this troubleshooting guide is here to help you identify and resolve common problems. Follow these steps to diagnose and address problems you may face:
+
+### Check System Requirements
+Ensure that your system meets the following requirements:
+
+- Supported operating system (Windows + Linux)
+- Administrative privileges
+- Supported web browser (refer to the documentation for compatibility)
+
+### Configuration Errors
+If you suspect configuration issues:
+
+- Review the configuration file (browsermon.conf) to check for errors or inconsistencies.
+- Ensure that the paths to browsermon and other required files are correctly specified in the configuration file.
+
+### Running Troubleshooting Script (Linux Only)
+If the above steps didn't work, and you're using Linux, consider running the browsermon troubleshooting script.
 ## License
 
 MIT License
@@ -77,3 +100,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+[repo_logo_img]: https://browsermon.ai/wp-content/uploads/2023/08/BrowserMon-Logo.png
+[repo_url]: https://github.com/eunomatix/browsermon
