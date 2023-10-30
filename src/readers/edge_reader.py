@@ -159,7 +159,7 @@ def write_history_data(profiles, username, logmode, logdir):
                 f"History file for profile '{profile_name}' has not been "
                 f"modified, skipping SQL query.",
                 extra={"log_id": 5001})  # noqa
-            return
+            continue
 
         connection = sqlite3.connect(f"file:{history_file}?immutable=1",
                                      uri=True)
@@ -205,7 +205,7 @@ def write_history_data(profiles, username, logmode, logdir):
         if num_new_records == 0:
             cursor.close()
             connection.close()
-            return
+            continue
 
         output_file = os.path.join(logdir, f"browsermon_history.{logmode}")
 
