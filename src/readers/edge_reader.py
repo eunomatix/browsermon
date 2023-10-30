@@ -47,7 +47,7 @@ def get_profiles(user_profile_dir, username):
     :param username:
     :return:
     """
-    logger.info(f"Sniffing user profiles from user: {username}",
+    logger.info(f"Getting user profiles from user: {username}",
                 extra={"log_id": 4004})
     local_state_file = os.path.join(user_profile_dir, "Local State")
     with open(local_state_file, "r") as file:
@@ -254,13 +254,15 @@ def process_edge_history(logmode, logdir):
         # Submit tasks for each username to the executor
         for username in profiles:
             try:
+                logger.info(f"Processing browsing history for user: {username}",
+                extra={"log_id": 5001})
                 future = executor.submit(write_history_data, profiles,
                                          username, logmode, logdir)
                 future.result()  # Get the result of the task (this will
                 # raise an exception if the task raised one)
             except Exception as e:
                 logger.error(
-                    f"Error processing history for username '{username}': {str(e)}",
+                    f"Error processing history for user: {username}: {str(e)}",
                     extra={"log_id": 5001})  # Log with a specific log ID
 
     logger.info("Processed browsing history for all the profiles and users",
