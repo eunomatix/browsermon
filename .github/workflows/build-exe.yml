@@ -96,7 +96,7 @@ jobs:
               run: pip install -r requirements.txt
             
             - name: Create Executeable
-              run: pyinstaller --hiddenimport win32timezone -F src/browsermon.py
+              run: pyinstaller -F src/browsermon.py
             
             - name: Prepare files for upload
               run: |
