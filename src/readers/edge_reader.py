@@ -122,7 +122,7 @@ def get_all_profiles():
                     f"Found Microsoft Edge profile directory for user: {user}",
                     extra={"log_id": 4003})
                 user_profiles = get_profiles(user_profile_dir, user)
-                profiles[username] = user_profiles
+                profiles[user] = user_profiles
 
     return profiles
 
