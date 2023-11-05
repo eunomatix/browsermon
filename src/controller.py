@@ -33,7 +33,7 @@ from utils.launcher import Launcher
 from utils.launcher import set_multiprocessing_start_method
 from utils.handlers import Handler
 
-__VERSION__ = "1.2.1"
+__VERSION__ = "1.3.0"
 
 class BrowsermonController:
     def __init__(self):
