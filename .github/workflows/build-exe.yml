@@ -42,7 +42,7 @@ jobs:
               run: pyinstaller -F troubleshoot/browsermon_ts.py
           
             - name: Copy troubeshooter executeable
-              run: copy dist\browsermon_ts artifact\
+              run: copy dist\browsermon_ts.exe artifact\
             
             - name: Upload Artifact
               uses: actions/upload-artifact@v2
@@ -84,7 +84,7 @@ jobs:
               run: pyinstaller -F troubleshoot/browsermon_ts.py
           
             - name: Copy troubeshooter executeable
-              run: copy dist\browsermon_ts artifact\
+              run: copy dist\browsermon_ts.exe artifact\
             - name: Upload Artifact
               uses: actions/upload-artifact@v2
               with:
@@ -123,7 +123,7 @@ jobs:
               run: pyinstaller -F troubleshoot/browsermon_ts.py
           
             - name: Copy troubeshooter executeable
-              run: copy dist\browsermon_ts artifact\
+              run: cp dist/browsermon_ts artifact/
             - name: Upload Artifact
               uses: actions/upload-artifact@v2
               with:
