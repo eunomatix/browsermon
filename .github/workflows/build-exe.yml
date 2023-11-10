@@ -37,6 +37,12 @@ jobs:
                 cp browsermon.conf artifact/
                 cp win_install.ps1 artifact/
                 cp win_uninstall.ps1 artifact/
+
+            - name: Create Troubleshooter exe 
+              run: pyinstaller -F troubleshoot/browsermon_ts.py
+          
+            - name: Copy troubeshooter executeable
+              run: copy dist\browsermon_ts artifact\
             
             - name: Upload Artifact
               uses: actions/upload-artifact@v2
@@ -74,6 +80,11 @@ jobs:
                 cp win_install.ps1 artifact/
                 cp win_uninstall.ps1 artifact/
             
+            - name: Create Troubleshooter exe 
+              run: pyinstaller -F troubleshoot/browsermon_ts.py
+          
+            - name: Copy troubeshooter executeable
+              run: copy dist\browsermon_ts artifact\
             - name: Upload Artifact
               uses: actions/upload-artifact@v2
               with:
@@ -108,6 +119,11 @@ jobs:
                 cp linux_install.sh artifact/
                 cp linux_uninstall.sh artifact/
             
+            - name: Create Troubleshooter exe 
+              run: pyinstaller -F troubleshoot/browsermon_ts.py
+          
+            - name: Copy troubeshooter executeable
+              run: copy dist\browsermon_ts artifact\
             - name: Upload Artifact
               uses: actions/upload-artifact@v2
               with:
