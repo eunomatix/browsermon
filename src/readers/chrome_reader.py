@@ -38,7 +38,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 entries_count = 0
 scheduler = BackgroundScheduler()
 """
-Defining custom logger for Chrome Reader
+Defining custom logger for Chrome_Reader
 
 """
 system = platform.system()
