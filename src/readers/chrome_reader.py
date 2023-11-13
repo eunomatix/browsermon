@@ -37,7 +37,10 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 entries_count = 0
 scheduler = BackgroundScheduler()
+"""
+Defining custom logger for Chrome Reader
 
+"""
 system = platform.system()
 default_log_loc = None
 
@@ -78,6 +81,10 @@ def has_root_privilege():
     return False
 
 def get_chrome_version():
+    """
+    Check Google Chrome Version.
+    :return: Version of google Chrome
+    """
     system = platform.system()
     version = ""
 
@@ -102,6 +109,11 @@ def get_chrome_version():
 
 def fixed_data():
 
+    """
+    Funtion to get fixed data related to the browser
+    :return: Return a Dict with Fixed data Related to browser
+
+    """
     Fixed_D = {
         "hostname": platform.node(),
         "os": platform.system(),
@@ -113,6 +125,11 @@ def fixed_data():
     return Fixed_D
 
 def get_profile_info(database_path):
+    """
+    Get Information Related to Browser profile 
+    :param Database path of The profile:
+    :return: Return a Dict with Profile related data Email id, account id and Email
+    """
 
     logger.info(f"database path: {database_path}")
     db_path = database_path.replace("History", "Preferences")
@@ -139,6 +156,10 @@ def get_profile_info(database_path):
     return None
 
 def get_profile_folders():
+    """
+    Get all the profiles of the user OS
+    :return: Return a Dict with OS user profle name and Profile Directory
+    """
     system = platform.system()
     profile_folders = []
 
@@ -182,6 +203,11 @@ def get_profile_folders():
     return profile_folders
 
 def get_Chrome_profile_folders(logdir):
+    """
+    Chrome profiles Folder paths
+    :param: Logdir of Firefox_profiles_data to save folder paths in json
+    :return: Saves Chrome profiles Database paths in json
+    """
     logdirec=logdir
     profile_data = get_profile_folders();
     profile_objects = {}
@@ -251,7 +277,11 @@ class InvalidScheduleWindowFormat(Exception):
     pass
 
 def parse_schedule_window(window):
-
+    """
+    Parse the schedule window argument into seconds.
+    :param window: Schedule window argument (e.g., 1m, 1h, 1d)
+    :return: Schedule window in seconds
+    """
     try:
         if window[-1] == "m":
             return int(window[:-1]) * 60
@@ -267,7 +297,12 @@ def parse_schedule_window(window):
 
 
 def monitor_history_db(db_path, logdir):
-
+    """
+    Fetch History from database
+    :param: Database Path
+    :param: Logdir of history log file
+    :return: Latest History Data fetched from the dabase 
+    """
     if not os.path.isfile(db_path):
         return None
 
@@ -329,6 +364,16 @@ def monitor_history_db(db_path, logdir):
 
 
 def write_history_data_to_json(history_data, write_file, db_path, logdirec, write_format):
+
+
+    """
+    Writes history Data
+    :param: history_data:  History Data recived from browser database 
+    :param: write_file:    Write file to write hisotry logs
+    :param: db_path: Path of database  
+    :param: logdirec: Log directory of Hisotory File
+    :param: write_format: Write format CSV or JSon
+    """
     global entries_count
     entries_count = 0 
     logger.info(f"Writing logs to browsermon_history.log in {write_format}", extra={'log_code': 'BM5001'})
@@ -407,7 +452,13 @@ def write_history_data_to_json(history_data, write_file, db_path, logdirec, writ
 
 
 def server(db_path, write_file, logdir, write_format):
-
+    """
+    Manage fecthing data and writing
+    :param: write_file:    Write file to write hisotry logs
+    :param: db_path: Path of database  
+    :param: logdir: Log directory of Hisotory File
+    :param: write_format: Write format CSV or JSon
+    """
     data = monitor_history_db(db_path, logdir)
     if data is not None:
         if data:
@@ -439,6 +490,11 @@ def server(db_path, write_file, logdir, write_format):
                     json.dump(profiles, file, indent=4)
 
 def process_chrome_history(logdir, write_format):
+    """
+    manages os profile fetching , Browser profile Fetching and run server funtion
+    :param: logdir: Log directory of Hisotory File
+    :param: write_format: Write format CSV or JSon
+    """
     global entries_count
     entries_count = 0
 
@@ -476,7 +532,15 @@ def handle_signal(exit_feedback_queue, signum, frame):
 
 
 def main(exit_feedback_queue, shared_lock, logdir, write_format, mode, schedule_window):
-    
+    """
+    Main funtion to Run the program
+    :param: exit_feedback_queue: For controller
+    :param: shared_lock: Shared lock for controller
+    :param: logdir: Log directory of Hisotory File
+    :param: write_format: Write format CSV or JSon
+    :param: mode: Either Scheduled or Real time mode
+    :param: schedule_window:  If scheduled then sheduled window time
+    """
     signal_handler = partial(handle_signal, exit_feedback_queue)
     signal.signal(signal.SIGTERM, signal_handler)
 

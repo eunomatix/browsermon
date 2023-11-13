@@ -40,7 +40,10 @@ scheduler = BackgroundScheduler()
 system = platform.system()
 default_log_loc = None
 
+"""
+Defining custom logger for Firefox Reader
 
+"""
 if default_log_loc is None:
     if system == "Linux":
         default_log_loc = "/opt/browsermon"
@@ -68,9 +71,13 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
-
-
 def get_profile_folders(logdir):
+
+    """
+    Get all the profiles of the user OS
+    :param Logidir :where history logs are going to be logged :
+    :return: Return a Dict with OS user profle name and Profile Directory
+    """
     system = platform.system()
     profile_folders = []
 
@@ -115,6 +122,11 @@ def get_profile_folders(logdir):
 
 
 class FixedData:
+    """
+    Fixed data class 
+    :param user_profile_dir:
+    :return: Return a Dict with Fixed data Related to browser which is not related to history
+    """
     def __init__(self, db_path=None):
         self.hostname = platform.node()
         self.os = platform.system()
@@ -161,6 +173,11 @@ class FixedData:
         return version
 
 def get_profile_info(database_path):
+    """
+    Get Information Related to Browser profile 
+    :param Database path of The profile:
+    :return: Return a Dict with Profile related data Email id, account id and Email
+    """
     logger.info(f"database path: {database_path}")
     system = platform.system()
     if system == "Windows":
@@ -202,6 +219,11 @@ def get_profile_info(database_path):
         pass
     
 def filter_folders(folder_path):
+    """
+    Filter folder paths dict 
+    :param Dict of folder paths:
+    :return: Return a Dict folder paths Cleaned
+    """
     excluded_items = ['Crash Reports', 'Pending Pings']
 
     folder_paths = [
@@ -213,6 +235,11 @@ def filter_folders(folder_path):
 
     return folder_paths
 def get_firefox_profile_folders(logdir):
+    """
+    Firefox profiles Folder paths
+    :param: Logdir of Firefox_profiles_data to save folder paths in json
+    :return: Saves Firefox profiles Database paths in json
+    """
     logdirec = logdir
     profile_data = get_profile_folders(logdirec)
     profile_objects = {}  # Initialize the profile_objects dictionary here
@@ -268,6 +295,12 @@ def get_firefox_profile_folders(logdir):
 
 
 def table_exists(cursor, table_name):
+    """
+    Checks if certain tables exists in the database or not
+    :param: Cursor and Table name in database
+    :return: If it is present or not
+
+    """
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
     return cursor.fetchone() is not None
 
@@ -279,6 +312,11 @@ class InvalidScheduleWindowFormat(Exception):
     pass
 
 def parse_schedule_window(window):
+    """
+    Parse the schedule window argument into seconds.
+    :param window: Schedule window argument (e.g., 1m, 1h, 1d)
+    :return: Schedule window in seconds
+    """
 
     try:
         if window[-1] == "m":
@@ -296,7 +334,13 @@ def parse_schedule_window(window):
 
 
 def monitor_history_db(db_path, logdir):
-
+    
+    """
+    Fetch History from database
+    :param: Database Path
+    :param: Logdir of history log file
+    :return: Latest History Data fetched from the dabase 
+    """
     if not os.path.isfile(db_path):
         logger.error(f"ERROR Database to get history logs not found for {db_path}", extra={'log_code': 'BM9001'})
         return None
@@ -368,6 +412,16 @@ def monitor_history_db(db_path, logdir):
 
 
 def write_history_data_to_json(history_data, write_file, db_path, logdirec, write_format):
+
+    """
+    Writes history Data
+    :param: history_data:  History Data recived from browser database 
+    :param: write_file:    Write file to write hisotry logs
+    :param: db_path: Path of database  
+    :param: logdirec: Log directory of Hisotory File
+    :param: write_format: Write format CSV or JSon
+    """
+
     print( "db_path used", db_path)
     process_id= 'null';
     global entries_count
@@ -451,7 +505,13 @@ def write_history_data_to_json(history_data, write_file, db_path, logdirec, writ
 
 
 def server(db_path, write_file, logdir, write_format):
-    
+    """
+    Manage fecthing data and writing
+    :param: write_file:    Write file to write hisotry logs
+    :param: db_path: Path of database  
+    :param: logdir: Log directory of Hisotory File
+    :param: write_format: Write format CSV or JSon
+    """
     data = monitor_history_db(db_path, logdir)
     if data:
         last_visit_time = data[-1][0]
@@ -491,6 +551,11 @@ def server(db_path, write_file, logdir, write_format):
 
 
 def process_Firefox_history(logdir, write_format):
+    """
+    manages os profile fetching , Browser profile Fetching and run server funtion
+    :param: logdir: Log directory of Hisotory File
+    :param: write_format: Write format CSV or JSon
+    """
     global entries_count
     entries_count = 0 
     system = platform.system()
@@ -528,6 +593,10 @@ def handle_signal(exit_feedback_queue, signum, frame):
     sys.exit(0)
 
 def log_os_info():
+    """
+    Checks permissions and OS compatibility
+    checks if script has root previlidge on linux and on windows it has adminstrative previledges
+    """
     if platform.system() == "Windows":
         logger.info("Running on Windows.")
         # Add the rest of the code for Windows operations if needed.
@@ -548,7 +617,15 @@ def log_os_info():
   
 
 def main(exit_feedback_queue, shared_lock, logdir, write_format, mode, schedule_window):
-
+    """
+    Main funtion to Run the program
+    :param: exit_feedback_queue: For controller
+    :param: shared_lock: Shared lock for controller
+    :param: logdir: Log directory of Hisotory File
+    :param: write_format: Write format CSV or JSon
+    :param: mode: Either Scheduled or Real time mode
+    :param: schedule_window:  If scheduled then sheduled window time
+    """
     signal_handler = partial(handle_signal, exit_feedback_queue)
     signal.signal(signal.SIGTERM, signal_handler)
     log_os_info()

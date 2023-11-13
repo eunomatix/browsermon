@@ -58,6 +58,16 @@ def parse_schedule_window(window):
 
 
 def prepare_entry(result, metadata, profile):
+
+    """
+    Preparing entry to Write in json or CSV fromat.  
+    :param Result: Gets result of Fetched Entries From Browser Database
+    :param Metadata: Static metadata dictionary From Get static metadata funtion 
+    :param Profile: Profile Link
+
+    :return: Data ready for Writing
+
+    """
     session_id = result[0]
     referrer = result[1]
     url = result[2]

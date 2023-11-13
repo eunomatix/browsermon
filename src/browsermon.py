@@ -23,7 +23,10 @@ import multiprocessing as mp
 
 SYSTEM = platform.system()
 
-if __name__ == '__main__':
+"""
+Main service funtion.
+"""
+def main():
     if SYSTEM == "Windows":
         import browsermon_service
         mp.freeze_support()
@@ -38,3 +41,5 @@ if __name__ == '__main__':
         import controller
         controller = controller.BrowsermonController()
         controller.run()
+if __name__ == '__main__':
+   main()
