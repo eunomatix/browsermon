@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.utils.common &mdash; Browsermon 1.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=292eb321"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Browsermon
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Browsermon</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../utils.html">src.utils</a></li>
+      <li class="breadcrumb-item active">src.utils.common</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.utils.common</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ****************************************************************************</span>
+<span class="c1"># **</span>
+<span class="c1"># ** Copyright (C) 2023 EUNOMATIX</span>
+<span class="c1"># ** This program is free software: you can redistribute it and/or modify</span>
+<span class="c1"># ** it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># ** the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># ** any later version.</span>
+<span class="c1"># **</span>
+<span class="c1"># ** This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># ** but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># ** GNU General Public License for more details.</span>
+<span class="c1"># **</span>
+<span class="c1"># ** You should have received a copy of the GNU General Public License</span>
+<span class="c1"># ** along with this program. If not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+<span class="c1"># **</span>
+<span class="c1"># ** Contact: info@eunomatix.com</span>
+<span class="c1"># **</span>
+<span class="c1"># **************************************************************************/</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+
+<div class="viewcode-block" id="InvalidScheduleWindowFormat">
+<a class="viewcode-back" href="../../../src.utils.html#src.utils.common.InvalidScheduleWindowFormat">[docs]</a>
+<span class="k">class</span> <span class="nc">InvalidScheduleWindowFormat</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Custom exception for the InvalidScheduleWindowFormat</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="generate_uuid">
+<a class="viewcode-back" href="../../../src.utils.html#src.utils.common.generate_uuid">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_uuid</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a UUID</span>
+<span class="sd">    :return: UUID</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid1</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="parse_schedule_window">
+<a class="viewcode-back" href="../../../src.utils.html#src.utils.common.parse_schedule_window">[docs]</a>
+<span class="k">def</span> <span class="nf">parse_schedule_window</span><span class="p">(</span><span class="n">window</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse the schedule window argument into seconds.</span>
+<span class="sd">    :param window: Schedule window argument (e.g., 1m, 1h, 1d)</span>
+<span class="sd">    :return: Schedule window in seconds</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">window</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">window</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="mi">60</span>
+        <span class="k">elif</span> <span class="n">window</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;h&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">window</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="mi">3600</span>
+        <span class="k">elif</span> <span class="n">window</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">window</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="mi">86400</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidScheduleWindowFormat</span>
+    <span class="k">except</span> <span class="n">InvalidScheduleWindowFormat</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;Invalid schedule window format. Please use the valid format (e.g., 1m, 1h, 1d)&quot;</span><span class="p">)</span>  <span class="c1"># noqa</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="prepare_entry">
+<a class="viewcode-back" href="../../../src.utils.html#src.utils.common.prepare_entry">[docs]</a>
+<span class="k">def</span> <span class="nf">prepare_entry</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">profile</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Preparing entry to Write in json or CSV fromat.  </span>
+<span class="sd">    :param Result: Gets result of Fetched Entries From Browser Database</span>
+<span class="sd">    :param Metadata: Static metadata dictionary From Get static metadata funtion </span>
+<span class="sd">    :param Profile: Profile Link</span>
+
+<span class="sd">    :return: Data ready for Writing</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">session_id</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">referrer</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">visit_time</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">visit_count</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+
+    <span class="n">visit_time_obj</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1601</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span>
+        <span class="n">microseconds</span><span class="o">=</span><span class="n">visit_time</span><span class="p">)</span>
+
+    <span class="c1"># Create an OrderedDict to maintain the order of keys</span>
+    <span class="n">entry</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+    <span class="c1"># Add metadata and profile information at the beginning of the entry</span>
+    <span class="n">entry</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+    <span class="n">entry</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">profile</span><span class="p">)</span>
+
+    <span class="c1"># Add other entry information</span>
+    <span class="n">entry</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;session_id&quot;</span><span class="p">:</span> <span class="n">session_id</span><span class="p">,</span> <span class="s2">&quot;referrer&quot;</span><span class="p">:</span> <span class="n">referrer</span><span class="p">,</span> <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span>
+        <span class="s2">&quot;visit_time&quot;</span><span class="p">:</span> <span class="n">visit_time_obj</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;visit_count&quot;</span><span class="p">:</span> <span class="n">visit_count</span><span class="p">,</span> <span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">entry</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Eunomatix.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.utils.handlers &mdash; Browsermon 1.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=292eb321"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Browsermon
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Browsermon</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../utils.html">src.utils</a></li>
+      <li class="breadcrumb-item active">src.utils.handlers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.utils.handlers</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ****************************************************************************</span>
+<span class="c1"># **</span>
+<span class="c1"># ** Copyright (C) 2023 EUNOMATIX</span>
+<span class="c1"># ** This program is free software: you can redistribute it and/or modify</span>
+<span class="c1"># ** it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># ** the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># ** any later version.</span>
+<span class="c1"># **</span>
+<span class="c1"># ** This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># ** but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># ** GNU General Public License for more details.</span>
+<span class="c1"># **</span>
+<span class="c1"># ** You should have received a copy of the GNU General Public License</span>
+<span class="c1"># ** along with this program. If not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+<span class="c1"># **</span>
+<span class="c1"># ** Contact: info@eunomatix.com</span>
+<span class="c1"># **</span>
+<span class="c1"># **************************************************************************/</span>
+<span class="kn">import</span> <span class="nn">os</span> 
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">apscheduler.triggers.cron</span> <span class="kn">import</span> <span class="n">CronTrigger</span>
+<span class="kn">from</span> <span class="nn">apscheduler.schedulers.background</span> <span class="kn">import</span> <span class="n">BackgroundScheduler</span>
+
+<div class="viewcode-block" id="Handler">
+<a class="viewcode-back" href="../../../src.utils.html#src.utils.handlers.Handler">[docs]</a>
+<span class="k">class</span> <span class="nc">Handler</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">rotation</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">backup_count</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">=</span> <span class="n">rotation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_path</span> <span class="o">=</span> <span class="n">file_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backup_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">backup_count</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="n">BackgroundScheduler</span><span class="p">()</span>
+
+    
+<div class="viewcode-block" id="Handler.rollover">
+<a class="viewcode-back" href="../../../src.utils.html#src.utils.handlers.Handler.rollover">[docs]</a>
+    <span class="k">def</span> <span class="nf">rollover</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Function: rollover()</span>
+<span class="sd">            Descirption: This function is for rotationThreshold of history log files that readers generates; how it works is that </span>
+<span class="sd">            if will rename the current history log files that all readers are writing to and create a new file with old name </span>
+<span class="sd">            history log files. </span>
+
+<span class="sd">        Args: None</span>
+<span class="sd">            </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">MIN_THRESHOLD</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">)</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">)</span> <span class="o">==</span> <span class="n">MIN_THRESHOLD</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">rotated_files</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span> <span class="o">+</span> <span class="s1">&#39;.</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">backup_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">rotated_files</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">rotated_files</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rotated_files</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">source_file</span> <span class="o">=</span> <span class="n">rotated_files</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">destination_file</span> <span class="o">=</span> <span class="n">rotated_files</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">source_file</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">source_file</span><span class="p">,</span> <span class="n">destination_file</span><span class="p">)</span>
+
+        <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Handler.get_scheduler_info">
+<a class="viewcode-back" href="../../../src.utils.html#src.utils.handlers.Handler.get_scheduler_info">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_scheduler_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        get_scheduler_info(, scheduler, logger) </span>
+<span class="sd">        Description:</span>
+<span class="sd">            This function is to log all the details about the apscheduler.backgroundScheduler</span>
+
+<span class="sd">        Args: </span>
+<span class="sd">            scheduler: (the object of the apscheduler that you wish to log information about</span>
+<span class="sd">            </span>
+<span class="sd">            logger: the objecct of the logging module that is responsible for logging into the log file. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Scheduler information:&quot;</span><span class="p">)</span>
+        <span class="c1"># Iterate over all jobs in the scheduler</span>
+        <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">get_jobs</span><span class="p">():</span>
+            <span class="c1"># Retrieve trigger information</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">trigger</span><span class="p">,</span> <span class="n">CronTrigger</span><span class="p">):</span>
+                <span class="n">cron_expression</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">trigger</span><span class="o">.</span><span class="n">fields</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Job Trigger Type: CronTrigger&quot;</span><span class="p">)</span>
+                <span class="c1">#logger.info(f&quot;Cron Expression: {cron_expression}&quot;)</span>
+                <span class="n">next_run_time</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">next_run_time</span>  <span class="c1"># Use job&#39;s next_run_time attribute</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Next Run Time: </span><span class="si">{</span><span class="n">next_run_time</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Job Trigger Type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">trigger</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">next_run_time</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">next_run_time</span>  <span class="c1"># Use job&#39;s next_run_time attribute</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Next Run Time: </span><span class="si">{</span><span class="n">next_run_time</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Handler.schedule_background_job">
+<a class="viewcode-back" href="../../../src.utils.html#src.utils.handlers.Handler.schedule_background_job">[docs]</a>
+    <span class="k">def</span> <span class="nf">schedule_background_job</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        schedule_background_job()</span>
+<span class="sd">        Description: </span>
+<span class="sd">            This function is to schedule the rollover job for rotating files. </span>
+<span class="sd">            This function uses apscheduler library in python to schedule the job. </span>
+
+<span class="sd">        Args: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Extract the numeric value and unit from the input string</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^(\d+)([mhd])$&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid interval format&quot;</span><span class="p">)</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Map the unit to the appropriate cron expression</span>
+        <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;m&#39;</span><span class="p">:</span>
+            <span class="n">cron_expr</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;*/</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> * * * *&quot;</span>
+        <span class="k">elif</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;h&#39;</span><span class="p">:</span>
+            <span class="n">cron_expr</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;0 */</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> * * *&quot;</span>
+        <span class="k">elif</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;d&#39;</span><span class="p">:</span>
+            <span class="n">cron_expr</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;0 0 */</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> * *&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid interval unit&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">add_job</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rollover</span><span class="p">,</span> <span class="n">trigger</span><span class="o">=</span><span class="n">CronTrigger</span><span class="o">.</span><span class="n">from_crontab</span><span class="p">(</span><span class="n">cron_expr</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> </div>
+
+                
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>   
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backup_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Backup count is set to 0, so no rotation will be performed&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Handler class invoked&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Running the scheduled job: rollover (funciton) for duration: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schedule_background_job</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_scheduler_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backup_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Cleanup of Handler class&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">remove_all_jobs</span><span class="p">()</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Eunomatix.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

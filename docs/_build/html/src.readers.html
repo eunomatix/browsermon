@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.readers package &mdash; Browsermon 1.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=292eb321"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="src.utils package" href="src.utils.html" />
+    <link rel="prev" title="Source Module" href="src.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Browsermon
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="releasenotes.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readme.html">BrowserMon - Revolutionary Browser Monitoring Tool</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readmetroubleshoot.html">Troubleshooting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Browsermon</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="src.html">Source Module</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">src.readers package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-src.readers.chrome_reader">src.readers.chrome_reader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-src.readers.edge_reader">src.readers.edge_reader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-src.readers.firefox_reader">src.readers.firefox_reader module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.utils.html">src.utils package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#module-src.browsermon">src.browsermon module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#module-src.browsermon_service">src.browsermon_service module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#module-src.controller">src.controller module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#module-src">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Browsermon</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Browsermon</a></li>
+          <li class="breadcrumb-item"><a href="src.html">Source Module</a></li>
+      <li class="breadcrumb-item active">src.readers package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/src.readers.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="src-readers-package">
+<h1>src.readers package<a class="headerlink" href="#src-readers-package" title="Link to this heading"></a></h1>
+<section id="module-src.readers.chrome_reader">
+<span id="src-readers-chrome-reader-module"></span><h2>src.readers.chrome_reader module<a class="headerlink" href="#module-src.readers.chrome_reader" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.readers.chrome_reader.CustomFormatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.readers.chrome_reader.</span></span><span class="sig-name descname"><span class="pre">CustomFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datefmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/chrome_reader.html#CustomFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.chrome_reader.CustomFormatter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Formatter</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.readers.chrome_reader.CustomFormatter.format">
+<span class="sig-name descname"><span class="pre">format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/chrome_reader.html#CustomFormatter.format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.chrome_reader.CustomFormatter.format" title="Link to this definition"></a></dt>
+<dd><p>Format the specified record as text.</p>
+<p>The record’s attribute dictionary is used as the operand to a
+string formatting operation which yields the returned string.
+Before formatting the dictionary, a couple of preparatory steps
+are carried out. The message attribute of the record is computed
+using LogRecord.getMessage(). If the formatting string uses the
+time (as determined by a call to usesTime(), formatTime() is
+called to format the event time. If there is exception information,
+it is formatted using formatException() and appended to the message.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="src.readers.chrome_reader.InvalidScheduleWindowFormat">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.readers.chrome_reader.</span></span><span class="sig-name descname"><span class="pre">InvalidScheduleWindowFormat</span></span><a class="reference internal" href="_modules/src/readers/chrome_reader.html#InvalidScheduleWindowFormat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.chrome_reader.InvalidScheduleWindowFormat" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Custom exception for the InvalidScheduleWindowFormat</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.chrome_reader.fixed_data">
+<span class="sig-prename descclassname"><span class="pre">src.readers.chrome_reader.</span></span><span class="sig-name descname"><span class="pre">fixed_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/chrome_reader.html#fixed_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.chrome_reader.fixed_data" title="Link to this definition"></a></dt>
+<dd><p>Funtion to get fixed data related to the browser
+:return: Return a Dict with Fixed data Related to browser</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.chrome_reader.get_Chrome_profile_folders">
+<span class="sig-prename descclassname"><span class="pre">src.readers.chrome_reader.</span></span><span class="sig-name descname"><span class="pre">get_Chrome_profile_folders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logdir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/chrome_reader.html#get_Chrome_profile_folders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.chrome_reader.get_Chrome_profile_folders" title="Link to this definition"></a></dt>
+<dd><p>Chrome profiles Folder paths
+:param: Logdir of Firefox_profiles_data to save folder paths in json
+:return: Saves Chrome profiles Database paths in json</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.chrome_reader.get_chrome_version">
+<span class="sig-prename descclassname"><span class="pre">src.readers.chrome_reader.</span></span><span class="sig-name descname"><span class="pre">get_chrome_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/chrome_reader.html#get_chrome_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.chrome_reader.get_chrome_version" title="Link to this definition"></a></dt>
+<dd><p>Check Google Chrome Version.
+:return: Version of google Chrome</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.chrome_reader.get_profile_folders">
+<span class="sig-prename descclassname"><span class="pre">src.readers.chrome_reader.</span></span><span class="sig-name descname"><span class="pre">get_profile_folders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/chrome_reader.html#get_profile_folders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.chrome_reader.get_profile_folders" title="Link to this definition"></a></dt>
+<dd><p>Get all the profiles of the user OS
+:return: Return a Dict with OS user profle name and Profile Directory</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.chrome_reader.get_profile_info">
+<span class="sig-prename descclassname"><span class="pre">src.readers.chrome_reader.</span></span><span class="sig-name descname"><span class="pre">get_profile_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/chrome_reader.html#get_profile_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.chrome_reader.get_profile_info" title="Link to this definition"></a></dt>
+<dd><p>Get Information Related to Browser profile 
+:param Database path of The profile:
+:return: Return a Dict with Profile related data Email id, account id and Email</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.chrome_reader.handle_signal">
+<span class="sig-prename descclassname"><span class="pre">src.readers.chrome_reader.</span></span><span class="sig-name descname"><span class="pre">handle_signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exit_feedback_queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/chrome_reader.html#handle_signal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.chrome_reader.handle_signal" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.chrome_reader.has_root_privilege">
+<span class="sig-prename descclassname"><span class="pre">src.readers.chrome_reader.</span></span><span class="sig-name descname"><span class="pre">has_root_privilege</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/chrome_reader.html#has_root_privilege"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.chrome_reader.has_root_privilege" title="Link to this definition"></a></dt>
+<dd><p>Check if the script has root privilege in Linux.
+:return: True if running with root privilege, False otherwise.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.chrome_reader.main">
+<span class="sig-prename descclassname"><span class="pre">src.readers.chrome_reader.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exit_feedback_queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shared_lock</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schedule_window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/chrome_reader.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.chrome_reader.main" title="Link to this definition"></a></dt>
+<dd><p>Main funtion to Run the program
+:param: exit_feedback_queue: For controller
+:param: shared_lock: Shared lock for controller
+:param: logdir: Log directory of Hisotory File
+:param: write_format: Write format CSV or JSon
+:param: mode: Either Scheduled or Real time mode
+:param: schedule_window:  If scheduled then sheduled window time</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.chrome_reader.monitor_history_db">
+<span class="sig-prename descclassname"><span class="pre">src.readers.chrome_reader.</span></span><span class="sig-name descname"><span class="pre">monitor_history_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/chrome_reader.html#monitor_history_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.chrome_reader.monitor_history_db" title="Link to this definition"></a></dt>
+<dd><p>Fetch History from database
+:param: Database Path
+:param: Logdir of history log file
+:return: Latest History Data fetched from the dabase</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.chrome_reader.parse_schedule_window">
+<span class="sig-prename descclassname"><span class="pre">src.readers.chrome_reader.</span></span><span class="sig-name descname"><span class="pre">parse_schedule_window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/chrome_reader.html#parse_schedule_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.chrome_reader.parse_schedule_window" title="Link to this definition"></a></dt>
+<dd><p>Parse the schedule window argument into seconds.
+:param window: Schedule window argument (e.g., 1m, 1h, 1d)
+:return: Schedule window in seconds</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.chrome_reader.process_chrome_history">
+<span class="sig-prename descclassname"><span class="pre">src.readers.chrome_reader.</span></span><span class="sig-name descname"><span class="pre">process_chrome_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_format</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/chrome_reader.html#process_chrome_history"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.chrome_reader.process_chrome_history" title="Link to this definition"></a></dt>
+<dd><p>manages os profile fetching , Browser profile Fetching and run server funtion
+:param: logdir: Log directory of Hisotory File
+:param: write_format: Write format CSV or JSon</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="src.readers.chrome_reader.scheduler">
+<span class="sig-prename descclassname"><span class="pre">src.readers.chrome_reader.</span></span><span class="sig-name descname"><span class="pre">scheduler</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;apscheduler.schedulers.background.BackgroundScheduler</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#src.readers.chrome_reader.scheduler" title="Link to this definition"></a></dt>
+<dd><p>Defining custom logger for Chrome Reader</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.chrome_reader.server">
+<span class="sig-prename descclassname"><span class="pre">src.readers.chrome_reader.</span></span><span class="sig-name descname"><span class="pre">server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_format</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/chrome_reader.html#server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.chrome_reader.server" title="Link to this definition"></a></dt>
+<dd><p>Manage fecthing data and writing
+:param: write_file:    Write file to write hisotry logs
+:param: db_path: Path of database  
+:param: logdir: Log directory of Hisotory File
+:param: write_format: Write format CSV or JSon</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.chrome_reader.write_history_data_to_json">
+<span class="sig-prename descclassname"><span class="pre">src.readers.chrome_reader.</span></span><span class="sig-name descname"><span class="pre">write_history_data_to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdirec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_format</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/chrome_reader.html#write_history_data_to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.chrome_reader.write_history_data_to_json" title="Link to this definition"></a></dt>
+<dd><p>Writes history Data
+:param: history_data:  History Data recived from browser database 
+:param: write_file:    Write file to write hisotry logs
+:param: db_path: Path of database  
+:param: logdirec: Log directory of Hisotory File
+:param: write_format: Write format CSV or JSon</p>
+</dd></dl>
+
+</section>
+<section id="module-src.readers.edge_reader">
+<span id="src-readers-edge-reader-module"></span><h2>src.readers.edge_reader module<a class="headerlink" href="#module-src.readers.edge_reader" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.edge_reader.cleanup">
+<span class="sig-prename descclassname"><span class="pre">src.readers.edge_reader.</span></span><span class="sig-name descname"><span class="pre">cleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cache_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encryption_key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/edge_reader.html#cleanup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.edge_reader.cleanup" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.edge_reader.cleanup_on_sigterm">
+<span class="sig-prename descclassname"><span class="pre">src.readers.edge_reader.</span></span><span class="sig-name descname"><span class="pre">cleanup_on_sigterm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/edge_reader.html#cleanup_on_sigterm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.edge_reader.cleanup_on_sigterm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.edge_reader.get_all_profiles">
+<span class="sig-prename descclassname"><span class="pre">src.readers.edge_reader.</span></span><span class="sig-name descname"><span class="pre">get_all_profiles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/edge_reader.html#get_all_profiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.edge_reader.get_all_profiles" title="Link to this definition"></a></dt>
+<dd><p>Get all the profiles for all the users on the operating system.
+:return: Dictionary of profiles</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.edge_reader.get_profiles">
+<span class="sig-prename descclassname"><span class="pre">src.readers.edge_reader.</span></span><span class="sig-name descname"><span class="pre">get_profiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_profile_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/edge_reader.html#get_profiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.edge_reader.get_profiles" title="Link to this definition"></a></dt>
+<dd><p>Get all the profiles of the user
+:param user_profile_dir:
+:param username:
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.edge_reader.main">
+<span class="sig-prename descclassname"><span class="pre">src.readers.edge_reader.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exit_feedback_queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shared_lock</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logmode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schedule_window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/edge_reader.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.edge_reader.main" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.edge_reader.process_edge_history">
+<span class="sig-prename descclassname"><span class="pre">src.readers.edge_reader.</span></span><span class="sig-name descname"><span class="pre">process_edge_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logmode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/edge_reader.html#process_edge_history"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.edge_reader.process_edge_history" title="Link to this definition"></a></dt>
+<dd><p>Process the Edge browsing history and write it to the output file using a
+dynamic thread pool.
+:param logmode:
+:param logdir:
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.edge_reader.write_history_data">
+<span class="sig-prename descclassname"><span class="pre">src.readers.edge_reader.</span></span><span class="sig-name descname"><span class="pre">write_history_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logmode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/edge_reader.html#write_history_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.edge_reader.write_history_data" title="Link to this definition"></a></dt>
+<dd><p>Write the browsing history data for a given profile.
+:param logdir:
+:param logmode:
+:param profiles: Profiles information
+:param username: Username
+:return: None</p>
+</dd></dl>
+
+</section>
+<section id="module-src.readers.firefox_reader">
+<span id="src-readers-firefox-reader-module"></span><h2>src.readers.firefox_reader module<a class="headerlink" href="#module-src.readers.firefox_reader" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.CustomFormatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.readers.firefox_reader.</span></span><span class="sig-name descname"><span class="pre">CustomFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datefmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#CustomFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.CustomFormatter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Formatter</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.CustomFormatter.format">
+<span class="sig-name descname"><span class="pre">format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#CustomFormatter.format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.CustomFormatter.format" title="Link to this definition"></a></dt>
+<dd><p>Format the specified record as text.</p>
+<p>The record’s attribute dictionary is used as the operand to a
+string formatting operation which yields the returned string.
+Before formatting the dictionary, a couple of preparatory steps
+are carried out. The message attribute of the record is computed
+using LogRecord.getMessage(). If the formatting string uses the
+time (as determined by a call to usesTime(), formatTime() is
+called to format the event time. If there is exception information,
+it is formatted using formatException() and appended to the message.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.FixedData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.readers.firefox_reader.</span></span><span class="sig-name descname"><span class="pre">FixedData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#FixedData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.FixedData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Fixed data class 
+:param user_profile_dir:
+:return: Return a Dict with Fixed data Related to browser which is not related to history</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.FixedData.get_firefox_version">
+<span class="sig-name descname"><span class="pre">get_firefox_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#FixedData.get_firefox_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.FixedData.get_firefox_version" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.InvalidScheduleWindowFormat">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.readers.firefox_reader.</span></span><span class="sig-name descname"><span class="pre">InvalidScheduleWindowFormat</span></span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#InvalidScheduleWindowFormat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.InvalidScheduleWindowFormat" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Custom exception for the InvalidScheduleWindowFormat</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.default_log_loc">
+<span class="sig-prename descclassname"><span class="pre">src.readers.firefox_reader.</span></span><span class="sig-name descname"><span class="pre">default_log_loc</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'C:\\browsermon'</span></em><a class="headerlink" href="#src.readers.firefox_reader.default_log_loc" title="Link to this definition"></a></dt>
+<dd><p>Defining custom logger for Firefox Reader</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.filter_folders">
+<span class="sig-prename descclassname"><span class="pre">src.readers.firefox_reader.</span></span><span class="sig-name descname"><span class="pre">filter_folders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#filter_folders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.filter_folders" title="Link to this definition"></a></dt>
+<dd><p>Filter folder paths dict 
+:param Dict of folder paths:
+:return: Return a Dict folder paths Cleaned</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.get_firefox_profile_folders">
+<span class="sig-prename descclassname"><span class="pre">src.readers.firefox_reader.</span></span><span class="sig-name descname"><span class="pre">get_firefox_profile_folders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logdir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#get_firefox_profile_folders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.get_firefox_profile_folders" title="Link to this definition"></a></dt>
+<dd><p>Firefox profiles Folder paths
+:param: Logdir of Firefox_profiles_data to save folder paths in json
+:return: Saves Firefox profiles Database paths in json</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.get_profile_folders">
+<span class="sig-prename descclassname"><span class="pre">src.readers.firefox_reader.</span></span><span class="sig-name descname"><span class="pre">get_profile_folders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logdir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#get_profile_folders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.get_profile_folders" title="Link to this definition"></a></dt>
+<dd><p>Get all the profiles of the user OS
+:param Logidir :where history logs are going to be logged :
+:return: Return a Dict with OS user profle name and Profile Directory</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.get_profile_info">
+<span class="sig-prename descclassname"><span class="pre">src.readers.firefox_reader.</span></span><span class="sig-name descname"><span class="pre">get_profile_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#get_profile_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.get_profile_info" title="Link to this definition"></a></dt>
+<dd><p>Get Information Related to Browser profile 
+:param Database path of The profile:
+:return: Return a Dict with Profile related data Email id, account id and Email</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.handle_signal">
+<span class="sig-prename descclassname"><span class="pre">src.readers.firefox_reader.</span></span><span class="sig-name descname"><span class="pre">handle_signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exit_feedback_queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#handle_signal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.handle_signal" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.log_os_info">
+<span class="sig-prename descclassname"><span class="pre">src.readers.firefox_reader.</span></span><span class="sig-name descname"><span class="pre">log_os_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#log_os_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.log_os_info" title="Link to this definition"></a></dt>
+<dd><p>Checks permissions and OS compatibility
+checks if script has root previlidge on linux and on windows it has adminstrative previledges</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.main">
+<span class="sig-prename descclassname"><span class="pre">src.readers.firefox_reader.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exit_feedback_queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shared_lock</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schedule_window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.main" title="Link to this definition"></a></dt>
+<dd><p>Main funtion to Run the program
+:param: exit_feedback_queue: For controller
+:param: shared_lock: Shared lock for controller
+:param: logdir: Log directory of Hisotory File
+:param: write_format: Write format CSV or JSon
+:param: mode: Either Scheduled or Real time mode
+:param: schedule_window:  If scheduled then sheduled window time</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.monitor_history_db">
+<span class="sig-prename descclassname"><span class="pre">src.readers.firefox_reader.</span></span><span class="sig-name descname"><span class="pre">monitor_history_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#monitor_history_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.monitor_history_db" title="Link to this definition"></a></dt>
+<dd><p>Fetch History from database
+:param: Database Path
+:param: Logdir of history log file
+:return: Latest History Data fetched from the dabase</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.parse_schedule_window">
+<span class="sig-prename descclassname"><span class="pre">src.readers.firefox_reader.</span></span><span class="sig-name descname"><span class="pre">parse_schedule_window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#parse_schedule_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.parse_schedule_window" title="Link to this definition"></a></dt>
+<dd><p>Parse the schedule window argument into seconds.
+:param window: Schedule window argument (e.g., 1m, 1h, 1d)
+:return: Schedule window in seconds</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.process_Firefox_history">
+<span class="sig-prename descclassname"><span class="pre">src.readers.firefox_reader.</span></span><span class="sig-name descname"><span class="pre">process_Firefox_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_format</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#process_Firefox_history"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.process_Firefox_history" title="Link to this definition"></a></dt>
+<dd><p>manages os profile fetching , Browser profile Fetching and run server funtion
+:param: logdir: Log directory of Hisotory File
+:param: write_format: Write format CSV or JSon</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.server">
+<span class="sig-prename descclassname"><span class="pre">src.readers.firefox_reader.</span></span><span class="sig-name descname"><span class="pre">server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_format</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.server" title="Link to this definition"></a></dt>
+<dd><p>Manage fecthing data and writing
+:param: write_file:    Write file to write hisotry logs
+:param: db_path: Path of database  
+:param: logdir: Log directory of Hisotory File
+:param: write_format: Write format CSV or JSon</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.table_exists">
+<span class="sig-prename descclassname"><span class="pre">src.readers.firefox_reader.</span></span><span class="sig-name descname"><span class="pre">table_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cursor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#table_exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.table_exists" title="Link to this definition"></a></dt>
+<dd><p>Checks if certain tables exists in the database or not
+:param: Cursor and Table name in database
+:return: If it is present or not</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.readers.firefox_reader.write_history_data_to_json">
+<span class="sig-prename descclassname"><span class="pre">src.readers.firefox_reader.</span></span><span class="sig-name descname"><span class="pre">write_history_data_to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logdirec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_format</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/readers/firefox_reader.html#write_history_data_to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.readers.firefox_reader.write_history_data_to_json" title="Link to this definition"></a></dt>
+<dd><p>Writes history Data
+:param: history_data:  History Data recived from browser database 
+:param: write_file:    Write file to write hisotry logs
+:param: db_path: Path of database  
+:param: logdirec: Log directory of Hisotory File
+:param: write_format: Write format CSV or JSon</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="src.html" class="btn btn-neutral float-left" title="Source Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="src.utils.html" class="btn btn-neutral float-right" title="src.utils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Eunomatix.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

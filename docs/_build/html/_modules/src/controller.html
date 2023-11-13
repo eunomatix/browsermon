@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.controller &mdash; Browsermon 1.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=292eb321"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Browsermon
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Browsermon</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.controller</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.controller</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ****************************************************************************</span>
+<span class="c1"># **</span>
+<span class="c1"># ** Copyright (C) 2023 EUNOMATIX</span>
+<span class="c1"># ** This program is free software: you can redistribute it and/or modify</span>
+<span class="c1"># ** it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># ** the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># ** any later version.</span>
+<span class="c1"># **</span>
+<span class="c1"># ** This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># ** but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># ** GNU General Public License for more details.</span>
+<span class="c1"># **</span>
+<span class="c1"># ** You should have received a copy of the GNU General Public License</span>
+<span class="c1"># ** along with this program. If not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+<span class="c1"># **</span>
+<span class="c1"># ** Contact: info@eunomatix.com</span>
+<span class="c1"># **</span>
+<span class="c1"># **************************************************************************/</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">queue</span>
+<span class="kn">import</span> <span class="nn">logging</span> 
+<span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">configparser</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">from</span> <span class="nn">logging.handlers</span> <span class="kn">import</span> <span class="n">RotatingFileHandler</span>
+
+<span class="kn">from</span> <span class="nn">utils.launcher</span> <span class="kn">import</span> <span class="n">Launcher</span>
+<span class="kn">from</span> <span class="nn">utils.launcher</span> <span class="kn">import</span> <span class="n">set_multiprocessing_start_method</span>
+<span class="kn">from</span> <span class="nn">utils.handlers</span> <span class="kn">import</span> <span class="n">Handler</span>
+
+<span class="n">__VERSION__</span> <span class="o">=</span> <span class="s2">&quot;1.3.0&quot;</span>
+
+<div class="viewcode-block" id="BrowsermonController">
+<a class="viewcode-back" href="../../src.html#src.controller.BrowsermonController">[docs]</a>
+<span class="k">class</span> <span class="nc">BrowsermonController</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SYSTEM</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_logger</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">launcherObj</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="BrowsermonController.init_logger">
+<a class="viewcode-back" href="../../src.html#src.controller.BrowsermonController.init_logger">[docs]</a>
+    <span class="k">def</span> <span class="nf">init_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+       
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">SYSTEM</span> <span class="o">==</span> <span class="s2">&quot;Windows&quot;</span><span class="p">:</span>
+            <span class="n">log_file</span> <span class="o">=</span> <span class="s2">&quot;C:</span><span class="se">\\</span><span class="s2">browsermon</span><span class="se">\\</span><span class="s2">browsermon.log&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">SYSTEM</span> <span class="o">==</span> <span class="s2">&quot;Linux&quot;</span><span class="p">:</span>
+            <span class="n">log_file</span> <span class="o">=</span> <span class="s2">&quot;/opt/browsermon/browsermon.log&quot;</span>
+
+        <span class="n">handler</span> <span class="o">=</span> <span class="n">RotatingFileHandler</span><span class="p">(</span>
+            <span class="n">log_file</span><span class="p">,</span>
+            <span class="n">maxBytes</span><span class="o">=</span><span class="mf">1e+7</span><span class="p">,</span>
+            <span class="n">backupCount</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> WD</span><span class="si">%(process)d</span><span class="s1">:: </span><span class="se">\&#39;</span><span class="s1">CONTROLLER:</span><span class="se">\&#39;</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+
+        <span class="c1"># Set up multiprocessing-safe logger</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">get_logger</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">logger</span></div>
+
+
+
+<div class="viewcode-block" id="BrowsermonController.get_installed_browsers">
+<a class="viewcode-back" href="../../src.html#src.controller.BrowsermonController.get_installed_browsers">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_installed_browsers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function returns a set of browsers installed on the system. For windows it uses</span>
+<span class="sd">        &#39;reg&#39; library to read windows registry and fetch the installed browsers.</span>
+<span class="sd">        For Linux it uses a simple command of &#39;which&#39;</span>
+
+<span class="sd">        Function returns a set of browsers installed on the system. For windows it uses</span>
+<span class="sd">        &#39;reg&#39; library to read windows registry and fetch the installed browsers.</span>
+<span class="sd">        For Linux it uses a simple command of &#39;which&#39;</span>
+
+<span class="sd">        Args: None</span>
+
+
+<span class="sd">        Returns: set of browsers installed on the system</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">browsers</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">SYSTEM</span> <span class="o">==</span> <span class="s1">&#39;Windows&#39;</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">winreg</span> <span class="k">as</span> <span class="nn">reg</span>
+            <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="sa">r</span><span class="s2">&quot;SOFTWARE\Clients\StartMenuInternet&quot;</span><span class="p">,</span>
+                <span class="sa">r</span><span class="s2">&quot;SOFTWARE\WOW6432Node\Clients\StartMenuInternet&quot;</span>
+                <span class="c1"># For 32-bit apps on 64-bit system</span>
+            <span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Open the registry key</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">OpenKey</span><span class="p">(</span><span class="n">reg</span><span class="o">.</span><span class="n">HKEY_LOCAL_MACHINE</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="c1"># Enumerating subkeys</span>
+                            <span class="n">browser</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">EnumKey</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="s2">&quot;Google Chrome&quot;</span> <span class="ow">in</span> <span class="n">browser</span><span class="p">:</span>
+                                <span class="n">browsers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;chrome&quot;</span><span class="p">)</span>
+                            <span class="k">elif</span> <span class="s2">&quot;Microsoft Edge&quot;</span> <span class="ow">in</span> <span class="n">browser</span><span class="p">:</span>
+                                <span class="n">browsers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;edge&quot;</span><span class="p">)</span>
+                            <span class="k">elif</span> <span class="s2">&quot;Firefox&quot;</span> <span class="ow">in</span> <span class="n">browser</span><span class="p">:</span>
+                                <span class="n">browsers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;firefox&quot;</span><span class="p">)</span> 
+                            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">except</span> <span class="ne">WindowsError</span><span class="p">:</span>
+                            <span class="c1"># If no more subkey, break the loop</span>
+                            <span class="k">break</span>
+                <span class="k">except</span> <span class="ne">WindowsError</span><span class="p">:</span>
+                    <span class="k">pass</span>  <span class="c1"># If key doesn&#39;t exist, move on to next one</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">SYSTEM</span> <span class="o">==</span> <span class="s1">&#39;Linux&#39;</span><span class="p">:</span>
+            <span class="n">command</span> <span class="o">=</span> <span class="s1">&#39;which -a google-chrome microsoft-edge firefox 2&gt;/dev/null&#39;</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">getoutput</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/usr/bin/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">line</span> <span class="o">==</span> <span class="s1">&#39;google-chrome&#39;</span><span class="p">:</span>
+                    <span class="n">browsers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;chrome&#39;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">line</span> <span class="o">==</span> <span class="s1">&#39;microsoft-edge&#39;</span><span class="p">:</span>
+                    <span class="n">browsers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;edge&#39;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">line</span> <span class="o">==</span> <span class="s1">&#39;firefox&#39;</span><span class="p">:</span>
+                    <span class="n">browsers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;firefox&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">browsers</span></div>
+
+
+
+<div class="viewcode-block" id="BrowsermonController.config_reader">
+<a class="viewcode-back" href="../../src.html#src.controller.BrowsermonController.config_reader">[docs]</a>
+    <span class="k">def</span> <span class="nf">config_reader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conf_file_path</span><span class="o">=</span><span class="s2">&quot;C:</span><span class="se">\\</span><span class="s2">browsermon</span><span class="se">\\</span><span class="s2">browsermon.conf&quot;</span>
+    <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Windows&quot;</span> <span class="k">else</span> <span class="s2">&quot;/opt/browsermon/browsermon.conf&quot;</span><span class="p">,</span>
+                    <span class="n">defaults</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function reads the config file and returns a dictionary of options</span>
+<span class="sd">        if the platform is windows then the default directory is C:\browsermon\brwosermon.conf</span>
+<span class="sd">        otherwise for linux it is /opt/browsermon/browsermon.conf</span>
+
+<span class="sd">        Args: conf_file_path: path to config file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;^\d+[mhd]$&#39;</span>
+            <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;browser&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;mode&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;schedule_window&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;logdir&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;logmode&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;rotation&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;backup_count&#39;</span><span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">defaults</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;browser&#39;</span><span class="p">:</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="s1">&#39;scheduled&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;schedule_window&#39;</span><span class="p">:</span> <span class="s1">&#39;1m&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;logdir&#39;</span><span class="p">:</span> <span class="s1">&#39;C:</span><span class="se">\\</span><span class="s1">browsermon</span><span class="se">\\</span><span class="s1">history&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">SYSTEM</span> <span class="o">==</span> <span class="s2">&quot;Windows&quot;</span> <span class="k">else</span> <span class="s1">&#39;/opt/browsermon/history&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;logmode&#39;</span><span class="p">:</span> <span class="s1">&#39;csv&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;rotation&#39;</span><span class="p">:</span> <span class="s1">&#39;1m&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;backup_count&#39;</span><span class="p">:</span> <span class="s1">&#39;5&#39;</span><span class="p">}</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reading config file from path: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">conf_file_path</span><span class="p">)</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">conf_file_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">config_init_exception</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Exception caught during initialization: </span><span class="si">{</span><span class="n">config_init_exception</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">defaults</span>
+
+        <span class="n">config_values</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Value for option &#39;</span><span class="si">{</span><span class="n">option</span><span class="si">}</span><span class="s2">&#39; is empty&quot;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">option</span> <span class="o">==</span> <span class="s1">&#39;schedule_window&#39;</span> <span class="ow">or</span> <span class="n">option</span> <span class="o">==</span> <span class="s1">&#39;rotation&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Value for option &#39;</span><span class="si">{</span><span class="n">option</span><span class="si">}</span><span class="s2">&#39; is invalid&quot;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">option</span> <span class="o">==</span> <span class="s1">&#39;logmode&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;csv&#39;</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">}:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Value for option &#39;</span><span class="si">{</span><span class="n">option</span><span class="si">}</span><span class="s2">&#39; is invalid&quot;</span><span class="p">))</span>
+                <span class="n">config_values</span><span class="p">[</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">Exception</span><span class="p">,</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exception caught for option &#39;</span><span class="si">{</span><span class="n">option</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">config_values</span><span class="p">[</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaults</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Options fetched from config file: </span><span class="si">{</span><span class="n">conf_file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">config_values</span></div>
+
+
+<div class="viewcode-block" id="BrowsermonController.run">
+<a class="viewcode-back" href="../../src.html#src.controller.BrowsermonController.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">set_multiprocessing_start_method</span><span class="p">()</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Browsermon Started, version: </span><span class="si">{</span><span class="n">__VERSION__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Main process id: </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_reader</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;options fetched </span><span class="si">{</span><span class="n">options</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logdir</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;logdir&#39;</span><span class="p">]</span>
+
+        <span class="n">installed_browsers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_installed_browsers</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Installed browsers: </span><span class="si">{</span><span class="n">installed_browsers</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">launcherObj</span> <span class="o">=</span> <span class="n">Launcher</span><span class="p">(</span><span class="n">installed_browsers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">launcherObj</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">with</span> <span class="n">Handler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;rotation&#39;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">logdir</span><span class="si">}</span><span class="s2">/browsermon_history.</span><span class="si">{</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;logmode&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;backup_count&#39;</span><span class="p">])</span> <span class="k">as</span> <span class="n">handler</span><span class="p">:</span>
+            <span class="n">relaunch_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">return_str</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Controller waiting (blocked) on exit_feedback_queue&quot;</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span> 
+                    <span class="n">return_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcherObj</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Controller timed out waiting on exit_feedback_queue&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">return_str</span> <span class="o">==</span> <span class="s2">&quot;edge exited&quot;</span> <span class="ow">and</span> <span class="n">relaunch_count</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">):</span>
+                        <span class="n">relaunch_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">launcherObj</span><span class="o">.</span><span class="n">processes</span><span class="p">[</span><span class="s1">&#39;edge&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">join</span><span class="p">()</span> <span class="c1">#join before relaunching to avoid zombie processes</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;exit_feedback_queue received enqueue from edge&quot;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;edge reader has exited&quot;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Relaunching edge reader&quot;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">launcherObj</span><span class="o">.</span><span class="n">launch_reader</span><span class="p">(</span><span class="s2">&quot;edge&quot;</span><span class="p">)</span> <span class="c1">#relaunch edge</span>
+                    <span class="k">elif</span> <span class="p">(</span><span class="n">return_str</span> <span class="o">==</span> <span class="s2">&quot;chrome exited&quot;</span> <span class="ow">and</span> <span class="n">relaunch_count</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">):</span>
+                        <span class="n">relaunch_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">launcherObj</span><span class="o">.</span><span class="n">processes</span><span class="p">[</span><span class="s1">&#39;chrome&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;exit_feedback_queue received enqueue from chrome&quot;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;chrome reader has exited&quot;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Relaunching chrome reader&quot;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">launcherObj</span><span class="o">.</span><span class="n">launch_reader</span><span class="p">(</span><span class="s2">&quot;chrome&quot;</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="p">(</span><span class="n">return_str</span> <span class="o">==</span> <span class="s2">&quot;firefox exited&quot;</span> <span class="ow">and</span> <span class="n">relaunch_count</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">):</span>
+                        <span class="n">relaunch_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">launcherObj</span><span class="o">.</span><span class="n">processes</span><span class="p">[</span><span class="s1">&#39;firefox&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;exit_feedback_queue received enqueue from firefox&quot;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;firefox reader has exited&quot;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Relaunching firefox reader&quot;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">launcherObj</span><span class="o">.</span><span class="n">launch_reader</span><span class="p">(</span><span class="s2">&quot;firefox&quot;</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">return_str</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Recieved no relaunch feedback in queue&quot;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Exiting controller; breaking infinite loop in run&quot;</span><span class="p">)</span>
+                        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="c1">#waiting for all child processes to exit before exiting controller</span>
+                        <span class="k">break</span>
+                <span class="k">except</span> <span class="n">queue</span><span class="o">.</span><span class="n">Empty</span><span class="p">:</span>
+                    <span class="c1">#checking if the processes are alive</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;exit_feedback_queue is empty&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Checking if child processes are still alive&quot;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">processes</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcherObj</span><span class="o">.</span><span class="n">processes</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcherObj</span><span class="o">.</span><span class="n">processes</span><span class="p">[</span><span class="n">processes</span><span class="p">]</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">launcherObj</span><span class="o">.</span><span class="n">processes</span><span class="p">[</span><span class="n">processes</span><span class="p">]</span><span class="o">.</span><span class="n">join</span><span class="p">()</span> <span class="c1">#join before relaunching the process </span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Process </span><span class="si">%s</span><span class="s2"> is not alive&quot;</span><span class="p">,</span> <span class="n">processes</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Relaunching process </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">processes</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">launcherObj</span><span class="o">.</span><span class="n">launch_reader</span><span class="p">(</span><span class="n">processes</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span> 
+                            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Process </span><span class="si">%s</span><span class="s2"> is alive, no need to relaunch&quot;</span><span class="p">,</span> <span class="n">processes</span><span class="p">)</span></div>
+</div>
+
+                            
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Eunomatix.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

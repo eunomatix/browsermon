@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.readers.edge_reader &mdash; Browsermon 1.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=292eb321"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Browsermon
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Browsermon</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.readers.edge_reader</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.readers.edge_reader</h1><div class="highlight"><pre>
+<span></span><span class="c1"># /****************************************************************************</span>
+<span class="c1">#  **</span>
+<span class="c1">#  ** Copyright (C) 2023 EUNOMATIX</span>
+<span class="c1">#  ** This program is free software: you can redistribute it and/or modify</span>
+<span class="c1">#  ** it under the terms of the GNU General Public License as published by</span>
+<span class="c1">#  ** the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1">#  ** any later version.</span>
+<span class="c1">#  **</span>
+<span class="c1">#  ** This program is distributed in the hope that it will be useful,</span>
+<span class="c1">#  ** but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1">#  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1">#  ** GNU General Public License for more details.</span>
+<span class="c1">#  **</span>
+<span class="c1">#  ** You should have received a copy of the GNU General Public License</span>
+<span class="c1">#  ** along with this program. If not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+<span class="c1">#  **</span>
+<span class="c1">#  ** Contact: info@eunomatix.com</span>
+<span class="c1">#  **</span>
+<span class="c1">#  **************************************************************************/</span>
+
+<span class="kn">import</span> <span class="nn">atexit</span>
+<span class="kn">import</span> <span class="nn">concurrent.futures</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">import</span> <span class="nn">signal</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">orjson</span> <span class="k">as</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">apscheduler.schedulers.background</span> <span class="kn">import</span> <span class="n">BackgroundScheduler</span>
+
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">system</span><span class="p">,</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">utils.caching</span> <span class="kn">import</span> <span class="n">write_cache_file</span><span class="p">,</span> <span class="n">read_cache_file</span>
+<span class="kn">from</span> <span class="nn">utils.common</span> <span class="kn">import</span> <span class="n">parse_schedule_window</span><span class="p">,</span> <span class="n">prepare_entry</span>
+<span class="kn">from</span> <span class="nn">utils.encryption</span> <span class="kn">import</span> <span class="n">gen_fernet_key</span>
+<span class="kn">from</span> <span class="nn">utils.metadata</span> <span class="kn">import</span> <span class="n">get_static_metadata</span>
+
+<span class="c1"># Global variable</span>
+<span class="n">cache</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+<div class="viewcode-block" id="get_profiles">
+<a class="viewcode-back" href="../../../src.readers.html#src.readers.edge_reader.get_profiles">[docs]</a>
+<span class="k">def</span> <span class="nf">get_profiles</span><span class="p">(</span><span class="n">user_profile_dir</span><span class="p">,</span> <span class="n">username</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get all the profiles of the user</span>
+<span class="sd">    :param user_profile_dir:</span>
+<span class="sd">    :param username:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Getting user profiles from user: </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">4004</span><span class="p">})</span>
+    <span class="n">local_state_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">user_profile_dir</span><span class="p">,</span> <span class="s2">&quot;Local State&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">local_state_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+    <span class="n">profile_info</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;profile&quot;</span><span class="p">)</span>
+    <span class="n">profiles</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">profile_info</span> <span class="ow">and</span> <span class="s2">&quot;info_cache&quot;</span> <span class="ow">in</span> <span class="n">profile_info</span><span class="p">:</span>
+        <span class="n">profiles</span> <span class="o">=</span> <span class="p">{</span><span class="n">profile_name</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;profile_id&quot;</span><span class="p">:</span> <span class="n">user_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gaia_id&quot;</span><span class="p">),</span>
+                                   <span class="s2">&quot;profile_title&quot;</span><span class="p">:</span> <span class="n">user_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
+                                   <span class="s2">&quot;profile_username&quot;</span><span class="p">:</span> <span class="n">user_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                                       <span class="s2">&quot;user_name&quot;</span><span class="p">),</span>
+                                   <span class="s2">&quot;profile_path&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                                       <span class="n">user_profile_dir</span><span class="p">,</span> <span class="n">profile_name</span><span class="p">),</span>
+                                   <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span> <span class="p">}</span> <span class="k">for</span>
+                    <span class="n">profile_name</span><span class="p">,</span> <span class="n">user_data</span> <span class="ow">in</span>
+                    <span class="n">profile_info</span><span class="p">[</span><span class="s2">&quot;info_cache&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="k">return</span> <span class="n">profiles</span></div>
+
+
+
+<div class="viewcode-block" id="get_all_profiles">
+<a class="viewcode-back" href="../../../src.readers.html#src.readers.edge_reader.get_all_profiles">[docs]</a>
+<span class="k">def</span> <span class="nf">get_all_profiles</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get all the profiles for all the users on the operating system.</span>
+<span class="sd">    :return: Dictionary of profiles</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sniffing users from </span><span class="si">{</span><span class="n">platform</span><span class="o">.</span><span class="n">node</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">4001</span><span class="p">})</span>
+    <span class="n">profiles</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">system</span> <span class="o">==</span> <span class="s2">&quot;Windows&quot;</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">winreg</span>
+
+        <span class="n">reg_key</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">reg_path</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;SOFTWARE\Microsoft\Windows &quot;</span> \
+                       <span class="sa">r</span><span class="s2">&quot;NT\CurrentVersion\ProfileList&quot;</span>
+            <span class="n">reg_key</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">OpenKey</span><span class="p">(</span><span class="n">winreg</span><span class="o">.</span><span class="n">HKEY_LOCAL_MACHINE</span><span class="p">,</span> <span class="n">reg_path</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">winreg</span><span class="o">.</span><span class="n">QueryInfoKey</span><span class="p">(</span><span class="n">reg_key</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">sid</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">EnumKey</span><span class="p">(</span><span class="n">reg_key</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">user_key</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">OpenKey</span><span class="p">(</span><span class="n">reg_key</span><span class="p">,</span> <span class="n">sid</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">profile_dir</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">QueryValueEx</span><span class="p">(</span><span class="n">user_key</span><span class="p">,</span>
+                                                         <span class="s2">&quot;ProfileImagePath&quot;</span><span class="p">)</span>
+                    <span class="n">username</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">profile_dir</span><span class="p">)</span>
+                    <span class="n">user_profile_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">profile_dir</span><span class="p">,</span> <span class="s2">&quot;AppData&quot;</span><span class="p">,</span>
+                                                    <span class="s2">&quot;Local&quot;</span><span class="p">,</span> <span class="s2">&quot;Microsoft&quot;</span><span class="p">,</span>
+                                                    <span class="s2">&quot;Edge&quot;</span><span class="p">,</span> <span class="s2">&quot;User Data&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">user_profile_dir</span><span class="p">):</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found Microsoft Edge profile directory &quot;</span>
+                                    <span class="sa">f</span><span class="s2">&quot;for user: </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                                    <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">4002</span><span class="p">})</span>
+                        <span class="n">user_profiles</span> <span class="o">=</span> <span class="n">get_profiles</span><span class="p">(</span><span class="n">user_profile_dir</span><span class="p">,</span>
+                                                     <span class="n">username</span><span class="p">)</span>
+                        <span class="n">profiles</span><span class="p">[</span><span class="n">username</span><span class="p">]</span> <span class="o">=</span> <span class="n">user_profiles</span>
+                <span class="k">finally</span><span class="p">:</span>
+                    <span class="n">winreg</span><span class="o">.</span><span class="n">CloseKey</span><span class="p">(</span><span class="n">user_key</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">9001</span><span class="p">})</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">reg_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">winreg</span><span class="o">.</span><span class="n">CloseKey</span><span class="p">(</span><span class="n">reg_key</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># Assume Linux</span>
+        <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="s1">&#39;/home&#39;</span><span class="p">):</span>
+            <span class="n">user_profile_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;/home&#39;</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="s1">&#39;.config&#39;</span><span class="p">,</span>
+                                            <span class="s1">&#39;microsoft-edge&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Check if the user has a Microsoft Edge profile directory</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">user_profile_dir</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Found Microsoft Edge profile directory for user: </span><span class="si">{</span><span class="n">user</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">4003</span><span class="p">})</span>
+                <span class="n">user_profiles</span> <span class="o">=</span> <span class="n">get_profiles</span><span class="p">(</span><span class="n">user_profile_dir</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+                <span class="n">profiles</span><span class="p">[</span><span class="n">user</span><span class="p">]</span> <span class="o">=</span> <span class="n">user_profiles</span>
+
+    <span class="k">return</span> <span class="n">profiles</span></div>
+
+
+
+<div class="viewcode-block" id="write_history_data">
+<a class="viewcode-back" href="../../../src.readers.html#src.readers.edge_reader.write_history_data">[docs]</a>
+<span class="k">def</span> <span class="nf">write_history_data</span><span class="p">(</span><span class="n">profiles</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">logmode</span><span class="p">,</span> <span class="n">logdir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write the browsing history data for a given profile.</span>
+<span class="sd">    :param logdir:</span>
+<span class="sd">    :param logmode:</span>
+<span class="sd">    :param profiles: Profiles information</span>
+<span class="sd">    :param username: Username</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">cache</span>
+
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">get_static_metadata</span><span class="p">(</span>
+        <span class="n">profiles</span><span class="p">[</span><span class="n">username</span><span class="p">][</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">profiles</span><span class="p">[</span><span class="n">username</span><span class="p">]))][</span><span class="s2">&quot;profile_path&quot;</span><span class="p">],</span>
+        <span class="n">username</span><span class="p">,</span> <span class="s2">&quot;edge&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Loop through the profiles for the given username</span>
+    <span class="k">for</span> <span class="n">profile_name</span><span class="p">,</span> <span class="n">profile_info</span> <span class="ow">in</span> <span class="n">profiles</span><span class="p">[</span><span class="n">username</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">history_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">profile_info</span><span class="p">[</span><span class="s2">&quot;profile_path&quot;</span><span class="p">],</span> <span class="s2">&quot;History&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Get the last modified time and last visit time for the profile</span>
+        <span class="n">profile_cache</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">profile_name</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">last_modified_time</span> <span class="o">=</span> <span class="n">profile_cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;last_modified_time&quot;</span><span class="p">)</span>
+        <span class="n">last_visit_time</span> <span class="o">=</span> <span class="n">profile_cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;last_visit_time&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check if the history file has been modified since the last run</span>
+        <span class="n">current_modified_time</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">history_file</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">last_modified_time</span> <span class="o">==</span> <span class="n">current_modified_time</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;History file for profile &#39;</span><span class="si">{</span><span class="n">profile_name</span><span class="si">}</span><span class="s2">&#39; has not been &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;modified, skipping SQL query.&quot;</span><span class="p">,</span>
+                <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">5001</span><span class="p">})</span>  <span class="c1"># noqa</span>
+            <span class="k">continue</span>
+
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file:</span><span class="si">{</span><span class="n">history_file</span><span class="si">}</span><span class="s2">?immutable=1&quot;</span><span class="p">,</span>
+                                     <span class="n">uri</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+
+        <span class="c1"># SQLite query to retrieve the data</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            SELECT</span>
+<span class="s2">                ca.window_id AS session_id,</span>
+<span class="s2">                u_referrer.url AS referrer,</span>
+<span class="s2">                u.url,</span>
+<span class="s2">                u.title,</span>
+<span class="s2">                v.visit_time,</span>
+<span class="s2">                u.visit_count</span>
+<span class="s2">            FROM</span>
+<span class="s2">                Context_annotations AS ca</span>
+<span class="s2">                INNER JOIN Visits AS v ON ca.visit_id = v.id</span>
+<span class="s2">                INNER JOIN URLs AS u ON u.id = v.url</span>
+<span class="s2">                LEFT JOIN Visits AS v_referrer ON v.from_visit = v_referrer.id</span>
+<span class="s2">                LEFT JOIN URLs AS u_referrer ON v_referrer.url = u_referrer.id</span>
+<span class="s2">            &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">last_visit_time</span><span class="p">:</span>
+            <span class="c1"># Filter for new records based on last processed visit time</span>
+            <span class="n">query</span> <span class="o">+=</span> <span class="s2">&quot; WHERE v.visit_time &gt; ?&quot;</span>
+            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="p">(</span><span class="n">last_visit_time</span><span class="p">,))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+
+        <span class="n">num_new_records</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="n">num_new_records</span><span class="si">}</span><span class="s2"> new records for profile &#39;</span><span class="si">{</span><span class="n">profile_name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;user: &#39;</span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;os_username&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">5002</span><span class="p">})</span>
+
+        <span class="c1"># Update the last modified time and last visit time in the cache</span>
+        <span class="n">profile_cache</span><span class="p">[</span><span class="s2">&quot;last_modified_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_modified_time</span>
+        <span class="n">profile_cache</span><span class="p">[</span><span class="s2">&quot;last_visit_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span>
+            <span class="mi">4</span><span class="p">]</span> <span class="k">if</span> <span class="n">rows</span> <span class="k">else</span> <span class="n">last_visit_time</span>
+        <span class="n">cache</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="p">{})[</span><span class="n">profile_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">profile_cache</span>
+
+        <span class="k">if</span> <span class="n">num_new_records</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">cursor</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">continue</span>
+
+        <span class="n">output_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">logdir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;browsermon_history.</span><span class="si">{</span><span class="n">logmode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s2">&quot;a+&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">logmode</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+                <span class="n">writer</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>  <span class="c1"># noqa</span>
+                    <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">OPT_INDENT_2</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;,</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">logmode</span> <span class="o">==</span> <span class="s2">&quot;csv&quot;</span><span class="p">:</span>
+                <span class="c1"># Prepare fieldnames dynamically from the keys of the first</span>
+                <span class="c1"># entry</span>
+                <span class="n">fieldnames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                    <span class="n">prepare_entry</span><span class="p">(</span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">profile_info</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="n">csv_writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictWriter</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="n">fieldnames</span><span class="p">)</span>
+                <span class="n">writer</span> <span class="o">=</span> <span class="n">csv_writer</span><span class="o">.</span><span class="n">writerow</span>
+
+                <span class="c1"># Check if the CSV file is empty and write header if needed</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">csv_writer</span><span class="o">.</span><span class="n">writeheader</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+                <span class="n">entry</span> <span class="o">=</span> <span class="n">prepare_entry</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">profile_info</span><span class="p">)</span>
+                <span class="n">writer</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+
+        <span class="n">cursor</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processed browsing history for profile &#39;</span><span class="si">{</span><span class="n">profile_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+                    <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">5003</span><span class="p">})</span></div>
+
+
+
+<div class="viewcode-block" id="process_edge_history">
+<a class="viewcode-back" href="../../../src.readers.html#src.readers.edge_reader.process_edge_history">[docs]</a>
+<span class="k">def</span> <span class="nf">process_edge_history</span><span class="p">(</span><span class="n">logmode</span><span class="p">,</span> <span class="n">logdir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Process the Edge browsing history and write it to the output file using a</span>
+<span class="sd">    dynamic thread pool.</span>
+<span class="sd">    :param logmode:</span>
+<span class="sd">    :param logdir:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">profiles</span> <span class="o">=</span> <span class="n">get_all_profiles</span><span class="p">()</span>
+
+    <span class="n">num_cpu_cores</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+
+    <span class="c1"># Create a ThreadPoolExecutor with a fixed thread pool size</span>
+    <span class="k">with</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span>
+            <span class="n">max_workers</span><span class="o">=</span><span class="n">num_cpu_cores</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+        <span class="c1"># Submit tasks for each username to the executor</span>
+        <span class="k">for</span> <span class="n">username</span> <span class="ow">in</span> <span class="n">profiles</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing browsing history for user: </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">5001</span><span class="p">})</span>
+                <span class="n">future</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">write_history_data</span><span class="p">,</span> <span class="n">profiles</span><span class="p">,</span>
+                                         <span class="n">username</span><span class="p">,</span> <span class="n">logmode</span><span class="p">,</span> <span class="n">logdir</span><span class="p">)</span>
+                <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>  <span class="c1"># Get the result of the task (this will</span>
+                <span class="c1"># raise an exception if the task raised one)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Error processing history for user: </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">5001</span><span class="p">})</span>  <span class="c1"># Log with a specific log ID</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Processed browsing history for all the profiles and users&quot;</span><span class="p">,</span>
+                <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">5004</span><span class="p">})</span></div>
+
+
+
+<div class="viewcode-block" id="cleanup_on_sigterm">
+<a class="viewcode-back" href="../../../src.readers.html#src.readers.edge_reader.cleanup_on_sigterm">[docs]</a>
+<span class="k">def</span> <span class="nf">cleanup_on_sigterm</span><span class="p">(</span><span class="n">signum</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="cleanup">
+<a class="viewcode-back" href="../../../src.readers.html#src.readers.edge_reader.cleanup">[docs]</a>
+<span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="n">cache_file</span><span class="p">,</span> <span class="n">encryption_key</span><span class="p">):</span>
+    <span class="c1"># Function to be called by atexit, ensuring cache is written to the file</span>
+    <span class="n">write_cache_file</span><span class="p">(</span><span class="n">cache_file</span><span class="p">,</span> <span class="n">encryption_key</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../../src.readers.html#src.readers.edge_reader.main">[docs]</a>
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">exit_feedback_queue</span><span class="p">,</span> <span class="n">shared_lock</span><span class="p">,</span> <span class="n">logdir</span><span class="p">,</span> <span class="n">logmode</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span>
+         <span class="n">schedule_window</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">cache</span>
+
+    <span class="k">if</span> <span class="n">system</span> <span class="o">==</span> <span class="s1">&#39;Linux&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">geteuid</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error, Shutting Down! Only root can run this script&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Shutting Down! Only root can run this script&quot;</span><span class="p">,</span>
+                <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">9001</span><span class="p">})</span>  <span class="c1"># noqa</span>
+            <span class="k">return</span>
+    <span class="k">elif</span> <span class="n">system</span> <span class="o">==</span> <span class="s1">&#39;Windows&#39;</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">ctypes</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">windll</span><span class="o">.</span><span class="n">shell32</span><span class="o">.</span><span class="n">IsUserAnAdmin</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error, Shutting Down! Only root can run this script&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Shutting Down! Only root can run this script&quot;</span><span class="p">,</span>
+                <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">9001</span><span class="p">})</span>  <span class="c1"># noqa</span>
+            <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">logdir</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found logdir </span><span class="si">{</span><span class="n">logdir</span><span class="si">}</span><span class="s2"> for writing history files&quot;</span><span class="p">,</span>
+                    <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">3001</span><span class="p">})</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">logdir</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Logdir </span><span class="si">{</span><span class="n">logdir</span><span class="si">}</span><span class="s2"> not found, creating new&quot;</span><span class="p">,</span>
+                       <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">3002</span><span class="p">})</span>
+
+    <span class="n">cache_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">logdir</span><span class="p">,</span> <span class="s2">&quot;browsermon_cache&quot;</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reader started successfully in </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2"> mode&quot;</span><span class="p">,</span>
+                <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">1001</span><span class="p">})</span>
+
+    <span class="c1"># encryption key</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="s1">&#39;EunoMatix_BrowserMon&#39;</span>
+    <span class="n">encryption_key</span> <span class="o">=</span> <span class="n">gen_fernet_key</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+
+    <span class="c1"># Register the write_cache_file function to be called when the</span>
+    <span class="c1"># program exits</span>
+    <span class="n">atexit</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">cleanup</span><span class="p">,</span> <span class="n">cache_file</span><span class="p">,</span> <span class="n">encryption_key</span><span class="p">)</span>
+
+    <span class="c1"># Set up the signal handler with the cleanup function</span>
+    <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">cleanup_on_sigterm</span><span class="p">)</span>
+
+    <span class="c1"># Read the cache file if it exists</span>
+    <span class="n">cache</span> <span class="o">=</span> <span class="n">read_cache_file</span><span class="p">(</span><span class="n">cache_file</span><span class="p">,</span> <span class="n">encryption_key</span><span class="p">)</span>
+
+    <span class="n">scheduler</span> <span class="o">=</span> <span class="n">BackgroundScheduler</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;scheduled&quot;</span><span class="p">:</span>
+        <span class="n">schedule_interval</span> <span class="o">=</span> <span class="n">parse_schedule_window</span><span class="p">(</span><span class="n">schedule_window</span><span class="p">)</span>
+        <span class="n">scheduler</span><span class="o">.</span><span class="n">add_job</span><span class="p">(</span><span class="n">process_edge_history</span><span class="p">,</span> <span class="s1">&#39;interval&#39;</span><span class="p">,</span>
+                          <span class="n">seconds</span><span class="o">=</span><span class="n">schedule_interval</span><span class="p">,</span>
+                          <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">logmode</span><span class="p">,</span> <span class="n">logdir</span><span class="p">))</span>  <span class="c1"># noqa</span>
+
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;real-time&quot;</span><span class="p">:</span>
+        <span class="n">scheduler</span><span class="o">.</span><span class="n">add_job</span><span class="p">(</span><span class="n">process_edge_history</span><span class="p">,</span> <span class="s1">&#39;interval&#39;</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                          <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">logmode</span><span class="p">,</span> <span class="n">logdir</span><span class="p">))</span>  <span class="c1"># Run every 10 seconds</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Run the main function directly when the program starts</span>
+        <span class="n">process_edge_history</span><span class="p">(</span><span class="n">logmode</span><span class="p">,</span> <span class="n">logdir</span><span class="p">)</span>
+        <span class="n">scheduler</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;accquiring lock ... &quot;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">8001</span><span class="p">})</span>
+        <span class="n">shared_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>  <span class="c1"># This will go into a blocking call if the</span>
+        <span class="c1"># lock is already accquired, which it will be by the controller</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;accquired lock&quot;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">8002</span><span class="p">})</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">KeyboardInterrupt</span><span class="p">,</span> <span class="ne">SystemExit</span><span class="p">):</span>
+        <span class="n">scheduler</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+        <span class="n">exit_feedback_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;edge exited&quot;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">8003</span><span class="p">})</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">9001</span><span class="p">})</span>
+        <span class="n">scheduler</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+        <span class="n">exit_feedback_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;edge exited&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Exiting Edge Reader; shutting down scheduler&quot;</span><span class="p">,</span>
+                <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">7001</span><span class="p">})</span>
+    <span class="n">scheduler</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+    <span class="n">scheduler</span><span class="o">.</span><span class="n">remove_all_jobs</span><span class="p">()</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Releasing lock&quot;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">7002</span><span class="p">})</span>
+    <span class="n">shared_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s2">&quot;Sending no error in exit feedback queue; so that controller doesn&#39;t &quot;</span>
+        <span class="s2">&quot;relaunch&quot;</span><span class="p">,</span>
+        <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">7003</span><span class="p">})</span>
+    <span class="n">exit_feedback_queue</span><span class="o">.</span><span class="n">put_nowait</span><span class="p">(</span><span class="s2">&quot;no error&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Sending sys.exit(0)&quot;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="mi">7004</span><span class="p">})</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+<span class="c1"># if __name__ == &#39;__main__&#39;: main(exit_feedback_queue=None,</span>
+<span class="c1"># shared_lock=None, logdir=&quot;/opt/browsermon/history&quot;, logmode=&quot;csv&quot;,</span>
+<span class="c1"># mode=&quot;real-time&quot;, schedule_window=&quot;1m&quot;)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Eunomatix.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
