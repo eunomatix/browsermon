@@ -34,6 +34,8 @@ jobs:
           cd docs
           Compress-Archive -Path _build -DestinationPath ..\_build.zip
           
-      - name: Move zip to the main directory and rename
-        run: |
-          mv _build.zip ../documentation.zip
+      - name: Upload documentation as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: documentation
+          path: ../documentation.zip
