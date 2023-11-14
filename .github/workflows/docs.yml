@@ -30,10 +30,8 @@ jobs:
           sphinx-build -b html . _build/html
 
       - name: Archive _build folder
-        run: |
-          cd docs
-          Compress-Archive -Path _build -DestinationPath ..\_build.zip
-          
+        run: Compress-Archive -Path docs/_build -DestinationPath docs/_build.zip
+        
       - name: Upload documentation as artifact
         uses: actions/upload-artifact@v2
         with:
