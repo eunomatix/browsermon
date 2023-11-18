@@ -4,7 +4,6 @@ on:
     push: 
         branches: 
             - develop
-            - ruff-fixes
     workflow_dispatch: 
 
 jobs:
