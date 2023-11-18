@@ -58,30 +58,8 @@ To build the project:
     ```
     Set-ExecutionPolicy RemoteSigned -Force ; .\win_install.ps1
     ```
-
-## Troubleshooting Guide
-If you encounter issues while using browsermon, this troubleshooting guide is here to help you identify and resolve common problems. Follow these steps to diagnose and address problems you may face:
-
-### Check System Requirements
-Ensure that your system meets the following requirements:
-
-- Supported operating system (Windows + Linux)
-- Administrative privileges
-- Supported web browser (refer to the documentation for compatibility)
-
-### Configuration Errors
-If you suspect configuration issues:
-
-- Review the configuration file (browsermon.conf) to check for errors or inconsistencies.
-- Ensure that the paths to browsermon and other required files are correctly specified in the configuration file.
-
-### Running Troubleshooting Script (Linux Only)
-You can find the troubleshooting script in the `src/utils` folder. The script is named `troubleshooting_script.sh`.
-
-To run the script, open your terminal and navigate to the `src/utils` directory and use the following command:
-```bash
-python troubleshooting_script.py
-```
+## Troubleshooting
+[Troubelshooting guide](docs/Troubeshoot.md)
 
 ## License
 
