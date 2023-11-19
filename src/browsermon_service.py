@@ -28,7 +28,7 @@ import controller
 class browserMonService(win32serviceutil.ServiceFramework):
     _svc_name_ = "browsermon"
     _svc_display_name_ = "browsermon"
-    _svc_description_ = "browser monitor service"
+    _svc_description_ = "browser monitor service v1.3.0"
 
     def __init__(self, args):
         win32serviceutil.ServiceFramework.__init__(self, args)

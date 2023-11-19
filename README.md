@@ -1,4 +1,9 @@
-# BrowserMon - Simple Python Application
+[![BrowserMon][repo_logo_img]][repo_url]
+
+![Static Badge](https://img.shields.io/badge/Version-1.2.1--alpha-brightgreen)
+![Static Badge](https://img.shields.io/badge/License-MIT-blue)
+
+# BrowserMon - Revolutionary Browser Monitoring Tool
 
 Welcome to BrowserMon, the revolutionary browser monitoring tool designed to provide unparalleled insights into browsing activities. With seamless compatibility with Chrome and Edge browsers, BrowserMon stands as a unique solution in the realm of browser monitoring. Whether operating in real-time mode or scheduled mode, this tool meticulously records browsing histories, capturing a comprehensive range of 17 distinct parameters.
 
@@ -53,6 +58,8 @@ To build the project:
     ```
     Set-ExecutionPolicy RemoteSigned -Force ; .\win_install.ps1
     ```
+## Troubleshooting
+[Troubelshooting guide](docs/Troubeshoot.md)
 
 ## License
 
@@ -77,3 +84,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+[repo_logo_img]: https://browsermon.ai/wp-content/uploads/2023/08/BrowserMon-Logo.png
+[repo_url]: https://github.com/eunomatix/browsermon

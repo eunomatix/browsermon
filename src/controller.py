@@ -33,6 +33,8 @@ from utils.launcher import Launcher
 from utils.launcher import set_multiprocessing_start_method
 from utils.handlers import Handler
 
+__VERSION__ = "1.3.0"
+
 class BrowsermonController:
     def __init__(self):
         self.SYSTEM = platform.system()
@@ -192,6 +194,7 @@ class BrowsermonController:
     def run(self):
         set_multiprocessing_start_method()
         pid = os.getpid()
+        self.logger.info(f"Browsermon Started, version: {__VERSION__}")
         self.logger.info(f"Main process id: {pid}")
 
         options = self.config_reader()

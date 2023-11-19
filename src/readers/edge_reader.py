@@ -30,11 +30,11 @@ import sys
 import orjson as json
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from src.utils import system, logger
-from src.utils.caching import write_cache_file, read_cache_file
-from src.utils.common import parse_schedule_window, prepare_entry
-from src.utils.encryption import gen_fernet_key
-from src.utils.metadata import get_static_metadata
+from utils import system, logger
+from utils.caching import write_cache_file, read_cache_file
+from utils.common import parse_schedule_window, prepare_entry
+from utils.encryption import gen_fernet_key
+from utils.metadata import get_static_metadata
 
 # Global variable
 cache = {}
@@ -47,7 +47,7 @@ def get_profiles(user_profile_dir, username):
     :param username:
     :return:
     """
-    logger.info(f"Sniffing user profiles from user: {username}",
+    logger.info(f"Getting user profiles from user: {username}",
                 extra={"log_id": 4004})
     local_state_file = os.path.join(user_profile_dir, "Local State")
     with open(local_state_file, "r") as file:
@@ -103,7 +103,7 @@ def get_all_profiles():
                                     extra={"log_id": 4002})
                         user_profiles = get_profiles(user_profile_dir,
                                                      username)
-                        profiles.update(user_profiles)
+                        profiles[username] = user_profiles
                 finally:
                     winreg.CloseKey(user_key)
         except Exception as e:
@@ -122,7 +122,7 @@ def get_all_profiles():
                     f"Found Microsoft Edge profile directory for user: {user}",
                     extra={"log_id": 4003})
                 user_profiles = get_profiles(user_profile_dir, user)
-                profiles.update(user_profiles)
+                profiles[user] = user_profiles
 
     return profiles
 
@@ -159,7 +159,7 @@ def write_history_data(profiles, username, logmode, logdir):
                 f"History file for profile '{profile_name}' has not been "
                 f"modified, skipping SQL query.",
                 extra={"log_id": 5001})  # noqa
-            return
+            continue
 
         connection = sqlite3.connect(f"file:{history_file}?immutable=1",
                                      uri=True)
@@ -205,7 +205,7 @@ def write_history_data(profiles, username, logmode, logdir):
         if num_new_records == 0:
             cursor.close()
             connection.close()
-            return
+            continue
 
         output_file = os.path.join(logdir, f"browsermon_history.{logmode}")
 
@@ -254,13 +254,15 @@ def process_edge_history(logmode, logdir):
         # Submit tasks for each username to the executor
         for username in profiles:
             try:
+                logger.info(f"Processing browsing history for user: {username}",
+                extra={"log_id": 5001})
                 future = executor.submit(write_history_data, profiles,
                                          username, logmode, logdir)
                 future.result()  # Get the result of the task (this will
                 # raise an exception if the task raised one)
             except Exception as e:
                 logger.error(
-                    f"Error processing history for username '{username}': {str(e)}",
+                    f"Error processing history for user: {username}: {str(e)}",
                     extra={"log_id": 5001})  # Log with a specific log ID
 
     logger.info("Processed browsing history for all the profiles and users",
