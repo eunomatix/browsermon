@@ -26,7 +26,6 @@ import platform
 import subprocess
 import configparser
 import multiprocessing
-import multiprocessing
 from logging.handlers import RotatingFileHandler
 
 from utils.launcher import Launcher
@@ -208,7 +207,7 @@ class BrowsermonController:
         self.launcherObj = Launcher(installed_browsers, self.logger, options)
         self.launcherObj.start()
 
-        with Handler(self.logger, options['rotation'], f"{logdir}/browsermon_history.{options['logmode']}", options['backup_count']) as handler:
+        with Handler(self.logger, options['rotation'], f"{logdir}/browsermon_history.{options['logmode']}", options['backup_count']):
             relaunch_count = 0
             while True:
                 return_str = None
@@ -237,7 +236,7 @@ class BrowsermonController:
                         self.logger.error("firefox reader has exited")
                         self.logger.info("Relaunching firefox reader")
                         self.launcherObj.launch_reader("firefox")
-                    elif return_str != None:
+                    elif return_str is not None:
                         self.logger.info("Recieved no relaunch feedback in queue")
                         self.logger.info("Exiting controller; breaking infinite loop in run")
                         time.sleep(2) #waiting for all child processes to exit before exiting controller
