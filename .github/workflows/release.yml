@@ -1,4 +1,4 @@
-name: Build Executeable 
+name: release 
 
 on: 
     push: 
@@ -160,4 +160,3 @@ jobs:
               browsermon_linux_x64
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}    
-            
