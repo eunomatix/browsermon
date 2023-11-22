@@ -14,7 +14,34 @@ Welcome to BrowserMon, the revolutionary browser monitoring tool designed to pro
 - **Data Privacy**: BrowserMon focuses solely on browser history and does not infringe upon broader internet activity or compromise user privacy beyond the scope of browsing data.
 
 - **Non-Intrusive Monitoring**: One of the standout benefits of BrowserMon is its non-intrusive monitoring capability. Regardless of the operating system you’re using, BrowserMon operates seamlessly behind the scenes without causing disruptions or interfering with other data on your system.
+# BrowserMon Application
+BrowserMon application caputres a rich set of 17 browsing parameters in **CSV** or **JSON** format. 
+| Parameter         | Description                                        |
+|-------------------|----------------------------------------------------|
+| `hostname`        | The name of the host computer.                     |
+| `os`              | Operating system used (e.g., Windows).             |
+| `os_username`     | Operating system username.                         |
+| `browser`         | Web browser used (e.g., edge).                     |
+| `browser_version` | Version of the web browser.                        |
+| `browser_db`      | Database type/version used by the browser.         |
+| `profile_id`      | Identifier for the browser profile (if applicable).|
+| `profile_title`   | Title of the browser profile.                      |
+| `profile_username`| Username associated with the browser profile.      |
+| `profile_path`    | File path to the browser profile data.             |
+| `username`        | Username of the profile.                           |
+| `session_id`      | Unique identifier for the session.                 |
+| `referrer`        | Referrer URL (if any).                             |
+| `url`             | URL of the webpage visited.                        |
+| `title`           | Title of the webpage visited.                      |
+| `visit_time`      | Time of the visit.                                 |
+| `visit_count`     | Number of times the URL was visited.               |
 
+![json-showcase](/images/browsingParams.png)
+
+browserMon Application supports Windows and Linux, for installing refer [Installation](#installation)
+<br>
+![windows-logo][windows-logo]
+![Linux-logo][linux-logo]
 ## Get Started
 
 ### Installation
@@ -63,27 +90,9 @@ To build the project:
 
 ## License
 
-MIT License
-
-Copyright (c) 2023 Eunomatix
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sub-license, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-**THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+[MIT License](/LICENSE)
 
 [repo_logo_img]: https://browsermon.ai/wp-content/uploads/2023/08/BrowserMon-Logo.png
 [repo_url]: https://github.com/eunomatix/browsermon
+[linux-logo]: https://browsermon.ai/wp-content/uploads/2023/08/Linux.png
+[windows-logo]: https://browsermon.ai/wp-content/uploads/2023/08/Windows-11.png
