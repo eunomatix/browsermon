@@ -40,7 +40,7 @@ BrowserMon application caputres a rich set of 17 browsing parameters in **CSV** 
 
 browserMon Application supports Windows and Linux, for installing refer [Installation](#installation)
 <br>
-![windows-logo](/images/windows-transparent.png)
+![windows-logo](/images/windows-logo.png)
 ![linux-logo](/images/linux-transparent.png)
 ## Get Started
 
