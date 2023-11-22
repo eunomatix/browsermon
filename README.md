@@ -1,6 +1,6 @@
 [![BrowserMon][repo_logo_img]][repo_url]
 
-![Static Badge](https://img.shields.io/badge/Version-1.2.1--alpha-brightgreen)
+![Static Badge](https://img.shields.io/badge/Version-1.3.0-brightgreen)
 ![Static Badge](https://img.shields.io/badge/License-MIT-blue)
 
 # BrowserMon - Revolutionary Browser Monitoring Tool
@@ -15,6 +15,7 @@ Welcome to BrowserMon, the revolutionary browser monitoring tool designed to pro
 
 - **Non-Intrusive Monitoring**: One of the standout benefits of BrowserMon is its non-intrusive monitoring capability. Regardless of the operating system you’re using, BrowserMon operates seamlessly behind the scenes without causing disruptions or interfering with other data on your system.
 # BrowserMon Application
+![browsemon](/images/browsermon-3.png)
 BrowserMon application caputres a rich set of 17 browsing parameters in **CSV** or **JSON** format. 
 | Parameter         | Description                                        |
 |-------------------|----------------------------------------------------|
@@ -36,12 +37,32 @@ BrowserMon application caputres a rich set of 17 browsing parameters in **CSV** 
 | `visit_time`      | Time of the visit.                                 |
 | `visit_count`     | Number of times the URL was visited.               |
 
-![json-showcase](/images/browsingParams.png)
+BrowserMon in action!
+```json
+{
+  "hostname": "ABDULLAHCHA49D1",
+  "os": "Windows",
+  "os_username": "appleconda",
+  "browser": "edge",
+  "browser_version": "119.0.2151.72",
+  "browser_db": "SQLite 3.35.5",
+  "profile_id": "",
+  "profile_title": "Profile 1",
+  "profile_username": "",
+  "profile_path": "C:\\Users\\appleconda\\AppData\\Local\\Microsoft\\Edge\\User Data\\Default",
+  "username": "appleconda",
+  "session_id": 1207029689,
+  "referrer": null,
+  "url": "https://www.example.org/",
+  "title": "Example Domain",
+  "visit_time": "2023-11-21 15:23:05",
+  "visit_count": 2
+},
 
-browserMon Application supports Windows and Linux, for installing refer [Installation](#installation)
-<br>
-![windows-logo](/images/windows-logo.png)
-![linux-logo](/images/linux-transparent.png)
+```
+
+BrowserMon  supports **Windows** and **Linux**, for detailed installation instructions, please refer [Installation](#installation)
+
 ## Get Started
 
 ### Installation
