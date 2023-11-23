@@ -1,4 +1,4 @@
-[![BrowserMon][repo_logo_img]][repo_url]
+<!-- [![BrowserMon][repo_logo_img]][repo_url] -->
 
 ![Static Badge](https://img.shields.io/badge/Version-1.3.0-brightgreen)
 ![Static Badge](https://img.shields.io/badge/License-MIT-blue)
