@@ -37,29 +37,13 @@ BrowserMon application caputres a rich set of 17 browsing parameters in **CSV** 
 | `visit_time`      | Time of the visit.                                 |
 | `visit_count`     | Number of times the URL was visited.               |
 
-BrowserMon in action!
-```json
-{
-  "hostname": "HOST-A49D1",
-  "os": "Windows",
-  "os_username": "jane_doe",
-  "browser": "edge",
-  "browser_version": "119.0.2151.72",
-  "browser_db": "SQLite 3.35.5",
-  "profile_id": "",
-  "profile_title": "Profile 1",
-  "profile_username": "",
-  "profile_path": "C:\\Users\\jane_doe\\AppData\\Local\\Microsoft\\Edge\\User Data\\Default",
-  "username": "jane_doe",
-  "session_id": 1207029689,
-  "referrer": null,
-  "url": "https://www.example.org/",
-  "title": "Example Domain",
-  "visit_time": "2023-11-21 15:23:05",
-  "visit_count": 2
-},
+### BrowserMon in action!
 
-```
+Below is an example of a session record in CSV format:
+
+| hostname        | os      | os_username | browser | browser_version | browser_db   | profile_id | profile_title | profile_username | profile_path                                            | username    | session_id | referrer | url                                                                                                                                                                                                 | title            | visit_time         | visit_count |
+|-----------------|---------|-------------|---------|-----------------|--------------|------------|---------------|------------------|---------------------------------------------------------|-------------|------------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|--------------------|-------------|
+| HOSTA49D1 | Windows | janedoe | edge    | 119.0.2151.72   | SQLite 3.35.5 |            | Profile 1     |                  | C:\Users\JaneDoe\AppData\Local\Microsoft\Edge\User Data\Default | janedoe | 1207030021 |          | https://www.example.com | Example Domain | 2023-11-24 04:27:16 | 1           |
 
 BrowserMon  supports **Windows** and **Linux**, for detailed installation instructions, please refer [Installation](#installation)
 
