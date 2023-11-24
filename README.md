@@ -50,7 +50,7 @@ BrowserMon in action!
   "profile_title": "Profile 1",
   "profile_username": "",
   "profile_path": "C:\\Users\\appleconda\\AppData\\Local\\Microsoft\\Edge\\User Data\\Default",
-  "username": "appleconda",
+  "username": "jane_doe",
   "session_id": 1207029689,
   "referrer": null,
   "url": "https://www.example.org/",
