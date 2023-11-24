@@ -40,7 +40,7 @@ BrowserMon application caputres a rich set of 17 browsing parameters in **CSV** 
 BrowserMon in action!
 ```json
 {
-  "hostname": "ABDULLAHCHA49D1",
+  "hostname": "HOST-A49D1",
   "os": "Windows",
   "os_username": "appleconda",
   "browser": "edge",
