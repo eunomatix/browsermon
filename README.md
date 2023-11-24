@@ -42,7 +42,7 @@ BrowserMon in action!
 {
   "hostname": "HOST-A49D1",
   "os": "Windows",
-  "os_username": "appleconda",
+  "os_username": "jane_doe",
   "browser": "edge",
   "browser_version": "119.0.2151.72",
   "browser_db": "SQLite 3.35.5",
