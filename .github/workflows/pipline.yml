@@ -22,7 +22,7 @@ jobs:
               echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
               echo "BRANCH_NAME=release-${TAG_NAME}" >> $GITHUB_ENV
               sed -i "s/__VERSION__ = .*/__VERSION__ = '${TAG_NAME}'/" src/version.py
-              sed -i "s/Description=Browsermon Service .*/Description=Browsermon Enterprise ${TAG_NAME} by Eunomatix/" service/browsermon.service
+              sed -i "s/Description=Browsermon Service .*/Description=Browsermon Community ${TAG_NAME} by Eunomatix/" service/browsermon.service
           - name: Commit Version Change
             uses: stefanzweifel/git-auto-commit-action@v5
             with:
