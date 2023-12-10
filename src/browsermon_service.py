@@ -24,7 +24,7 @@ import servicemanager
 import socket 
 
 import controller
-from verion import __VERSION__
+from version import __VERSION__
 
 class browserMonService(win32serviceutil.ServiceFramework):
     _svc_name_ = "browsermon"

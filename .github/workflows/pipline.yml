@@ -4,40 +4,47 @@ on:
     push:
         tags:
             - 'v*.*.*'
+env:
+  TAG_NAME: ${{ github.ref_name }}
+  BRANCH_NAME: "release-${{ github.ref_name }}"
 
 jobs:
-    update-version:
+    update_version:
         runs-on: ubuntu-latest
         permissions:
             contents: write
         
         steps:
           - name: Checkout
-            uses: actions/checkout@v2
+            uses: actions/checkout@v4
           
-          - name: Update version
+          - name: check env variables 
             run: |
-              TAG_NAME=${GITHUB_REF#refs/tags/}
-              echo "Tag: $TAG_NAME"
-              echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
-              echo "BRANCH_NAME=release-${TAG_NAME}" >> $GITHUB_ENV
+              echo "${{ env.TAG_NAME }}"
+              echo "${{ env.BRANCH_NAME }}"
+
+          - id: change_version
+            run: |
               sed -i "s/__VERSION__ = .*/__VERSION__ = '${TAG_NAME}'/" src/version.py
-              sed -i "s/Description=Browsermon Service .*/Description=Browsermon Community ${TAG_NAME} by Eunomatix/" service/browsermon.service
+              sed -i "s/Description=.*/Description=Browsermon Community ${TAG_NAME} by Eunomatix/" service/browsermon.service
+
           - name: Commit Version Change
             uses: stefanzweifel/git-auto-commit-action@v5
             with:
               commit_message: "Version ${{ env.TAG_NAME }}"
               branch: ${{ env.BRANCH_NAME }}
               create_branch: true
-    
+
     build_win_x64:
         runs-on: windows-latest
-        needs: [update-version]
+        needs: [update_version]
         
         steps:
           - name: Checkout
-            uses: actions/checkout@v2
-          
+            uses: actions/checkout@v4
+            with:
+              ref: ${{ env.BRANCH_NAME }}
+
           - name: Setup Python
             uses: actions/setup-python@v2
             with:
@@ -77,11 +84,13 @@ jobs:
 
     build_win_x86:
       runs-on: windows-latest
-      needs: [update-version]
+      needs: [update_version]
       
       steps:
         - name: Checkout
-          uses: actions/checkout@v2
+          uses: actions/checkout@v4
+          with: 
+            ref: ${{ env.BRANCH_NAME }}
         
         - name: Setup Python
           uses: actions/setup-python@v2
@@ -122,43 +131,46 @@ jobs:
       
     build_linux_x64:
       runs-on: ubuntu-latest
-      needs: [update-version]
+      needs: [update_version]
+
       steps:
-          - name: Checkout
-            uses: actions/checkout@v2
+        - name: Checkout
+          uses: actions/checkout@v4
+          with: 
+            ref: ${{ env.BRANCH_NAME }}
 
-          - name: Setup Python
-            uses: actions/setup-python@v2
-            with:
-                python-version: 3.9
-                architecture: x64
+        - name: Setup Python
+          uses: actions/setup-python@v2
+          with:
+              python-version: 3.9
+              architecture: x64
 
-          - name: Install Dependencies 
-            run: pip install -r requirements.txt
-          
-          - name: Create Executeable
-            run: pyinstaller -F src/browsermon.py
-          
-          - name: Prepare files for upload
-            run: |
-              mkdir artifact
-              cp dist/browsermon artifact/ 
-              cp -r service/ artifact/
-              cp README.md artifact/
-              cp browsermon.conf artifact/
-              cp linux_install.sh artifact/
-              cp linux_uninstall.sh artifact/
-          
-          - name: Create Troubleshooter exe 
-            run: pyinstaller -F troubleshoot/browsermon_ts.py
+        - name: Install Dependencies 
+          run: pip install -r requirements.txt
         
-          - name: Copy troubeshooter executeable
-            run: cp dist/browsermon_ts artifact/
-          - name: Upload Artifact
-            uses: actions/upload-artifact@v2
-            with:
-              name: browsermon-linux-x64
-              path: artifact/
+        - name: Create Executeable
+          run: pyinstaller -F src/browsermon.py
+        
+        - name: Prepare files for upload
+          run: |
+            mkdir artifact
+            cp dist/browsermon artifact/ 
+            cp -r service/ artifact/
+            cp README.md artifact/
+            cp browsermon.conf artifact/
+            cp linux_install.sh artifact/
+            cp linux_uninstall.sh artifact/
+        
+        - name: Create Troubleshooter exe 
+          run: pyinstaller -F troubleshoot/browsermon_ts.py
+      
+        - name: Copy troubeshooter executeable
+          run: cp dist/browsermon_ts artifact/
+        - name: Upload Artifact
+          uses: actions/upload-artifact@v2
+          with:
+            name: browsermon-linux-x64
+            path: artifact/
     create_release:
       runs-on: ubuntu-latest
       needs: [build_win_x64, build_win_x86, build_linux_x64]
