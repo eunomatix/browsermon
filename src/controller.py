@@ -33,7 +33,7 @@ from utils.launcher import Launcher
 from utils.launcher import set_multiprocessing_start_method
 from utils.handlers import Handler
 
-__VERSION__ = "1.3.0"
+from version import __VERSION__
 
 class BrowsermonController:
     def __init__(self):
@@ -208,7 +208,7 @@ class BrowsermonController:
         self.launcherObj = Launcher(installed_browsers, self.logger, options)
         self.launcherObj.start()
 
-        with Handler(self.logger, options['rotation'], f"{logdir}/browsermon_history.{options['logmode']}", options['backup_count']) as handler:
+        with Handler(self.logger, options['rotation'], f"{logdir}/browsermon_history.{options['logmode']}", options['backup_count']):
             relaunch_count = 0
             while True:
                 return_str = None
@@ -237,7 +237,7 @@ class BrowsermonController:
                         self.logger.error("firefox reader has exited")
                         self.logger.info("Relaunching firefox reader")
                         self.launcherObj.launch_reader("firefox")
-                    elif return_str != None:
+                    elif return_str is not None:
                         self.logger.info("Recieved no relaunch feedback in queue")
                         self.logger.info("Exiting controller; breaking infinite loop in run")
                         time.sleep(2) #waiting for all child processes to exit before exiting controller

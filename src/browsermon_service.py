@@ -24,11 +24,12 @@ import servicemanager
 import socket 
 
 import controller
+from version import __VERSION__
 
 class browserMonService(win32serviceutil.ServiceFramework):
     _svc_name_ = "browsermon"
     _svc_display_name_ = "browsermon"
-    _svc_description_ = "browser monitor service v1.3.0"
+    _svc_description_ = f"BrowserMon Community {__VERSION__} by Eunomatix"
 
     def __init__(self, args):
         win32serviceutil.ServiceFramework.__init__(self, args)
