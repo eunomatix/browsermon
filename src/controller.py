@@ -26,7 +26,6 @@ import platform
 import subprocess
 import configparser
 import multiprocessing
-import multiprocessing
 from logging.handlers import RotatingFileHandler
 
 from utils.launcher import Launcher
