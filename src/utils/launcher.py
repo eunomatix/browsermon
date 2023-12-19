@@ -26,7 +26,7 @@ from readers.firefox_reader import main as firefox_reader_main
 def set_multiprocessing_start_method():
     try:
         mp.set_start_method('spawn')
-    except RuntimeError as e:
+    except RuntimeError:
         pass
 
 class Launcher:

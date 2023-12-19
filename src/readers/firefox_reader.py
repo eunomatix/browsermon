@@ -89,7 +89,7 @@ def get_profile_folders(logdir):
                     username = os.path.basename(profile_dir)
 
                     # Filter out system-level profiles
-                    if not username.lower() in ['systemprofile', 'localservice', 'networkservice']:
+                    if username.lower() not in ['systemprofile', 'localservice', 'networkservice']:
                         profile_folders.append({
                             'Profile Name': username,
                             'Folder Path': profile_dir
@@ -133,7 +133,7 @@ class FixedData:
                 reg_path = r"SOFTWARE\Mozilla\Mozilla Firefox"
                 reg_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, reg_path)
                 version, _ = winreg.QueryValueEx(reg_key, "CurrentVersion")
-            except Exception as e:
+            except Exception:
                 # Handle the exception or log an error if needed
                 version = None
         elif system == "Linux":
@@ -154,7 +154,7 @@ class FixedData:
                     else:
                         # If no match is found, set version to None or a default value
                         version = None
-            except Exception as e:
+            except Exception:
                 # Handle the exception or log an error if needed
                 version = None
 
@@ -216,12 +216,10 @@ def get_firefox_profile_folders(logdir):
     logdirec = logdir
     profile_data = get_profile_folders(logdirec)
     profile_objects = {}  # Initialize the profile_objects dictionary here
-    Default_folder_path = []  # List to store additional folder paths
 
     for profile in profile_data:
         profile_name = profile['Profile Name']
         get_os_username = profile_name
-        Default_folder_path = ''
         logger.info(f"Extracting user profiles from {get_os_username}", extra={'log_code': 'BM4001'})
 
         system = platform.system()
@@ -254,7 +252,7 @@ def get_firefox_profile_folders(logdir):
             with open(json_file_for_profiles) as existing_file:
                 existing_data = json.load(existing_file)
         else:
-            logger.error(f"File Not found to Write profile links, exiting", extra={'log_code': 'BM9001'})
+            logger.error("File Not found to Write profile links, exiting", extra={'log_code': 'BM9001'})
 
         existing_links = {profile['Profile Link'] for profile in existing_data}
         new_profile_objects = [profile for profile in profile_objects.values() if profile['Profile Link'] not in existing_links]
@@ -290,7 +288,7 @@ def parse_schedule_window(window):
         else:
             raise InvalidScheduleWindowFormat
     except InvalidScheduleWindowFormat:
-        logger.warn(f"Invalid schedule window format. Please use the valid format (e.g., 1m, 1h, 1d)", extra={'log_code': 'BM9001'})
+        logger.warn("Invalid schedule window format. Please use the valid format (e.g., 1m, 1h, 1d)", extra={'log_code': 'BM9001'})
         sys.exit(1)
 
 
@@ -328,7 +326,7 @@ def monitor_history_db(db_path, logdir):
             else:
                 last_saved_value_number = None
         else:
-            logger.error(f"File not found to read Profile Links", extra={'log_code': 'BM9001'})
+            logger.error("File not found to read Profile Links", extra={'log_code': 'BM9001'})
 
         
         if last_saved_value_number is not None:
@@ -369,12 +367,11 @@ def monitor_history_db(db_path, logdir):
 
 def write_history_data_to_json(history_data, write_file, db_path, logdirec, write_format):
     print( "db_path used", db_path)
-    process_id= 'null';
+    process_id= 'null'
     global entries_count
     entries_count = 0 
     logger.info(f"Writing logs to browsermon_history.log in {write_format}", extra={'log_code': 'BM5001'})
-    logdir = logdirec
-    profile_path= db_path; 
+    profile_path= db_path 
     Profile_data = get_profile_info(db_path)  
 
     Os_username= db_path.split(os.path.sep)[2]
@@ -440,10 +437,10 @@ def write_history_data_to_json(history_data, write_file, db_path, logdirec, writ
                     writer.writerow(entry_data)
 
           else:
-            logger.info(f"No Data found for Writing:", extra={'log_code': 'BM5001'})
+            logger.info("No Data found for Writing:", extra={'log_code': 'BM5001'})
        
-        except Exception as e:
-          logger.warn(f"ERROR Exception Found while writing browsermon_history.log :" , extra={'log_code': 'BM9001'})  
+        except Exception:
+          logger.warn("ERROR Exception Found while writing browsermon_history.log :" , extra={'log_code': 'BM9001'})  
                 
     logger.info(f"Total {entries_count} for Profile {db_path}: are Processed ", extra={'log_code': 'BM5002'})
 
@@ -481,10 +478,10 @@ def server(db_path, write_file, logdir, write_format):
                 with open(json_file_profiles, 'w') as file:
                     json.dump(profiles, file, indent=4)
             else:
-                logger.error(f"Invalid Path:" , extra={'log_code': 'BM9001'})  
+                logger.error("Invalid Path:" , extra={'log_code': 'BM9001'})  
 
         else:
-            logger.error(f"Can't find Firefox Profile Data file:" , extra={'log_code': 'BM9001'})  
+            logger.error("Can't find Firefox Profile Data file:" , extra={'log_code': 'BM9001'})  
     else:
         logger.info(f"No New data Found while monitoring Profile {db_path}:" , extra={'log_code': 'BM5003'})  
 
@@ -494,8 +491,8 @@ def process_Firefox_history(logdir, write_format):
     global entries_count
     entries_count = 0 
     system = platform.system()
-    profile_folders = get_profile_folders(logdir)
-    Firefox_users_profiles = get_firefox_profile_folders(logdir)
+    get_profile_folders(logdir)
+    get_firefox_profile_folders(logdir)
     json_file_path = os.path.join(logdir, 'Firefox_profiles_data.json')
 
     try:
@@ -571,7 +568,7 @@ def main(exit_feedback_queue, shared_lock, logdir, write_format, mode, schedule_
     scheduler = BackgroundScheduler()
     
     logger.info(f"Reader Started successfully in {mode} mode", extra={'log_code': 'BM1001'})
-    logger.info(f"Validated parameters Successfully",extra={'log_code': 'BM2001'})
+    logger.info("Validated parameters Successfully",extra={'log_code': 'BM2001'})
 
     if mode == "scheduled":
         schedule_interval = parse_schedule_window(schedule_window)
@@ -579,7 +576,7 @@ def main(exit_feedback_queue, shared_lock, logdir, write_format, mode, schedule_
     elif mode == "real-time":
         scheduler.add_job(process_Firefox_history, 'interval', args=[logdir, write_format],seconds=10)    
     else:
-        logger.error(f"Issue found while processing input parameters, exiting",extra={'log_code': 'BM2002'})
+        logger.error("Issue found while processing input parameters, exiting",extra={'log_code': 'BM2002'})
     
 
     try:
@@ -593,7 +590,7 @@ def main(exit_feedback_queue, shared_lock, logdir, write_format, mode, schedule_
         exit_feedback_queue.put("Firefox exited")
         scheduler.shutdown()
         sys.exit(1)
-    except Exception as e:
+    except Exception:
         logger.warn("Came here Exception e")
         exit_feedback_queue.put("Firefox exited")
         sys.exit(1)

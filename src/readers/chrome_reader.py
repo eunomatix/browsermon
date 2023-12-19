@@ -29,9 +29,6 @@ import signal
 import datetime
 import sys
 import subprocess
-import queue
-import threading
-import time
 import platform
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -88,7 +85,7 @@ def get_chrome_version():
             reg_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_READ | winreg.KEY_WOW64_32KEY)
             version, _ = winreg.QueryValueEx(reg_key, "version")
         except Exception as e:
-            logger.error(f"ERROR Exception Found While Finding Chrome Version ", e ,extra= {'log_code': 'BM9001'})
+            logger.error("ERROR Exception Found While Finding Chrome Version ", e ,extra= {'log_code': 'BM9001'})
 
     elif system == "Linux":
         try:
@@ -96,7 +93,7 @@ def get_chrome_version():
             output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
             version = output.decode().strip().split()[-1]
         except Exception as e:
-            logger.error(f"ERROR Exception Found while finding Chrome version ", e ,extra={'log_code': 'BM9001'} )
+            logger.error("ERROR Exception Found while finding Chrome version ", e ,extra={'log_code': 'BM9001'} )
 
     return version
 
@@ -157,7 +154,7 @@ def get_profile_folders():
                     username = os.path.basename(profile_dir)
 
                     # Filter out system-level profiles
-                    if not username.lower() in ['systemprofile', 'localservice', 'networkservice']:
+                    if username.lower() not in ['systemprofile', 'localservice', 'networkservice']:
                         profile_folders.append({
                             'Profile Name': username,
                             'Folder Path': profile_dir
@@ -182,8 +179,7 @@ def get_profile_folders():
     return profile_folders
 
 def get_Chrome_profile_folders(logdir):
-    logdirec=logdir
-    profile_data = get_profile_folders();
+    profile_data = get_profile_folders()
     profile_objects = {}
     Default_folder_path = []  # List to store additional folder paths
 
@@ -262,7 +258,7 @@ def parse_schedule_window(window):
         else:
             raise InvalidScheduleWindowFormat
     except InvalidScheduleWindowFormat:
-        logger.error(f"Invalid schedule window format. Please use the valid format (e.g., 1m, 1h, 1d)")
+        logger.error("Invalid schedule window format. Please use the valid format (e.g., 1m, 1h, 1d)")
         sys.exit(1)
 
 
@@ -324,7 +320,7 @@ def monitor_history_db(db_path, logdir):
 
     except PermissionError as pe:
         logger.warning(f"CHROME-READER: WARN Permission error while reading the {db_path}: {pe}", extra={'log_code': 'BM4003'})
-        logger.error(f"ERROR Exception Found while processing {db_path}: {e}", extra={'log_code': 'BM9001'})
+        logger.error(f"ERROR Exception Found while processing {db_path}: {pe}", extra={'log_code': 'BM9001'})
         return None
 
 
@@ -332,14 +328,13 @@ def write_history_data_to_json(history_data, write_file, db_path, logdirec, writ
     global entries_count
     entries_count = 0 
     logger.info(f"Writing logs to browsermon_history.log in {write_format}", extra={'log_code': 'BM5001'})
-    logdir = logdirec
-    profile_path= db_path;
+    profile_path= db_path
     Profile_data = get_profile_info(db_path)
     system = platform.system()
     if system == "Windows":
         Os_username = os.path.dirname(os.path.dirname(os.path.dirname(db_path))).split(os.path.sep)[-5]
     elif system == "Linux":
-        Os_username= directory_name = os.path.basename(os.path.dirname(db_path))
+        Os_username = os.path.basename(os.path.dirname(db_path))
 
     fix_data = fixed_data()
     fix_data["os_username"] = Os_username
@@ -399,8 +394,8 @@ def write_history_data_to_json(history_data, write_file, db_path, logdirec, writ
                             writer.writeheader()
                         writer.writerow(entry_data)
 
-        except Exception as e:
-          logger.info(f"ERROR Exception Found while writing browsermon_history.log :" , extra={'log_code': 'BM9001'})  
+        except Exception:
+          logger.info("ERROR Exception Found while writing browsermon_history.log :" , extra={'log_code': 'BM9001'})  
                 
     logger.info(f"Total {entries_count} for Profile {db_path}: are Processed ", extra={'log_code': 'BM5002'})
     entries_count = 0  # Reset the count for the next function call
@@ -443,8 +438,8 @@ def process_chrome_history(logdir, write_format):
     entries_count = 0
 
     system = platform.system()
-    profile_folders = get_profile_folders()
-    chrome_users_profiles = get_Chrome_profile_folders(logdir)
+    get_profile_folders()
+    get_Chrome_profile_folders(logdir)
     json_file_path = os.path.join(logdir, 'Chrome_profiles_data.json')
 
     try:
@@ -485,10 +480,10 @@ def main(exit_feedback_queue, shared_lock, logdir, write_format, mode, schedule_
         
     # Add the rest of the code for Windows operations if needed.
     elif platform.system() == "Linux":
-        logger.info(f"Running on Linux.")
+        logger.info("Running on Linux.")
         # Check if running with root privilege on Linux
         if has_root_privilege():
-            logger.info(f"Running with root privilege.")
+            logger.info("Running with root privilege.")
         # Add the rest of the code for root privileged operations on Linux if needed.
         else:
             logger.info("Not running with root privilege.")
@@ -519,17 +514,17 @@ def main(exit_feedback_queue, shared_lock, logdir, write_format, mode, schedule_
 
     if mode == "scheduled":
         logger.info(f"Reader Started successfully in {mode} mode", extra={'log_code': 'BM1001'})
-        logger.info(f"Validated parameters Successfully",extra={'log_code': 'BM2001'})
+        logger.info("Validated parameters Successfully",extra={'log_code': 'BM2001'})
 
         schedule_interval = parse_schedule_window(schedule_window)
         scheduler.add_job(process_chrome_history, 'interval', args=[logdir, write_format],seconds=schedule_interval)
     elif mode == "real-time":
         logger.info(f"Reader Started successfully in {mode} mode", extra={'log_code': 'BM1001'})
-        logger.info(f"Validated parameters Successfully",extra={'log_code': 'BM2001'})
+        logger.info("Validated parameters Successfully",extra={'log_code': 'BM2001'})
         process_chrome_history(logdir, write_format)  # Call it once before starting the scheduler
         scheduler.add_job(process_chrome_history, 'interval', args=[logdir, write_format],seconds=5)    
     else:
-        logger.error(f"Issue found while processing input parameters, exiting",extra={'log_code': 'BM2002'})
+        logger.error("Issue found while processing input parameters, exiting",extra={'log_code': 'BM2002'})
     
 
     try:

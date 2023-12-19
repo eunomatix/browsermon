@@ -76,8 +76,7 @@ class Handler:
         for job in scheduler.get_jobs():
             # Retrieve trigger information
             if isinstance(job.trigger, CronTrigger):
-                cron_expression = job.trigger.fields
-                logger.info(f"Job Trigger Type: CronTrigger")
+                logger.info("Job Trigger Type: CronTrigger")
                 #logger.info(f"Cron Expression: {cron_expression}")
                 next_run_time = job.next_run_time  # Use job's next_run_time attribute
                 logger.info(f"Next Run Time: {next_run_time}")
