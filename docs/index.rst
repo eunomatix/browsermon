@@ -19,7 +19,7 @@ monitoring
    releasenotes
    readme
    readmetroubleshoot
-   modules
+   .. modules
 
 
 Indices and tables
