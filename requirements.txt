@@ -2,3 +2,5 @@ orjson
 APScheduler
 cryptography
 pyinstaller
+sphinx
+sphinx_rtd_theme
