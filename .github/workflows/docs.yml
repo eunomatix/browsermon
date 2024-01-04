@@ -1,39 +1,39 @@
-name: Sphinx Documentation Build
+# name: Sphinx Documentation Build
 
-on:
-  push:
-    branches:
-      - documentation
+# on:
+#   push:
+#     branches:
+#       - documentation
 
-jobs:
-  build:
-    runs-on: windows-latest
+# jobs:
+#   build:
+#     runs-on: windows-latest
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v2
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
-          architecture: x64
+#       - name: Setup Python
+#         uses: actions/setup-python@v2
+#         with:
+#           python-version: 3.8
+#           architecture: x64
 
-      - name: Install Dependencies 
-        run: |
-          pip install -r requirements.txt
-          pip install sphinx sphinx-rtd-theme pywin32  # Adding sphinx and sphinx-rtd-theme
+#       - name: Install Dependencies 
+#         run: |
+#           pip install -r requirements.txt
+#           pip install sphinx sphinx-rtd-theme pywin32  # Adding sphinx and sphinx-rtd-theme
 
-      - name: Build HTML
-        run: |
-          cd docs
-          sphinx-build -b html . _build/html
+#       - name: Build HTML
+#         run: |
+#           cd docs
+#           sphinx-build -b html . _build/html
 
-      - name: Archive _build folder
-        run: Compress-Archive -Path docs/_build -DestinationPath docs/_build.zip
+#       - name: Archive _build folder
+#         run: Compress-Archive -Path docs/_build -DestinationPath docs/_build.zip
         
-      - name: Upload documentation as artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: documentation
-          path: docs\_build.zip
+#       - name: Upload documentation as artifact
+#         uses: actions/upload-artifact@v2
+#         with:
+#           name: documentation
+#           path: docs\_build.zip

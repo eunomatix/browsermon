@@ -63,17 +63,17 @@ sure there are no errors in the ``browsermon.conf`` file. If it contains
 any errors or typos, BrowserMon service will use default configurations,
 which are:
 
-.. code:: json
+.. code-block:: json
 
-   {
-       'browser': 'all',
-       'mode': 'scheduled',
-       'schedule_window': '1m',
-       'logdir': 'C:\\browsermon\\history' (Windows) or /opt/browsermon/history (Linux),
-       'logmode': 'csv',
-       'rotation': '1m',
-       'backup_count': '5'
-   }
+    {
+        "browser": "all",
+        "mode": "scheduled",
+        "schedule_window": "1m",
+        "logdir": "/opt/browsermon/history (Windows)  or /opt/browsermon/history (linix)",
+        "logmode": "csv",
+        "rotation": "1m",
+        "backup_count": 5
+    }
 
 ### History is not being logged
 

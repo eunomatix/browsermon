@@ -48,13 +48,13 @@ If the service is not behaving as expected in the configuration, make sure there
 
 ```json
 {
-    'browser': 'all',
-    'mode': 'scheduled',
-    'schedule_window': '1m',
-    'logdir': 'C:\\browsermon\\history' (Windows) or /opt/browsermon/history (Linux),
-    'logmode': 'csv',
-    'rotation': '1m',
-    'backup_count': '5'
+    "browser": "all",
+    "mode": "scheduled",
+    "schedule_window": "1m",
+    "logdir": "C:\\browsermon\\history or /opt/browsermon/history",
+    "logmode": "csv",
+    "rotation": "1m",
+    "backup_count": 5
 }
 ```
 <br>
