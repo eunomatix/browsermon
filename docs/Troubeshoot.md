@@ -102,9 +102,18 @@ For further details, you can take a look at the troubleshooter script on Eunomat
 
 ### How to run troubleshooter?
 
-Troubleshooter script is available on GitHub, which you can download and run:
+Troubleshooter script is available on GitHub with release, which you can download and run:
 
-`python browsermon.py troubleshoot --logs-dir <logs directory>`
+For Linux:
+
+`./browsermon_ts.sh troubleshoot --logs-dir <logs directory>`
+
+For Windows:
+
+`.\browsermon_ts.exe troubleshoot --logs-dir <logs directory>`
+
+Appropriate Execution policy might need to be set before running the script on windows. 
+
 
 
 BrowserMon troubleshooter comes with `procmon` (Process Monitor). The troubleshooter uses it to monitor real-time file system, Registry, and process/thread activity of BrowserMon process. This is only supported on Windows.
