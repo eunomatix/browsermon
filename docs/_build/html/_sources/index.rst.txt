@@ -18,14 +18,17 @@ monitoring
  
    releasenotes
    readme
-   readmetroubleshoot
+   watchdog
+   readmetsnew
+   watchdogts
+   .. readmetroubleshoot
    .. modules
 
 
-Indices and tables
-==================
+.. Indices and tables
+.. ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-* Website: www.browsermon.com 
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
+.. * Website: www.browsermon.com 

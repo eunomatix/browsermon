@@ -1,3 +1,7 @@
+.. role:: raw-latex(raw)
+   :format: latex
+..
+
 |BrowserMon|
 
 |Static Badge| |image1|
@@ -29,76 +33,65 @@ Features
    BrowserMon is its non-intrusive monitoring capability. Regardless of
    the operating system you’re using, BrowserMon operates seamlessly
    behind the scenes without causing disruptions or interfering with
-   other data on your system.
+   other data on your system. 
 
-Get Started
------------
+-  **Centralized management with Watchdog -Only for enterprise version :**: Browsermon enterprise is managed 
+   by Watchdog.Which serves as a centralized management and licensing server for Browsermon 
+   agents installed in the enterprise. Watchdog operates on a dedicated Linux server (or VM) 
+   and registers all enterprise Browsermon instances to perform health checking and
+   validate licenses.
+   
 
-Installation
-~~~~~~~~~~~~
 
-To install using freeze executable/binaries, download the .zip file and
-follow the instructions mentioned in the release for your specific
-operating system.
+BrowserMon application caputres a rich set of 16 browsing parameters
+in **CSV** or **JSON** format.
 
-To build the project:
+.. list-table::
+   :widths: 25 75
 
-1. Get the source code:
-   ``git clone https://github.com/eunomatix/browsermon``
+   * - :Parameter:  
+     - :Description: 
+   * - hostname
+     - The name of the host computer.
+   * - os
+     - Operating system used (e.g., Windows).
+   * - os_username
+     - Operating system username.  
+   * - browser
+     - Web browser used (e.g., edge).
+   * - browser_version
+     - Version of the web browser.  
+   * - browser_db
+     - Database type/version used by the browser.  
+   * - profile_id
+     - Identifier for the browser profile (if applicable)..  
+   * - profile_title
+     - Title of the browser profile..  
+   * - profile_username
+     - Username associated with the browser profile..  
+   * - profile_path
+     - File path to the browser profile data.  
+   * - username
+     - Username of the profile..  
+   * - session_id
+     - Unique identifier for the session.  
+   * - referrer
+     - Referrer URL (if any). 
+   * - url
+     - URL of the webpage visited.  
+   * - title
+     - Title of the webpage visited.  
+   * - visit_time
+     - Time of the visit..  
+   * - visit_count
+     - Number of times the URL was visited.
 
-2. Create a Python environment: ``python -m venv venv`` Install
-   dependencies in the environment: ``pip install -r requirements.txt``
-   **Note**: For Windows, you will also have to install *pywin32*, which
-   is not present in the requirement.txt file: ``pip install pywin32``
-
-3. Create executable using PyInstaller:
-   ``pyinstaller -F src/browsermon.py`` For Windows:
-   ``pyinstaller --hiddenimport win32timezone -F src/browsermon.py``
-
-4. Run service install scripts: ``./linux_install.sh`` or
-   ``Set-ExecutionPolicy RemoteSigned -Force ; .\win_install.ps1``
-
-Troubleshooting Guide
----------------------
-
-If you encounter issues while using browsermon, this troubleshooting
-guide is here to help you identify and resolve common problems. Follow
-these steps to diagnose and address problems you may face:
-
-Check System Requirements
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Ensure that your system meets the following requirements:
-
--  Supported operating system (Windows + Linux)
--  Administrative privileges
--  Supported web browser (refer to the documentation for compatibility)
-
-Configuration Errors
-~~~~~~~~~~~~~~~~~~~~
-
-If you suspect configuration issues:
-
--  Review the configuration file (browsermon.conf) to check for errors
-   or inconsistencies.
--  Ensure that the paths to browsermon and other required files are
-   correctly specified in the configuration file.
-
-Running Troubleshooting Script (Linux Only)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You can find the troubleshooting script in the ``src/utils`` folder. The
-script is named ``troubleshooting_script.sh``.
-
-To run the script, open your terminal and navigate to the ``src/utils``
-directory and use the following command:
-
-.. code:: bash
-
-   python troubleshooting_script.py
 
 License
 -------
+
+Browsermon Comm is available under MIT License
+
 
 MIT License
 
@@ -127,3 +120,63 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
    :target: https://github.com/eunomatix/browsermon
 .. |Static Badge| image:: https://img.shields.io/badge/Version-1.2.1--alpha-brightgreen
 .. |image1| image:: https://img.shields.io/badge/License-MIT-blue
+
+Browsermon Community Version Installation
+=========================================
+ 
+To build the project:
+
+1. Get the source code:
+   ``git clone https://github.com/eunomatix/browsermon``
+
+2. Create a Python environment: ``python -m venv venv`` Install
+   dependencies in the environment: ``pip install -r requirements.txt``
+   **Note**: For Windows, you will also have to install *pywin32*, which
+   is not present in the requirement.txt file: ``pip install pywin32``
+
+3. Create executable using PyInstaller:
+   ``pyinstaller -F src/browsermon.py`` For Windows:
+   ``pyinstaller --hiddenimport win32timezone -F src/browsermon.py``
+
+4. Run service install scripts: ``./linux_install.sh`` or
+   ``Set-ExecutionPolicy RemoteSigned -Force ; .\win_install.ps1``
+
+Browsermon Enterprise Version Installation
+==========================================
+
+**Windows**
+To install, download the browsermon.zip file, extract the file and
+open powershell as administrator where you extracted the file. Run
+the following command
+   ``Set-ExecutionPolicy RemoteSigned -Force ; .\win_install.ps1`` 
+**Linux**
+Download the ``browsermon_linux-x64.zip`` extract it and run
+``linux_install.sh`` as sudo ## Watchdog Installation #### Linux Only
+To seamlessly integrate Watchdog into your system, follow these
+straightforward steps:
+
+1. Download the latest Watchdog binaries for the Linux 
+2. Extract the downloaded zip file to unveil the essential components.
+3. Ensure the ``watchdog.conf`` file is passed as the arg to the
+   Watchdog.
+4. Populate your ``watchdog.conf`` file with the provided *BMKEY* and
+   *AUTHCODE*.
+5. Ready to roll! Execute the binary using the following command:
+
+.. code:: bash
+
+   ./Watchdog --config-path /path/to/watchdog.conf
+
+6. To generate the SSL certificate run the following command. You can
+   change your cert config in the ``ssl_config.ini`` file.
+
+.. code:: bash
+
+   ./Watchdog --config-path /path/to/watchdog.conf --generate-ssl
+
+Experience the power of Watchdog as it efficiently manages and verifies
+licenses for enhanced security and operational control. For the latest
+releases, explore the Watchdog `releases
+page <https://github.com/eunomatix/watchdog/releases>`__.
+
+

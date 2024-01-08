@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Troubleshooting" href="readmetroubleshoot.html" />
+    <link rel="next" title="WATCHDOG" href="watchdog.html" />
     <link rel="prev" title="Release Notes" href="releasenotes.html" /> 
 </head>
 
@@ -47,20 +47,14 @@
 <li class="toctree-l1"><a class="reference internal" href="releasenotes.html">Release Notes</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">BrowserMon - Revolutionary Browser Monitoring Tool</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#features">Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#get-started">Get Started</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#installation">Installation</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#troubleshooting-guide">Troubleshooting Guide</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#check-system-requirements">Check System Requirements</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#configuration-errors">Configuration Errors</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#running-troubleshooting-script-linux-only">Running Troubleshooting Script (Linux Only)</a></li>
-</ul>
-</li>
 <li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="readmetroubleshoot.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#browsermon-community-version-installation">Browsermon Community Version Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#browsermon-enterprise-version-installation">Browsermon Enterprise Version Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="watchdog.html">WATCHDOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readmetsnew.html">Browsermon Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="watchdogts.html">Watchdog Troubleshooting</a></li>
 </ul>
 
         </div>
@@ -113,68 +107,88 @@ BrowserMon is its non-intrusive monitoring capability. Regardless of
 the operating system you’re using, BrowserMon operates seamlessly
 behind the scenes without causing disruptions or interfering with
 other data on your system.</p></li>
+<li><p><strong>Centralized management with Watchdog -Only for enterprise version :</strong>: Browsermon enterprise is managed
+by Watchdog.Which serves as a centralized management and licensing server for Browsermon
+agents installed in the enterprise. Watchdog operates on a dedicated Linux server (or VM)
+and registers all enterprise Browsermon instances to perform health checking and
+validate licenses.</p></li>
 </ul>
-</section>
-<section id="get-started">
-<h2>Get Started<a class="headerlink" href="#get-started" title="Link to this heading"></a></h2>
-<section id="installation">
-<h3>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h3>
-<p>To install using freeze executable/binaries, download the .zip file and
-follow the instructions mentioned in the release for your specific
-operating system.</p>
-<p>To build the project:</p>
-<ol class="arabic simple">
-<li><p>Get the source code:
-<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/eunomatix/browsermon</span></code></p></li>
-<li><p>Create a Python environment: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">venv</span> <span class="pre">venv</span></code> Install
-dependencies in the environment: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">requirements.txt</span></code>
-<strong>Note</strong>: For Windows, you will also have to install <em>pywin32</em>, which
-is not present in the requirement.txt file: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pywin32</span></code></p></li>
-<li><p>Create executable using PyInstaller:
-<code class="docutils literal notranslate"><span class="pre">pyinstaller</span> <span class="pre">-F</span> <span class="pre">src/browsermon.py</span></code> For Windows:
-<code class="docutils literal notranslate"><span class="pre">pyinstaller</span> <span class="pre">--hiddenimport</span> <span class="pre">win32timezone</span> <span class="pre">-F</span> <span class="pre">src/browsermon.py</span></code></p></li>
-<li><p>Run service install scripts: <code class="docutils literal notranslate"><span class="pre">./linux_install.sh</span></code> or
-<code class="docutils literal notranslate"><span class="pre">Set-ExecutionPolicy</span> <span class="pre">RemoteSigned</span> <span class="pre">-Force</span> <span class="pre">;</span> <span class="pre">.\win_install.ps1</span></code></p></li>
-</ol>
-</section>
-</section>
-<section id="troubleshooting-guide">
-<h2>Troubleshooting Guide<a class="headerlink" href="#troubleshooting-guide" title="Link to this heading"></a></h2>
-<p>If you encounter issues while using browsermon, this troubleshooting
-guide is here to help you identify and resolve common problems. Follow
-these steps to diagnose and address problems you may face:</p>
-<section id="check-system-requirements">
-<h3>Check System Requirements<a class="headerlink" href="#check-system-requirements" title="Link to this heading"></a></h3>
-<p>Ensure that your system meets the following requirements:</p>
-<ul class="simple">
-<li><p>Supported operating system (Windows + Linux)</p></li>
-<li><p>Administrative privileges</p></li>
-<li><p>Supported web browser (refer to the documentation for compatibility)</p></li>
-</ul>
-</section>
-<section id="configuration-errors">
-<h3>Configuration Errors<a class="headerlink" href="#configuration-errors" title="Link to this heading"></a></h3>
-<p>If you suspect configuration issues:</p>
-<ul class="simple">
-<li><p>Review the configuration file (browsermon.conf) to check for errors
-or inconsistencies.</p></li>
-<li><p>Ensure that the paths to browsermon and other required files are
-correctly specified in the configuration file.</p></li>
-</ul>
-</section>
-<section id="running-troubleshooting-script-linux-only">
-<h3>Running Troubleshooting Script (Linux Only)<a class="headerlink" href="#running-troubleshooting-script-linux-only" title="Link to this heading"></a></h3>
-<p>You can find the troubleshooting script in the <code class="docutils literal notranslate"><span class="pre">src/utils</span></code> folder. The
-script is named <code class="docutils literal notranslate"><span class="pre">troubleshooting_script.sh</span></code>.</p>
-<p>To run the script, open your terminal and navigate to the <code class="docutils literal notranslate"><span class="pre">src/utils</span></code>
-directory and use the following command:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>troubleshooting_script.py
-</pre></div>
-</div>
-</section>
+<p>BrowserMon application caputres a rich set of 16 browsing parameters
+in <strong>CSV</strong> or <strong>JSON</strong> format.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 75%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+</td>
+<td><dl class="field-list simple">
+<dt class="field-odd">Description<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+</td>
+</tr>
+<tr class="row-even"><td><p>hostname</p></td>
+<td><p>The name of the host computer.</p></td>
+</tr>
+<tr class="row-odd"><td><p>os</p></td>
+<td><p>Operating system used (e.g., Windows).</p></td>
+</tr>
+<tr class="row-even"><td><p>os_username</p></td>
+<td><p>Operating system username.</p></td>
+</tr>
+<tr class="row-odd"><td><p>browser</p></td>
+<td><p>Web browser used (e.g., edge).</p></td>
+</tr>
+<tr class="row-even"><td><p>browser_version</p></td>
+<td><p>Version of the web browser.</p></td>
+</tr>
+<tr class="row-odd"><td><p>browser_db</p></td>
+<td><p>Database type/version used by the browser.</p></td>
+</tr>
+<tr class="row-even"><td><p>profile_id</p></td>
+<td><p>Identifier for the browser profile (if applicable)..</p></td>
+</tr>
+<tr class="row-odd"><td><p>profile_title</p></td>
+<td><p>Title of the browser profile..</p></td>
+</tr>
+<tr class="row-even"><td><p>profile_username</p></td>
+<td><p>Username associated with the browser profile..</p></td>
+</tr>
+<tr class="row-odd"><td><p>profile_path</p></td>
+<td><p>File path to the browser profile data.</p></td>
+</tr>
+<tr class="row-even"><td><p>username</p></td>
+<td><p>Username of the profile..</p></td>
+</tr>
+<tr class="row-odd"><td><p>session_id</p></td>
+<td><p>Unique identifier for the session.</p></td>
+</tr>
+<tr class="row-even"><td><p>referrer</p></td>
+<td><p>Referrer URL (if any).</p></td>
+</tr>
+<tr class="row-odd"><td><p>url</p></td>
+<td><p>URL of the webpage visited.</p></td>
+</tr>
+<tr class="row-even"><td><p>title</p></td>
+<td><p>Title of the webpage visited.</p></td>
+</tr>
+<tr class="row-odd"><td><p>visit_time</p></td>
+<td><p>Time of the visit..</p></td>
+</tr>
+<tr class="row-even"><td><p>visit_count</p></td>
+<td><p>Number of times the URL was visited.</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 <section id="license">
 <h2>License<a class="headerlink" href="#license" title="Link to this heading"></a></h2>
+<p>Browsermon Comm is available under MIT License</p>
 <p>MIT License</p>
 <p>Copyright (c) 2023 Eunomatix</p>
 <p>Permission is hereby granted, free of charge, to any person obtaining a
@@ -195,13 +209,68 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
 </section>
 </section>
+<section id="browsermon-community-version-installation">
+<h1>Browsermon Community Version Installation<a class="headerlink" href="#browsermon-community-version-installation" title="Link to this heading"></a></h1>
+<p>To build the project:</p>
+<ol class="arabic simple">
+<li><p>Get the source code:
+<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/eunomatix/browsermon</span></code></p></li>
+<li><p>Create a Python environment: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">venv</span> <span class="pre">venv</span></code> Install
+dependencies in the environment: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">requirements.txt</span></code>
+<strong>Note</strong>: For Windows, you will also have to install <em>pywin32</em>, which
+is not present in the requirement.txt file: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pywin32</span></code></p></li>
+<li><p>Create executable using PyInstaller:
+<code class="docutils literal notranslate"><span class="pre">pyinstaller</span> <span class="pre">-F</span> <span class="pre">src/browsermon.py</span></code> For Windows:
+<code class="docutils literal notranslate"><span class="pre">pyinstaller</span> <span class="pre">--hiddenimport</span> <span class="pre">win32timezone</span> <span class="pre">-F</span> <span class="pre">src/browsermon.py</span></code></p></li>
+<li><p>Run service install scripts: <code class="docutils literal notranslate"><span class="pre">./linux_install.sh</span></code> or
+<code class="docutils literal notranslate"><span class="pre">Set-ExecutionPolicy</span> <span class="pre">RemoteSigned</span> <span class="pre">-Force</span> <span class="pre">;</span> <span class="pre">.\win_install.ps1</span></code></p></li>
+</ol>
+</section>
+<section id="browsermon-enterprise-version-installation">
+<h1>Browsermon Enterprise Version Installation<a class="headerlink" href="#browsermon-enterprise-version-installation" title="Link to this heading"></a></h1>
+<p><strong>Windows</strong>
+To install, download the browsermon.zip file, extract the file and
+open powershell as administrator where you extracted the file. Run
+the following command</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">Set-ExecutionPolicy</span> <span class="pre">RemoteSigned</span> <span class="pre">-Force</span> <span class="pre">;</span> <span class="pre">.\win_install.ps1</span></code></p>
+</div></blockquote>
+<p><strong>Linux</strong>
+Download the <code class="docutils literal notranslate"><span class="pre">browsermon_linux-x64.zip</span></code> extract it and run
+<code class="docutils literal notranslate"><span class="pre">linux_install.sh</span></code> as sudo ## Watchdog Installation #### Linux Only
+To seamlessly integrate Watchdog into your system, follow these
+straightforward steps:</p>
+<ol class="arabic simple">
+<li><p>Download the latest Watchdog binaries for the Linux</p></li>
+<li><p>Extract the downloaded zip file to unveil the essential components.</p></li>
+<li><p>Ensure the <code class="docutils literal notranslate"><span class="pre">watchdog.conf</span></code> file is passed as the arg to the
+Watchdog.</p></li>
+<li><p>Populate your <code class="docutils literal notranslate"><span class="pre">watchdog.conf</span></code> file with the provided <em>BMKEY</em> and
+<em>AUTHCODE</em>.</p></li>
+<li><p>Ready to roll! Execute the binary using the following command:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./Watchdog<span class="w"> </span>--config-path<span class="w"> </span>/path/to/watchdog.conf
+</pre></div>
+</div>
+<ol class="arabic simple" start="6">
+<li><p>To generate the SSL certificate run the following command. You can
+change your cert config in the <code class="docutils literal notranslate"><span class="pre">ssl_config.ini</span></code> file.</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./Watchdog<span class="w"> </span>--config-path<span class="w"> </span>/path/to/watchdog.conf<span class="w"> </span>--generate-ssl
+</pre></div>
+</div>
+<p>Experience the power of Watchdog as it efficiently manages and verifies
+licenses for enhanced security and operational control. For the latest
+releases, explore the Watchdog <a class="reference external" href="https://github.com/eunomatix/watchdog/releases">releases
+page</a>.</p>
+</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="releasenotes.html" class="btn btn-neutral float-left" title="Release Notes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="readmetroubleshoot.html" class="btn btn-neutral float-right" title="Troubleshooting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="watchdog.html" class="btn btn-neutral float-right" title="WATCHDOG" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
