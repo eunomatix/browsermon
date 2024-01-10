@@ -46,18 +46,24 @@ If the service is not starting, review the logs of the service. If the service i
 
 If the service is not behaving as expected in the configuration, make sure there are no errors in the `browsermon.conf` file. If it contains any errors or typos, BrowserMon service will use default configurations, which are:
 
-```json
-{
-    'browser': 'all',
-    'mode': 'scheduled',
-    'schedule_window': '1m',
-    'logdir': 'C:\\browsermon\\history' (Windows) or /opt/browsermon/history (Linux),
-    'logmode': 'csv',
-    'rotation': '1m',
-    'backup_count': '5'
-}
+```conf
+[default]
+browser=all,
+
+mode=scheduled,
+
+schedule_window=1m
+
+logdir=C:\\browsermon\\history (Windows) or /opt/browsermon/history (Linux),
+
+logmode=csv,
+
+rotation=1m,
+
+backup_count=5
 ```
 <br>
+
 ### History is not being logged
 
 If the service is not logging history in the folder mentioned in the `browsermon.conf` file, make sure you supplied the correct folder and path, and indeed the folder exists where you wish the history to be written.
@@ -102,10 +108,15 @@ For further details, you can take a look at the troubleshooter script on Eunomat
 
 ### How to run troubleshooter?
 
-Troubleshooter script is available on GitHub, which you can download and run:
+Troubelshooter comes packaged with every releaes you can run the troubleshooter:
 
-`python browsermon.py troubleshoot --logs-dir <logs directory>`
+On linux:
 
+`./browsermon_ts troubleshoot --logs-dir <logs directory>`
+
+On Windows:
+
+`.\browsermon_ts.exe troubeshoot --logs-dir <logs directory>`
 
 BrowserMon troubleshooter comes with `procmon` (Process Monitor). The troubleshooter uses it to monitor real-time file system, Registry, and process/thread activity of BrowserMon process. This is only supported on Windows.
 
