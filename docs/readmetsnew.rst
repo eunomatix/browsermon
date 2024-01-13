@@ -4,7 +4,7 @@ Troubleshooting
 This section provides some troubleshooting tips related to the Browsermon and watchdog
 service.
 
-Browsermon Troubleshooting
+Browsermon troubleshooting
 --------------------------
 
 Initial Checks
@@ -175,7 +175,7 @@ option *–logs-dir*
 
 
 
-Watchdog Troubleshooting
+Watchdog troubleshooting
 ------------------------
 This section provides some troubleshooting tips related to watchdog.
 

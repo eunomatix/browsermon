@@ -6,8 +6,8 @@
 
 |Static Badge| |image1|
 
-BrowserMon - Revolutionary Browser Monitoring Tool
-==================================================
+Browsermon Introduction
+=======================
 
 Welcome to Browsermon, the revolutionary browser monitoring tool
 designed to provide unparalleled insights into browsing activities. With

@@ -138,7 +138,7 @@ The ``get-licenses`` API endpoint retrieves the list of active GUIDs.
 
 **Description:** Display the list of active licensed controllers.
 
-Browsermon Enterprise Version  installtaion
+Browsermon enterprise version  installtaion
 -------------------------------------------
 
 Browsermon Enterprise Version runs in client-server model, 
