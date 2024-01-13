@@ -10,7 +10,7 @@ activities on these popular web browsers, providing valuable insights into user 
 and potential security threats.
 
 It's important to note that while the community version offers a range of capabilities, 
-it operates under certain limitations, including running on a single endpoint per month. 
+it operates under certain limitations, including running on a single device. 
 This constraint aligns with the community-oriented nature of the version, making it suitable 
 for individual users  seeking basic browser monitoring functionalities. The availability of 
 these features in the community version allows users to experience the benefits of Browsermon's

@@ -9,9 +9,9 @@
 BrowserMon - Revolutionary Browser Monitoring Tool
 ==================================================
 
-Welcome to BrowserMon, the revolutionary browser monitoring tool
+Welcome to Browsermon, the revolutionary browser monitoring tool
 designed to provide unparalleled insights into browsing activities. With
-seamless compatibility with Chrome and Edge browsers, BrowserMon stands
+seamless compatibility with Google Chrome , Mozilla Firefox and Microsoft Edge browsers, Browsermon stands
 as a unique solution in the realm of browser monitoring. Whether
 operating in real-time mode or scheduled mode, this tool meticulously
 records browsing histories, capturing a comprehensive range of 17
@@ -43,7 +43,7 @@ distinct parameters.
    
 
 
-BrowserMon application caputres a rich set of 17 browsing parameters
+Browsermon application caputres a rich set of 17 browsing parameters
 in **CSV** or **JSON** format.
 
 .. list-table::

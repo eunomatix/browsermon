@@ -9,9 +9,9 @@
 Welcome to Browsermon's documentation!
 ======================================
   
-Browsermon is a Browser monitoring tool designed to provide unparalleled insights
-into browsing activities. With seamless compatibility with Chrome and
-Edge browsers, BrowserMon stands as a unique solution in the area of browser monitoring.
+Browsermon is a browser monitoring tool designed to provide unparalleled insights
+into browsing activities. With seamless compatibility with Google Chrome , Mozilla firefox and
+Microsoft Edge browsers, Browsermon stands as a unique solution in the area of browser monitoring.
 
 
 .. toctree::
