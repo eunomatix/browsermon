@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="WATCHDOG" href="watchdog.html" />
+    <link rel="next" title="Community Version" href="Community%20Version.html" />
     <link rel="prev" title="Release Notes" href="releasenotes.html" /> 
 </head>
 
@@ -45,16 +45,10 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="releasenotes.html">Release Notes</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">BrowserMon - Revolutionary Browser Monitoring Tool</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#features">Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="#browsermon-community-version-installation">Browsermon Community Version Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#browsermon-enterprise-version-installation">Browsermon Enterprise Version Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="watchdog.html">WATCHDOG</a></li>
-<li class="toctree-l1"><a class="reference internal" href="readmetsnew.html">Browsermon Troubleshooting</a></li>
-<li class="toctree-l1"><a class="reference internal" href="watchdogts.html">Watchdog Troubleshooting</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">BrowserMon - Revolutionary Browser Monitoring Tool</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Community%20Version.html">Community Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="enterprise%20version.html">Enterprise Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readmetsnew.html">Troubleshooting</a></li>
 </ul>
 
         </div>
@@ -92,28 +86,7 @@ as a unique solution in the realm of browser monitoring. Whether
 operating in real-time mode or scheduled mode, this tool meticulously
 records browsing histories, capturing a comprehensive range of 17
 distinct parameters.</p>
-<section id="features">
-<h2>Features<a class="headerlink" href="#features" title="Link to this heading"></a></h2>
-<ul class="simple">
-<li><p><strong>Comprehensive Monitoring</strong>: BrowserMon captures a rich set of 17
-browsing parameters, providing a comprehensive view of browsing
-activities. This depth of data enables accurate analysis and informed
-decision-making.</p></li>
-<li><p><strong>Data Privacy</strong>: BrowserMon focuses solely on browser history and
-does not infringe upon broader internet activity or compromise user
-privacy beyond the scope of browsing data.</p></li>
-<li><p><strong>Non-Intrusive Monitoring</strong>: One of the standout benefits of
-BrowserMon is its non-intrusive monitoring capability. Regardless of
-the operating system you’re using, BrowserMon operates seamlessly
-behind the scenes without causing disruptions or interfering with
-other data on your system.</p></li>
-<li><p><strong>Centralized management with Watchdog -Only for enterprise version :</strong>: Browsermon enterprise is managed
-by Watchdog.Which serves as a centralized management and licensing server for Browsermon
-agents installed in the enterprise. Watchdog operates on a dedicated Linux server (or VM)
-and registers all enterprise Browsermon instances to perform health checking and
-validate licenses.</p></li>
-</ul>
-<p>BrowserMon application caputres a rich set of 16 browsing parameters
+<p>BrowserMon application caputres a rich set of 17 browsing parameters
 in <strong>CSV</strong> or <strong>JSON</strong> format.</p>
 <table class="docutils align-default">
 <colgroup>
@@ -186,91 +159,13 @@ in <strong>CSV</strong> or <strong>JSON</strong> format.</p>
 </tbody>
 </table>
 </section>
-<section id="license">
-<h2>License<a class="headerlink" href="#license" title="Link to this heading"></a></h2>
-<p>Browsermon Comm is available under MIT License</p>
-<p>MIT License</p>
-<p>Copyright (c) 2023 Eunomatix</p>
-<p>Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the
-“Software”), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sub-license, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:</p>
-<p>The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.</p>
-<p>**THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
-</section>
-</section>
-<section id="browsermon-community-version-installation">
-<h1>Browsermon Community Version Installation<a class="headerlink" href="#browsermon-community-version-installation" title="Link to this heading"></a></h1>
-<p>To build the project:</p>
-<ol class="arabic simple">
-<li><p>Get the source code:
-<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/eunomatix/browsermon</span></code></p></li>
-<li><p>Create a Python environment: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">venv</span> <span class="pre">venv</span></code> Install
-dependencies in the environment: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">requirements.txt</span></code>
-<strong>Note</strong>: For Windows, you will also have to install <em>pywin32</em>, which
-is not present in the requirement.txt file: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pywin32</span></code></p></li>
-<li><p>Create executable using PyInstaller:
-<code class="docutils literal notranslate"><span class="pre">pyinstaller</span> <span class="pre">-F</span> <span class="pre">src/browsermon.py</span></code> For Windows:
-<code class="docutils literal notranslate"><span class="pre">pyinstaller</span> <span class="pre">--hiddenimport</span> <span class="pre">win32timezone</span> <span class="pre">-F</span> <span class="pre">src/browsermon.py</span></code></p></li>
-<li><p>Run service install scripts: <code class="docutils literal notranslate"><span class="pre">./linux_install.sh</span></code> or
-<code class="docutils literal notranslate"><span class="pre">Set-ExecutionPolicy</span> <span class="pre">RemoteSigned</span> <span class="pre">-Force</span> <span class="pre">;</span> <span class="pre">.\win_install.ps1</span></code></p></li>
-</ol>
-</section>
-<section id="browsermon-enterprise-version-installation">
-<h1>Browsermon Enterprise Version Installation<a class="headerlink" href="#browsermon-enterprise-version-installation" title="Link to this heading"></a></h1>
-<p><strong>Windows</strong>
-To install, download the browsermon.zip file, extract the file and
-open powershell as administrator where you extracted the file. Run
-the following command</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">Set-ExecutionPolicy</span> <span class="pre">RemoteSigned</span> <span class="pre">-Force</span> <span class="pre">;</span> <span class="pre">.\win_install.ps1</span></code></p>
-</div></blockquote>
-<p><strong>Linux</strong>
-Download the <code class="docutils literal notranslate"><span class="pre">browsermon_linux-x64.zip</span></code> extract it and run
-<code class="docutils literal notranslate"><span class="pre">linux_install.sh</span></code> as sudo ## Watchdog Installation #### Linux Only
-To seamlessly integrate Watchdog into your system, follow these
-straightforward steps:</p>
-<ol class="arabic simple">
-<li><p>Download the latest Watchdog binaries for the Linux</p></li>
-<li><p>Extract the downloaded zip file to unveil the essential components.</p></li>
-<li><p>Ensure the <code class="docutils literal notranslate"><span class="pre">watchdog.conf</span></code> file is passed as the arg to the
-Watchdog.</p></li>
-<li><p>Populate your <code class="docutils literal notranslate"><span class="pre">watchdog.conf</span></code> file with the provided <em>BMKEY</em> and
-<em>AUTHCODE</em>.</p></li>
-<li><p>Ready to roll! Execute the binary using the following command:</p></li>
-</ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./Watchdog<span class="w"> </span>--config-path<span class="w"> </span>/path/to/watchdog.conf
-</pre></div>
-</div>
-<ol class="arabic simple" start="6">
-<li><p>To generate the SSL certificate run the following command. You can
-change your cert config in the <code class="docutils literal notranslate"><span class="pre">ssl_config.ini</span></code> file.</p></li>
-</ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./Watchdog<span class="w"> </span>--config-path<span class="w"> </span>/path/to/watchdog.conf<span class="w"> </span>--generate-ssl
-</pre></div>
-</div>
-<p>Experience the power of Watchdog as it efficiently manages and verifies
-licenses for enhanced security and operational control. For the latest
-releases, explore the Watchdog <a class="reference external" href="https://github.com/eunomatix/watchdog/releases">releases
-page</a>.</p>
-</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="releasenotes.html" class="btn btn-neutral float-left" title="Release Notes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="watchdog.html" class="btn btn-neutral float-right" title="WATCHDOG" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Community%20Version.html" class="btn btn-neutral float-right" title="Community Version" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
