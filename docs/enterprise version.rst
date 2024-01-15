@@ -38,8 +38,8 @@ Features
    validate licenses.
    
 
-Watchdog
---------
+What is Watchdog
+----------------
 Watchdog provides centralized monitoring and management for enterprise deployment
 .Watchdog Features includes.
 
@@ -51,7 +51,7 @@ Watchdog provides centralized monitoring and management for enterprise deploymen
 -  **License Verification:** Watchdog boasts a robust API dedicated to
    validating the authenticity of controllers’ licenses. This ensures a
    secure and authenticated gateway to access essential services.
-
+|image2|
 
 **Getting Started**
 ~~~~~~~~~~~~~~~~~~~
@@ -79,8 +79,10 @@ Watchdog provides centralized monitoring and management for enterprise deploymen
 
 
 
-**Configuration**
-~~~~~~~~~~~~~~~~~
+**Watchdog Parameters**
+~~~~~~~~~~~~~~~~~~~~~~~
+
+
 
 
 Watchdog relies on the watchdog.conf configuration file for essential
@@ -138,18 +140,18 @@ The ``get-licenses`` API endpoint retrieves the list of active GUIDs.
 
 **Description:** Display the list of active licensed controllers.
 
-Browsermon enterprise version  installtaion
--------------------------------------------
+Installtaion
+------------
 
 Browsermon Enterprise Version runs in client-server model, 
 where Browsermon Controller(s) run on all enterprise endpoints
 for local browser history log collection. Whereas a central Browsermon 
 Watchdog server is installed to perform health checking and distributed
 management of all Browsermon controllers installed endpoints.
-|image2|
 
-Controller  installtaion
-~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Controller  installtaion**
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Windows:**
 
@@ -163,7 +165,7 @@ administrator where you extracted the file.Run the following command
 Download the ``browsermon_linux-x64.zip`` extract it and run
 ``linux_install.sh`` as sudo
 
-**Watchdog Installation** 
+**Watchdog installation** 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 Watchdog Server is supported on Linux only. To seamlessly integrate Watchdog into your system, 
 follow these straightforward steps:
