@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.abspath('../troubleshoot'))
 
 
 project = 'Browsermon'
-copyright = '2023, Eunomatix'
+copyright = '2024, Eunomatix'
 author = 'Eunomatix'
 release = '1.0.1'
 

@@ -121,8 +121,8 @@ Contacting Support
 
 Download the BrowserMon troubleshooter from the website, which will
 collect all logs and relevant information and save it into a file named
-``browsermon_archive.zip``, which you can then transfer to the team that
-will help you fix the issue.
+``browsermon_archive.zip``, which you can then transfer to the team via email support@browsermon.ai
+that will help you fix the issue.
 
 Privacy Disclaimer
 ~~~~~~~~~~~~~~~~~~
@@ -248,7 +248,7 @@ Contacting Support
 
 Download the Watchdog troubleshooter from the website, to
 collect all logs and relevant information and save it into a file named
-``watchdog_archive.zip``, which can be shared to the team that
+``watchdog_archive.zip``, which can be shared to the team via email support@browsermon.ai that
 will help you fix the issue.
 
 -  Run the script in the same folder as the Watchdog binary or optionally use absolute paths for ``LOGDIR``, ``CERTFILE`` and ``KEYFILE`` in the config file.

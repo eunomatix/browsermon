@@ -2,7 +2,7 @@ Release Notes
 ============================
 
 -  **New Features**
-    Version 1.3.0 - 2023-11-05
+    Version 1.3.0 - 2023-12-15
 
     TroubleShooting script /troubleshoot/browsermon_ts.py Script is aimed to collect logs that can prove to be useful when debugging issue on client side.
 
