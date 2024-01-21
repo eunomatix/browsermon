@@ -33,10 +33,9 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from utils import system, logger
 from utils.caching import write_cache_file, read_cache_file
-from utils.common import parse_schedule_window, prepare_entry
+from utils.common import parse_schedule_window, prepare_entry, initialize_json_writer
 from utils.encryption import gen_fernet_key
 from utils.metadata import get_static_metadata
-from utils.common import initialize_json_writer
 
 # Global variable
 cache = {}
@@ -216,10 +215,11 @@ def write_history_data(profiles, username, logmode, logdir):
             'csv': 'a+'
         }
 
-        newline_arg = '' if logmode == 'json' else None
+        newline_arg = '' if logmode == 'csv' else None
 
-        output_file = Path(output_file)
-        output_file.touch(exist_ok=True)
+        if logmode == "json":
+            output_file = Path(output_file)
+            output_file.touch(exist_ok=True)
 
         with open(output_file, file_modes[logmode], newline=newline_arg) as file:
             if logmode == "json":
