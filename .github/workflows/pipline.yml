@@ -70,11 +70,10 @@ jobs:
       - name: Build shared library for Linux
         run: |
           gcc -shared -o ${LIBRARY_NAME}_linux64.so -fPIC src/json_writer.c
-          gcc -m32 -shared -o ${LIBRARY_NAME}_linux32.so -fPIC src/json_writer.c
 
   build_win_x64:
     runs-on: windows-latest
-    needs: [ update_version, build_shared_library_win ]
+    needs: [ build_shared_library_win ]
 
     steps:
       - name: Checkout
@@ -121,7 +120,7 @@ jobs:
 
   build_win_x86:
     runs-on: windows-latest
-    needs: [ update_version, build_shared_library_win ]
+    needs: [ build_shared_library_win ]
 
     steps:
       - name: Checkout
@@ -168,7 +167,7 @@ jobs:
 
   build_linux_x64:
     runs-on: ubuntu-latest
-    needs: [ update_version, build_shared_library_linux ]
+    needs: [ build_shared_library_linux ]
 
     steps:
       - name: Checkout
