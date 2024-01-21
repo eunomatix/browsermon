@@ -120,7 +120,7 @@ jobs:
 
       - name: Build
         run: |
-          pyinstaller --hiddenimport win32timezone -F --add-binary 'windows-libraries${LIBRARY_NAME}_win64.dll;.' src/browsermon.py
+          pyinstaller --hiddenimport win32timezone -F --add-binary "windows-libraries${LIBRARY_NAME}_win64.dll:." src/browsermon.py
 
       - name: Prepare Files for upload
         run: |
@@ -173,7 +173,7 @@ jobs:
 
       - name: Build
         run: |
-          pyinstaller --hiddenimport win32timezone -F --add-binary 'windows-libraries/${LIBRARY_NAME}_win32.dll;.' src/browsermon.py
+          pyinstaller --hiddenimport win32timezone -F --add-binary "windows-libraries/${LIBRARY_NAME}_win32.dll:." src/browsermon.py
 
       - name: Prepare Files for upload
         run: |
@@ -223,7 +223,7 @@ jobs:
 
       - name: Create Executeable
         run: |
-          pyinstaller -F --add-binary 'linux-libraries${LIBRARY_NAME}_linux64.so;.' src/browsermon.py
+          pyinstaller -F --add-binary "linux-libraries${LIBRARY_NAME}_linux64.so:." src/browsermon.py
 
       - name: Prepare files for upload
         run: |
