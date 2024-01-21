@@ -2,8 +2,8 @@ name: Browsermon CI/CD
 
 on:
   push:
-#    tags:
-#      - 'v*.*.*'
+    tags:
+      - 'v*.*.*'
 
 env:
   TAG_NAME: ${{ github.ref_name }}

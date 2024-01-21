@@ -94,12 +94,12 @@ def load_cjson_lib():
     library = 'json_writer'
 
     if system == 'Linux':
-        return ctypes.CDLL('json_writer_linux64.so')
+        return ctypes.CDLL(f'{library}_linux64.so')
     else:
         if arch == '64bit':
-            return ctypes.CDLL('json_writer_win64.dll')
+            return ctypes.CDLL(f'{library}_win64.dll')
         else:
-            return ctypes.CDLL('json_writer_win32.dll')
+            return ctypes.CDLL(f'{library}_win32.dll')
 
 
 def initialize_json_writer():
