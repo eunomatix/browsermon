@@ -88,22 +88,3 @@ def prepare_entry(result, metadata, profile):
                   "visit_count": visit_count, })
 
     return entry
-
-
-def load_cjson_lib():
-    library = 'json_writer'
-
-    if system == 'Linux':
-        return ctypes.CDLL(f'{library}_linux64.so')
-    else:
-        if arch == '64bit':
-            return ctypes.CDLL(f'{library}_win64.dll')
-        else:
-            return ctypes.CDLL(f'{library}_win32.dll')
-
-
-def initialize_json_writer():
-    writer = load_cjson_lib()
-    writer.write_json_entry.argtypes = [ctypes.c_int, ctypes.c_char_p]
-    writer.write_json_entry.restype = None
-    return writer

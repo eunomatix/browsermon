@@ -21,6 +21,7 @@
 import atexit
 import concurrent.futures
 import csv
+import ctypes
 import os
 import platform
 import signal
@@ -31,9 +32,9 @@ from pathlib import Path
 import orjson as json
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from utils import system, logger
+from utils import system, logger, arch
 from utils.caching import write_cache_file, read_cache_file
-from utils.common import parse_schedule_window, prepare_entry, initialize_json_writer
+from utils.common import parse_schedule_window, prepare_entry
 from utils.encryption import gen_fernet_key
 from utils.metadata import get_static_metadata
 
@@ -223,9 +224,19 @@ def write_history_data(profiles, username, logmode, logdir):
 
         with open(output_file, file_modes[logmode], newline=newline_arg) as file:
             if logmode == "json":
-                writer = initialize_json_writer()
+                library = 'json_writer'
+
+                if system == 'Linux':
+                    writer = ctypes.CDLL(f'{library}_linux64.so')
+                else:
+                    if arch == '64bit':
+                        writer = ctypes.CDLL(f'{library}_win64.dll')
+                    else:
+                        writer = ctypes.CDLL(f'{library}_win32.dll')
+                writer.write_json_entry.argtypes = [ctypes.c_int, ctypes.c_char_p]
+                writer.write_json_entry.restype = None
                 file_descriptor = file.fileno()
-                entry_writer = lambda x: writer.write_json_entry(file_descriptor, json.dumps(x)) #noqa
+                entry_writer = lambda x: writer.write_json_entry(file_descriptor, json.dumps(x))  # noqa
             elif logmode == "csv":
                 # Prepare fieldnames dynamically from the keys of the first entry
                 fieldnames = list(
