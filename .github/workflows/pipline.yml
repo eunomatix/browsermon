@@ -54,13 +54,16 @@ jobs:
         run: |
           x86_64-w64-mingw32-gcc -shared -o ${LIBRARY_NAME}_win64.dll -fPIC src/json_writer.c
           i686-w64-mingw32-gcc -shared -o ${LIBRARY_NAME}_win32.dll -fPIC src/json_writer.c
+      - name: Prepare Files for upload
+        run: |
+          mkdir windows-libraries
+          cp ${LIBRARY_NAME}_win64.dll windows-libraries/
+          cp ${LIBRARY_NAME}_win32.dll windows-libraries/
       - name: Upload Windows Libraries
         uses: actions/upload-artifact@v3
         with:
           name: windows-libraries
-          path: |
-            ${LIBRARY_NAME}_win64.dll
-            ${LIBRARY_NAME}_win32.dll
+          path: windows-libraries/
 
   build_shared_library_linux:
     runs-on: ubuntu-latest
@@ -77,11 +80,15 @@ jobs:
       - name: Build shared library for Linux
         run: |
           gcc -shared -o ${LIBRARY_NAME}_linux64.so -fPIC src/json_writer.c
+      - name: Prepare Files for upload
+        run: |
+          mkdir linux-libraries
+          cp ${LIBRARY_NAME}_linux64.so linux-libraries/
       - name: Upload Linux Libraries
         uses: actions/upload-artifact@v3
         with:
           name: linux-libraries
-          path: ${LIBRARY_NAME}_linux64.so
+          path: linux-libraries/
 
   build_win_x64:
     runs-on: windows-latest
@@ -109,6 +116,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: windows-libraries
+          path: windows-libraries
 
       - name: Build
         run: |
@@ -161,6 +169,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: windows-libraries
+          path: windows-libraries
 
       - name: Build
         run: |
@@ -210,6 +219,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: linux-libraries
+          path: linux-libraries
 
       - name: Create Executeable
         run: |
