@@ -102,7 +102,7 @@ def load_cjson_lib():
             return ctypes.CDLL(f'{library}_win10_32.dll')
 
 
-def initialize_writer():
+def initialize_json_writer():
     writer = load_cjson_lib()
     writer.write_json_entry.argtypes = [ctypes.c_int, ctypes.c_char_p]
     writer.write_json_entry.restype = None

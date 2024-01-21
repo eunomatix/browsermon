@@ -1,3 +1,7 @@
+## [Version 1.4.0] - 2024-01-21
+- **Bug Fixes**
+    - Fixes the JSON Bug
+
 ## [Version 1.3.0] - 2023-11-05
 - **New Features**
     - TroubleShooting script /troubleshoot/browsermon_ts.py 
