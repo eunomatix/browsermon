@@ -225,7 +225,7 @@ def write_history_data(profiles, username, logmode, logdir):
             if logmode == "json":
                 writer = initialize_json_writer()
                 file_descriptor = file.fileno()
-                entry_writer = lambda x: writer.write_json_entry(file_descriptor, json.dumps(x))
+                entry_writer = lambda x: writer.write_json_entry(file_descriptor, json.dumps(x)) #noqa
             elif logmode == "csv":
                 # Prepare fieldnames dynamically from the keys of the first entry
                 fieldnames = list(

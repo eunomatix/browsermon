@@ -52,8 +52,8 @@ jobs:
 
       - name: Build shared library for Windows
         run: |
-          x86_64-w64-mingw32-gcc -shared -o ${LIBRARY_NAME}_win64.dll -fPIC lib/json_writer.c
-          i686-w64-mingw32-gcc -shared -o ${LIBRARY_NAME}_win32.dll -fPIC lib/json_writer.c
+          x86_64-w64-mingw32-gcc -shared -o ${LIBRARY_NAME}_win64.dll -fPIC src/json_writer.c
+          i686-w64-mingw32-gcc -shared -o ${LIBRARY_NAME}_win32.dll -fPIC src/json_writer.c
 
   build_shared_library_linux:
     runs-on: ubuntu-latest
@@ -69,8 +69,8 @@ jobs:
 
       - name: Build shared library for Linux
         run: |
-          gcc -shared -o ${LIBRARY_NAME}_linux64.so -fPIC lib/json_writer.c
-          gcc -m32 -shared -o ${LIBRARY_NAME}_linux32.so -fPIC lib/json_writer.c
+          gcc -shared -o ${LIBRARY_NAME}_linux64.so -fPIC src/json_writer.c
+          gcc -m32 -shared -o ${LIBRARY_NAME}_linux32.so -fPIC src/json_writer.c
 
   build_win_x64:
     runs-on: windows-latest
