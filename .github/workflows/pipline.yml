@@ -54,6 +54,13 @@ jobs:
         run: |
           x86_64-w64-mingw32-gcc -shared -o ${LIBRARY_NAME}_win64.dll -fPIC src/json_writer.c
           i686-w64-mingw32-gcc -shared -o ${LIBRARY_NAME}_win32.dll -fPIC src/json_writer.c
+      - name: Upload Windows Libraries
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-libraries
+          path: |
+            ${LIBRARY_NAME}_win64.dll
+            ${LIBRARY_NAME}_win32.dll
 
   build_shared_library_linux:
     runs-on: ubuntu-latest
@@ -70,6 +77,11 @@ jobs:
       - name: Build shared library for Linux
         run: |
           gcc -shared -o ${LIBRARY_NAME}_linux64.so -fPIC src/json_writer.c
+      - name: Upload Linux Libraries
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-libraries
+          path: ${LIBRARY_NAME}_linux64.so
 
   build_win_x64:
     runs-on: windows-latest
@@ -93,9 +105,14 @@ jobs:
           pip install pywin32
           pip install -r requirements.txt
 
+      - name: Download Windows Libraries
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-libraries
+
       - name: Build
         run: |
-          pyinstaller --hiddenimport win32timezone -F --add-binary '${{ runner.workspace }}/${LIBRARY_NAME}_win64.dll;.' src/browsermon.py
+          pyinstaller --hiddenimport win32timezone -F --add-binary 'windows-libraries${LIBRARY_NAME}_win64.dll;.' src/browsermon.py
 
       - name: Prepare Files for upload
         run: |
@@ -140,9 +157,14 @@ jobs:
           pip install pywin32
           pip install -r requirements.txt
 
+      - name: Download Windows Libraries
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-libraries
+
       - name: Build
         run: |
-          pyinstaller --hiddenimport win32timezone -F --add-binary '${{ runner.workspace }}/${LIBRARY_NAME}_win32.dll;.' src/browsermon.py
+          pyinstaller --hiddenimport win32timezone -F --add-binary 'windows-libraries/${LIBRARY_NAME}_win32.dll;.' src/browsermon.py
 
       - name: Prepare Files for upload
         run: |
@@ -184,9 +206,14 @@ jobs:
       - name: Install Dependencies
         run: pip install -r requirements.txt
 
+      - name: Download Linux Libraries
+        uses: actions/download-artifact@v3
+        with:
+          name: linux-libraries
+
       - name: Create Executeable
         run: |
-          pyinstaller -F --add-binary '${{ runner.workspace }}/${LIBRARY_NAME}_linux64.so;.' src/browsermon.py
+          pyinstaller -F --add-binary 'linux-libraries${LIBRARY_NAME}_linux64.so;.' src/browsermon.py
 
       - name: Prepare files for upload
         run: |
