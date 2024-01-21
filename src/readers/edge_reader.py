@@ -26,6 +26,7 @@ import platform
 import signal
 import sqlite3
 import sys
+from pathlib import Path
 
 import orjson as json
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -35,6 +36,7 @@ from utils.caching import write_cache_file, read_cache_file
 from utils.common import parse_schedule_window, prepare_entry
 from utils.encryption import gen_fernet_key
 from utils.metadata import get_static_metadata
+from utils.common import initialize_json_writer
 
 # Global variable
 cache = {}
@@ -209,17 +211,27 @@ def write_history_data(profiles, username, logmode, logdir):
 
         output_file = os.path.join(logdir, f"browsermon_history.{logmode}")
 
-        with open(output_file, "a+", newline='') as file:
+        file_modes = {
+            'json': 'r+b',
+            'csv': 'a+'
+        }
+
+        newline_arg = '' if logmode == 'json' else None
+
+        output_file = Path(output_file)
+        output_file.touch(exist_ok=True)
+
+        with open(output_file, file_modes[logmode], newline=newline_arg) as file:
             if logmode == "json":
-                writer = lambda x: file.write(  # noqa
-                    json.dumps(x, option=json.OPT_INDENT_2).decode() + ",\n")
+                writer = initialize_json_writer()
+                file_descriptor = file.fileno()
+                entry_writer = lambda x: writer.write_json_entry(file_descriptor, json.dumps(x))
             elif logmode == "csv":
-                # Prepare fieldnames dynamically from the keys of the first
-                # entry
+                # Prepare fieldnames dynamically from the keys of the first entry
                 fieldnames = list(
                     prepare_entry(rows[0], metadata, profile_info).keys())
                 csv_writer = csv.DictWriter(file, fieldnames=fieldnames)
-                writer = csv_writer.writerow
+                entry_writer = csv_writer.writerow
 
                 # Check if the CSV file is empty and write header if needed
                 if file.tell() == 0:
@@ -227,7 +239,7 @@ def write_history_data(profiles, username, logmode, logdir):
 
             for result in rows:
                 entry = prepare_entry(result, metadata, profile_info)
-                writer(entry)
+                entry_writer(entry)
 
         cursor.close()
         connection.close()
@@ -255,7 +267,7 @@ def process_edge_history(logmode, logdir):
         for username in profiles:
             try:
                 logger.info(f"Processing browsing history for user: {username}",
-                extra={"log_id": 5001})
+                            extra={"log_id": 5001})
                 future = executor.submit(write_history_data, profiles,
                                          username, logmode, logdir)
                 future.result()  # Get the result of the task (this will

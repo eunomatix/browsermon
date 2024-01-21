@@ -17,10 +17,14 @@
 # ** Contact: info@eunomatix.com
 # **
 # **************************************************************************/
+import ctypes
 import datetime
 import sys
 import uuid
 from collections import OrderedDict
+
+from utils import system
+from utils import arch
 
 
 class InvalidScheduleWindowFormat(Exception):
@@ -29,12 +33,14 @@ class InvalidScheduleWindowFormat(Exception):
     """
     pass
 
+
 def generate_uuid():
     """
     Generate a UUID
     :return: UUID
     """
     return str(uuid.uuid1())
+
 
 def parse_schedule_window(window):
     """
@@ -77,8 +83,27 @@ def prepare_entry(result, metadata, profile):
 
     # Add other entry information
     entry.update({"session_id": session_id, "referrer": referrer, "url": url,
-        "title": title,
-        "visit_time": visit_time_obj.strftime("%Y-%m-%d %H:%M:%S"),
-        "visit_count": visit_count, })
+                  "title": title,
+                  "visit_time": visit_time_obj.strftime("%Y-%m-%d %H:%M:%S"),
+                  "visit_count": visit_count, })
 
     return entry
+
+
+def load_cjson_lib():
+    library = 'json_writer'
+
+    if system == 'Linux':
+        return ctypes.CDLL(f'{library}_linux64.so')
+    else:
+        if arch == '64bit':
+            return ctypes.CDLL(f'{library}_win10_64.dll')
+        else:
+            return ctypes.CDLL(f'{library}_win10_32.dll')
+
+
+def initialize_writer():
+    writer = load_cjson_lib()
+    writer.write_json_entry.argtypes = [ctypes.c_int, ctypes.c_char_p]
+    writer.write_json_entry.restype = None
+    return writer

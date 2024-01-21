@@ -27,6 +27,7 @@ DEFAULT_LOG_LOCATIONS = {"Linux": "/opt/browsermon",
 
 # Determine system and set default log location
 system = platform.system()
+arch = platform.architecture()[0]
 default_log_loc = DEFAULT_LOG_LOCATIONS.get(system)
 
 if default_log_loc and not os.path.exists(default_log_loc):
