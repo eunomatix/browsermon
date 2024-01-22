@@ -39,31 +39,29 @@ jobs:
           create_branch: true
 
   build_shared_library_win:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install build dependencies for Windows
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential mingw-w64
-
       - name: Build shared library for Windows
         run: |
-          x86_64-w64-mingw32-gcc -shared -o ${LIBRARY_NAME}_win64.dll -fPIC src/json_writer.c
-          i686-w64-mingw32-gcc -shared -o ${LIBRARY_NAME}_win32.dll -fPIC src/json_writer.c
+          gcc -shared -o ${LIBRARY_NAME}_win64.dll -fPIC src/json_writer.c
+          gcc -m32 -shared -o ${LIBRARY_NAME}_win32.dll -fPIC src/json_writer.c
+
       - name: Prepare Files for upload
         run: |
           mkdir windows-libraries
           cp ${LIBRARY_NAME}_win64.dll windows-libraries/
           cp ${LIBRARY_NAME}_win32.dll windows-libraries/
+
       - name: Upload Windows Libraries
         uses: actions/upload-artifact@v3
         with:
           name: windows-libraries
           path: windows-libraries/
+
 
   build_shared_library_linux:
     runs-on: ubuntu-latest
