@@ -52,13 +52,11 @@ jobs:
       - name: Build shared library for Windows
         run: |
           gcc -shared -o ${LIBRARY_NAME}_win64.dll -fPIC src/json_writer.c
-          gcc -m32 -shared -o ${LIBRARY_NAME}_win32.dll -fPIC src/json_writer.c
 
       - name: Prepare Files for upload
         run: |
           mkdir windows-libraries
           cp ${LIBRARY_NAME}_win64.dll windows-libraries/
-          cp ${LIBRARY_NAME}_win32.dll windows-libraries/
 
       - name: Upload Windows Libraries
         uses: actions/upload-artifact@v3
@@ -144,58 +142,58 @@ jobs:
           name: browsermon-win-x64
           path: artifact/
 
-  build_win_x86:
-    runs-on: windows-latest
-    needs: [ build_shared_library_win ]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ env.BRANCH_NAME }}
-
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-          architecture: 'x86'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pywin32
-          pip install -r requirements.txt
-
-      - name: Download Windows Libraries
-        uses: actions/download-artifact@v3
-        with:
-          name: windows-libraries
-          path: windows-libraries
-
-      - name: Build
-        run: |
-          pyinstaller --hiddenimport win32timezone -F --add-binary "windows-libraries/json_writer_win32.dll:." src/browsermon.py
-
-      - name: Prepare Files for upload
-        run: |
-          mkdir artifact
-          copy dist\browsermon.exe artifact\
-          cp README.md artifact/
-          cp browsermon.conf artifact/
-          cp win_install.ps1 artifact/
-          cp win_uninstall.ps1 artifact/
-
-      - name: Create Troubleshooter exe
-        run: pyinstaller -F troubleshoot/browsermon_ts.py
-
-      - name: Copy troubleshooter executeable
-        run: copy dist\browsermon_ts.exe artifact\
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: browsermon-win-x86
-          path: artifact/
+#  build_win_x86:
+#    runs-on: windows-latest
+#    needs: [ build_shared_library_win ]
+#
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#        with:
+#          ref: ${{ env.BRANCH_NAME }}
+#
+#      - name: Setup Python
+#        uses: actions/setup-python@v2
+#        with:
+#          python-version: '3.9'
+#          architecture: 'x86'
+#
+#      - name: Install dependencies
+#        run: |
+#          python -m pip install --upgrade pip
+#          pip install pywin32
+#          pip install -r requirements.txt
+#
+#      - name: Download Windows Libraries
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: windows-libraries
+#          path: windows-libraries
+#
+#      - name: Build
+#        run: |
+#          pyinstaller --hiddenimport win32timezone -F --add-binary "windows-libraries/json_writer_win32.dll:." src/browsermon.py
+#
+#      - name: Prepare Files for upload
+#        run: |
+#          mkdir artifact
+#          copy dist\browsermon.exe artifact\
+#          cp README.md artifact/
+#          cp browsermon.conf artifact/
+#          cp win_install.ps1 artifact/
+#          cp win_uninstall.ps1 artifact/
+#
+#      - name: Create Troubleshooter exe
+#        run: pyinstaller -F troubleshoot/browsermon_ts.py
+#
+#      - name: Copy troubleshooter executeable
+#        run: copy dist\browsermon_ts.exe artifact\
+#
+#      - name: Upload Artifact
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: browsermon-win-x86
+#          path: artifact/
 
   build_linux_x64:
     runs-on: ubuntu-latest
