@@ -69,7 +69,7 @@ jobs:
         run: |
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             gcc --version
-            gcc -shared -o json_writer_win${{ matrix.architecture == 'x64' ? '64' : '32' }}.dll -fPIC src/json_writer.c
+            gcc -shared -o json_writer_win${{ matrix.architecture == 'x64' && '64' || '32' }}.dll -fPIC src/json_writer.c
           else
             gcc -shared -o json_writer_linux64.so -fPIC src/json_writer.c
           fi
@@ -79,7 +79,7 @@ jobs:
         run: |
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             mkdir ${{ matrix.os }}-libraries
-            cp json_writer_win${{ matrix.architecture == 'x64' ? '64' : '32' }}.dll ${{ matrix.os }}-libraries/
+            cp json_writer_win${{ matrix.architecture == 'x64' && '64' || '32' }}.dll ${{ matrix.os }}-libraries/
           else
             mkdir ${{ matrix.os }}-libraries
             cp json_writer_linux64.so ${{ matrix.os }}-libraries/
