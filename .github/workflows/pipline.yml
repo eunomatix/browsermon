@@ -45,6 +45,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install MinGW
+        run: |
+          choco install mingw -y --params "/exceptions:seh /arch: x86_64"
+
       - name: Build shared library for Windows
         run: |
           gcc -shared -o ${LIBRARY_NAME}_win64.dll -fPIC src/json_writer.c
@@ -61,7 +65,6 @@ jobs:
         with:
           name: windows-libraries
           path: windows-libraries/
-
 
   build_shared_library_linux:
     runs-on: ubuntu-latest
