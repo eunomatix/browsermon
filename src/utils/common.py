@@ -17,14 +17,10 @@
 # ** Contact: info@eunomatix.com
 # **
 # **************************************************************************/
-import ctypes
 import datetime
 import sys
 import uuid
 from collections import OrderedDict
-
-from utils import system
-from utils import arch
 
 
 class InvalidScheduleWindowFormat(Exception):
