@@ -263,17 +263,17 @@ jobs:
           zip -r browsermon-win-x64.zip *
           cd ..
 
-      - name: Download Artifact win-x86
-        uses: actions/download-artifact@v3
-        with:
-          name: browsermon-win-x86
-          path: browsermon-win-x86
-
-      - name: Zip Dowloaded Artifact win-x86
-        run: |
-          cd browsermon-win-x86
-          zip -r browsermon-win-x86.zip *
-          cd ..
+#      - name: Download Artifact win-x86
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: browsermon-win-x86
+#          path: browsermon-win-x86
+#
+#      - name: Zip Dowloaded Artifact win-x86
+#        run: |
+#          cd browsermon-win-x86
+#          zip -r browsermon-win-x86.zip *
+#          cd ..
 
       - name: Download Artifact linux-x64
         uses: actions/download-artifact@v3
@@ -293,7 +293,7 @@ jobs:
         with:
           files: |
             browsermon-win-x64/browsermon-win-x64.zip
-            browsermon-win-x86/browsermon-win-x86.zip
+#            browsermon-win-x86/browsermon-win-x86.zip
             browsermon-linux-x64/browsermon-linux-x64.zip
 
           prerelease: false
