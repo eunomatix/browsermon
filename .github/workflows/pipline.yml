@@ -69,11 +69,11 @@ jobs:
       - name: Prepare Files for upload
         run: |
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            mkdir windows-libraries
-            cp json_writer_win64.dll windows-libraries/
+            mkdir ${{ matrix.os }}-libraries
+            cp json_writer_win64.dll ${{ matrix.os }}-libraries/
           else
-            mkdir linux-libraries
-            cp json_writer_linux64.so linux-libraries/
+            mkdir ${{ matrix.os }}-libraries
+            cp json_writer_linux64.so ${{ matrix.os }}-libraries/
           fi
         shell: bash
 
