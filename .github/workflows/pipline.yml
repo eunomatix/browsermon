@@ -51,12 +51,12 @@ jobs:
 
       - name: Build shared library for Windows
         run: |
-          gcc -shared -o ${LIBRARY_NAME}_win64.dll -fPIC src/json_writer.c
+          gcc -shared -o json_writer_win64.dll -fPIC src/json_writer.c
 
       - name: Prepare Files for upload
         run: |
           mkdir windows-libraries
-          cp ${LIBRARY_NAME}_win64.dll windows-libraries/
+          cp json_writer_win64.dll windows-libraries/
 
       - name: Upload Windows Libraries
         uses: actions/upload-artifact@v3
