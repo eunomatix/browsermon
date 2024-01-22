@@ -41,7 +41,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [ windows-latest, ubuntu-latest ]
+        architecture: [ x64, x86 ]
+        exclude:
+          - os: ubuntu-latest
+            architecture: x86
 
     steps:
       - name: Checkout
@@ -50,7 +54,11 @@ jobs:
       - name: Install Dependencies
         run: |
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            choco install mingw -y --params "/exceptions:seh /arch: x86_64"
+            if [ "${{ matrix.architecture }}" == "x64" ]; then
+              choco install mingw -y --params "/exceptions:seh /arch: x86_64"
+            else
+              choco install mingw -y --params "/exceptions:seh /arch: x86"
+            fi
           else
             sudo apt-get update
             sudo apt-get install -y build-essential
@@ -60,7 +68,8 @@ jobs:
       - name: Build Shared Library
         run: |
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            gcc -shared -o json_writer_win64.dll -fPIC src/json_writer.c
+            gcc --version
+            gcc -shared -o json_writer_win${{ matrix.architecture == 'x64' ? '64' : '32' }}.dll -fPIC src/json_writer.c
           else
             gcc -shared -o json_writer_linux64.so -fPIC src/json_writer.c
           fi
@@ -70,7 +79,7 @@ jobs:
         run: |
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             mkdir ${{ matrix.os }}-libraries
-            cp json_writer_win64.dll ${{ matrix.os }}-libraries/
+            cp json_writer_win${{ matrix.architecture == 'x64' ? '64' : '32' }}.dll ${{ matrix.os }}-libraries/
           else
             mkdir ${{ matrix.os }}-libraries
             cp json_writer_linux64.so ${{ matrix.os }}-libraries/
@@ -83,6 +92,7 @@ jobs:
           name: ${{ matrix.os }}-libraries
           path: |
             ${{ matrix.os }}-libraries/
+
 
 #  build_binary:
 #    name: Build Binary
