@@ -293,7 +293,6 @@ jobs:
         with:
           files: |
             browsermon-win-x64/browsermon-win-x64.zip
-#            browsermon-win-x86/browsermon-win-x86.zip
             browsermon-linux-x64/browsermon-linux-x64.zip
 
           prerelease: false
