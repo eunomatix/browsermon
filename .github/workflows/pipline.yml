@@ -2,8 +2,8 @@ name: Browsermon CI/CD
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
+#    tags:
+#      - 'v*.*.*'
 
 env:
   TAG_NAME: ${{ github.ref_name }}
@@ -55,6 +55,7 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y build-essential
           fi
+        shell: bash
 
       - name: Build Shared Library
         run: |
@@ -63,6 +64,7 @@ jobs:
           else
             gcc -shared -o json_writer_linux64.so -fPIC src/json_writer.c
           fi
+        shell: bash
 
       - name: Prepare Files for upload
         run: |
@@ -73,6 +75,7 @@ jobs:
             mkdir linux-libraries
             cp json_writer_linux64.so linux-libraries/
           fi
+        shell: bash
 
       - name: Upload Libraries
         uses: actions/upload-artifact@v3
@@ -81,93 +84,93 @@ jobs:
           path: |
             ${{ matrix.os }}-libraries/
 
-  build_binary:
-    name: Build Binary
-    needs: build_shared_library
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest, ubuntu-latest]
-        architecture: [x64]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ env.BRANCH_NAME }}
-
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-          architecture: ${{ matrix.architecture }}
-
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pywin32
-          pip install -r requirements.txt
-
-      - name: Download Libraries
-        uses: actions/download-artifact@v3
-        with:
-          name: ${{ matrix.os }}-libraries
-          path: ${{ matrix.os }}-libraries
-
-      - name: Build
-        run: |
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            choco install mingw -y --params "/exceptions:seh /arch: x86"
-            gcc -m32 -shared -o json_writer_win32.dll -fPIC src/json_writer.c
-            pyinstaller --hiddenimport win32timezone -F --add-binary "windows-libraries/json_writer_win32.dll:." src/browsermon.py
-          else
-            pyinstaller -F --add-binary "${{ matrix.os }}-libraries/json_writer_linux64.so:." src/browsermon.py
-          fi
-
-      - name: Prepare Files for upload
-        run: |
-          mkdir artifact
-          cp dist/browsermon artifact/
-          cp README.md artifact/
-          cp browsermon.conf artifact/
-
-      - name: Create Troubleshooter exe
-        run: pyinstaller -F troubleshoot/browsermon_ts.py
-
-      - name: Copy troubleshooter executeable
-        run: cp dist/browsermon_ts artifact/
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: browsermon-${{ matrix.os }}-${{ matrix.architecture }}
-          path: artifact/
-
-  create_release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    needs: [ build_binary ]
-
-    steps:
-      - name: Download Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: browsermon-${{ matrix.os }}-${{ matrix.architecture }}
-          path: browsermon-${{ matrix.os }}-${{ matrix.architecture }}
-
-      - name: Zip Downloaded Artifacts
-        run: |
-          cd browsermon-${{ matrix.os }}-${{ matrix.architecture }}
-          zip -r browsermon-${{ matrix.os }}-${{ matrix.architecture }}.zip *
-          cd ..
-
-      - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            browsermon-${{ matrix.os }}-${{ matrix.architecture }}/browsermon-${{ matrix.os }}-${{ matrix.architecture }}.zip
-
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#  build_binary:
+#    name: Build Binary
+#    needs: build_shared_library
+#    runs-on: ${{ matrix.os }}
+#    strategy:
+#      matrix:
+#        os: [windows-latest, ubuntu-latest]
+#        architecture: [x64]
+#
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#        with:
+#          ref: ${{ env.BRANCH_NAME }}
+#
+#      - name: Setup Python
+#        uses: actions/setup-python@v2
+#        with:
+#          python-version: '3.9'
+#          architecture: ${{ matrix.architecture }}
+#
+#      - name: Install Dependencies
+#        run: |
+#          python -m pip install --upgrade pip
+#          pip install pywin32
+#          pip install -r requirements.txt
+#
+#      - name: Download Libraries
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: ${{ matrix.os }}-libraries
+#          path: ${{ matrix.os }}-libraries
+#
+#      - name: Build
+#        run: |
+#          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+#            choco install mingw -y --params "/exceptions:seh /arch: x86"
+#            gcc -m32 -shared -o json_writer_win32.dll -fPIC src/json_writer.c
+#            pyinstaller --hiddenimport win32timezone -F --add-binary "windows-libraries/json_writer_win32.dll:." src/browsermon.py
+#          else
+#            pyinstaller -F --add-binary "${{ matrix.os }}-libraries/json_writer_linux64.so:." src/browsermon.py
+#          fi
+#
+#      - name: Prepare Files for upload
+#        run: |
+#          mkdir artifact
+#          cp dist/browsermon artifact/
+#          cp README.md artifact/
+#          cp browsermon.conf artifact/
+#
+#      - name: Create Troubleshooter exe
+#        run: pyinstaller -F troubleshoot/browsermon_ts.py
+#
+#      - name: Copy troubleshooter executeable
+#        run: cp dist/browsermon_ts artifact/
+#
+#      - name: Upload Artifact
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: browsermon-${{ matrix.os }}-${{ matrix.architecture }}
+#          path: artifact/
+#
+#  create_release:
+#    name: Create Release
+#    runs-on: ubuntu-latest
+#    needs: [ build_binary ]
+#
+#    steps:
+#      - name: Download Artifacts
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: browsermon-${{ matrix.os }}-${{ matrix.architecture }}
+#          path: browsermon-${{ matrix.os }}-${{ matrix.architecture }}
+#
+#      - name: Zip Downloaded Artifacts
+#        run: |
+#          cd browsermon-${{ matrix.os }}-${{ matrix.architecture }}
+#          zip -r browsermon-${{ matrix.os }}-${{ matrix.architecture }}.zip *
+#          cd ..
+#
+#      - name: Create Release
+#        id: create_release
+#        uses: softprops/action-gh-release@v1
+#        with:
+#          files: |
+#            browsermon-${{ matrix.os }}-${{ matrix.architecture }}/browsermon-${{ matrix.os }}-${{ matrix.architecture }}.zip
+#
+#          prerelease: false
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
