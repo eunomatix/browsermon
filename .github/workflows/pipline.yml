@@ -192,9 +192,6 @@ jobs:
           name: browsermon-${{ matrix.os }}-${{ matrix.architecture }}
           path: artifact
 
-      - name: Print Artifacts
-        run: ls -R artifact
-
       - name: Zip Downloaded Artifacts
         run: |
           cd artifact/
@@ -203,8 +200,8 @@ jobs:
       - name: Upload Zipped Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: browsermon-${{ matrix.os }}-${{ matrix.architecture }}-${{ github.ref_name }}
-          path: zipped-artifact
+          name: zipped-artifact
+          path: artifact/browsermon-${{ matrix.os }}-${{ matrix.architecture }}-${{ github.ref_name }}.zip
 
   finalize_release:
     name: Finalize Release
@@ -216,6 +213,8 @@ jobs:
         with:
           name: zipped-artifacts
           path: zipped-artifacts
+      - name: Print Artifacts
+        run: ls -R artifact
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
