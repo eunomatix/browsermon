@@ -192,36 +192,39 @@ jobs:
           name: browsermon-${{ matrix.os }}-${{ matrix.architecture }}
           path: artifact
 
-      - name: Zip Downloaded Artifacts
-        run: |
-          cd artifact/browsermon-${{ matrix.os }}-${{ matrix.architecture }}
-          zip -r browsermon-${{ matrix.os }}-${{ matrix.architecture }}-${{ github.ref_name }}.zip *
+      - name: Print Artifacts
+        run: ls -R artifact
 
-      - name: Upload Zipped Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: browsermon-${{ matrix.os }}-${{ matrix.architecture }}-${{ github.ref_name }}
-          path: zipped-artifact
-
-  finalize_release:
-    name: Finalize Release
-    runs-on: ubuntu-latest
-    needs: [create_release]
-    steps:
-      - name: Download Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: zipped-artifacts
-          path: zipped-artifacts
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            zipped-artifacts/browsermon-windows-latest-x64-${{ github.ref_name }}.zip
-            zipped-artifacts/browsermon-windows-latest-x86-${{ github.ref_name }}.zip
-            zipped-artifacts/browsermon-ubuntu-latest-x64-${{ github.ref_name }}.zip
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Zip Downloaded Artifacts
+#        run: |
+#          cd artifact/browsermon-${{ matrix.os }}-${{ matrix.architecture }}
+#          zip -r browsermon-${{ matrix.os }}-${{ matrix.architecture }}-${{ github.ref_name }}.zip *
+#
+#      - name: Upload Zipped Artifacts
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: browsermon-${{ matrix.os }}-${{ matrix.architecture }}-${{ github.ref_name }}
+#          path: zipped-artifact
+#
+#  finalize_release:
+#    name: Finalize Release
+#    runs-on: ubuntu-latest
+#    needs: [create_release]
+#    steps:
+#      - name: Download Artifacts
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: zipped-artifacts
+#          path: zipped-artifacts
+#
+#      - name: Create Release
+#        uses: softprops/action-gh-release@v1
+#        with:
+#          files: |
+#            zipped-artifacts/browsermon-windows-latest-x64-${{ github.ref_name }}.zip
+#            zipped-artifacts/browsermon-windows-latest-x86-${{ github.ref_name }}.zip
+#            zipped-artifacts/browsermon-ubuntu-latest-x64-${{ github.ref_name }}.zip
+#          prerelease: false
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
