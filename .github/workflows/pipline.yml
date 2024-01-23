@@ -149,8 +149,13 @@ jobs:
 
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             cp dist/browsermon.exe artifact/
+            cp win_install.ps1 artifact/
+            cp win_uninstall.ps1 artifact/
           else
             cp dist/browsermon artifact/
+            cp -r service/ artifact/
+            cp linux_install.sh artifact/
+            cp linux_uninstall.sh artifact/
           fi
         shell: bash
 
@@ -171,7 +176,6 @@ jobs:
         with:
           name: browsermon-${{ matrix.os }}-${{ matrix.architecture }}
           path: artifact/
-
 
   create_release:
     name: Create Release
@@ -213,8 +217,6 @@ jobs:
         with:
           name: zipped-artifacts
           path: zipped-artifacts
-      - name: Print Artifacts
-        run: ls -R zipped-artifacts
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
