@@ -397,7 +397,7 @@ def write_history_data_to_json(history_data, write_file, db_path, logdirec, writ
                         writer.write_json_entry.argtypes = [ctypes.c_int, ctypes.c_char_p]
                         writer.write_json_entry.restype = None
                         file_descriptor = file.fileno()
-                        writer.write_json_entry(file_descriptor, json.dumps(entry_data))
+                        writer.write_json_entry(file_descriptor, json.dumps(entry_data).encode('utf-8'))
 
                 elif write_format == 'csv':
                     fieldnames = ["hostname", "os", "os_username", "browser", "browser_version", "browser_db",
