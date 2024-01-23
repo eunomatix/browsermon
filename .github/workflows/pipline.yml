@@ -214,7 +214,7 @@ jobs:
           name: zipped-artifacts
           path: zipped-artifacts
       - name: Print Artifacts
-        run: ls -R artifact
+        run: ls -R zipped-artifacts
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
