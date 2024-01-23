@@ -68,7 +68,6 @@ jobs:
       - name: Build Shared Library
         run: |
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            gcc --version
             gcc -shared -o json_writer_win${{ matrix.architecture == 'x64' && '64' || '32' }}.dll -fPIC src/json_writer.c
           else
             gcc -shared -o json_writer_linux64.so -fPIC src/json_writer.c
@@ -173,17 +172,25 @@ jobs:
           name: browsermon-${{ matrix.os }}-${{ matrix.architecture }}
           path: artifact/
 
+
   create_release:
     name: Create Release
     runs-on: ubuntu-latest
-    needs: [ build_binary ]
+    needs: [build_binary]
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        architecture: [x64, x86]
+        exclude:
+          - os: ubuntu-latest
+            architecture: x86
 
     steps:
       - name: Download Artifacts
         uses: actions/download-artifact@v3
         with:
           name: browsermon-${{ matrix.os }}-${{ matrix.architecture }}
-          path: browsermon-${{ matrix.os }}-${{ matrix.architecture }}
+          path: artifact
 
       - name: Zip Downloaded Artifacts
         run: |
@@ -191,13 +198,31 @@ jobs:
           zip -r browsermon-${{ matrix.os }}-${{ matrix.architecture }}.zip *
           cd ..
 
+      - name: Upload Zipped Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: zipped-artifacts-${{ matrix.os }}-${{ matrix.architecture }}
+          path: browsermon-${{ matrix.os }}-${{ matrix.architecture }}.zip
+
+  finalize_release:
+    name: Finalize Release
+    runs-on: ubuntu-latest
+    needs: [create_release]
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: zipped-artifacts
+          path: zipped-artifacts
+
       - name: Create Release
-        id: create_release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            browsermon-${{ matrix.os }}-${{ matrix.architecture }}/browsermon-${{ matrix.os }}-${{ matrix.architecture }}.zip
-
+            browsermon-windows-latest-x64-${{ github.ref_name }}.zip
+            browsermon-windows-latest-x86-${{ github.ref_name }}.zip
+            browsermon-ubuntu-latest-x64-${{ github.ref_name }}.zip
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
