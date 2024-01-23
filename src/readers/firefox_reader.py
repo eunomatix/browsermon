@@ -17,7 +17,7 @@
 # ** Contact: info@eunomatix.com
 # **
 # **************************************************************************/
-
+import ctypes
 import os
 import glob
 import sqlite3
@@ -32,6 +32,7 @@ import sys
 import platform
 from apscheduler.schedulers.background import BackgroundScheduler
 
+from utils import arch
 from utils.metadata import has_root_privilege
 
 entries_count = 0
@@ -39,7 +40,6 @@ scheduler = BackgroundScheduler()
 
 system = platform.system()
 default_log_loc = None
-
 
 if default_log_loc is None:
     if system == "Linux":
@@ -52,12 +52,14 @@ if default_log_loc is None:
 log_file = os.path.join(default_log_loc, "browsermon.log")
 log_format = "%(asctime)s %(log_code)s:: 'Firefox Reader:' - %(levelname)s %(message)s"  # noqa
 
+
 class CustomFormatter(logging.Formatter):
     def format(self, record):
         if hasattr(record, 'log_code'):
             return super().format(record)
         record.log_code = ''  # Set an empty log code if not present
         return super().format(record)
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)  # Set the logger level to INFO
@@ -66,8 +68,6 @@ formatter = CustomFormatter(log_format)
 handler = logging.FileHandler(log_file)
 handler.setFormatter(formatter)
 logger.addHandler(handler)
-
-
 
 
 def get_profile_folders(logdir):
@@ -99,18 +99,18 @@ def get_profile_folders(logdir):
                     winreg.CloseKey(user_key)
         except Exception as e:
             print(f"Error: {str(e)}")
-    
+
     elif system == "Linux":
         base_path = '/home'
         excluded_folders = ['root']
         for folder_path in glob.glob(os.path.join(base_path, '*')):
-          folder_name = os.path.basename(folder_path)
-          if os.path.isdir(folder_path) and folder_name not in excluded_folders:
-            profile_folders.append({
-                'Profile Name': folder_name,
-                'Folder Path': folder_path
-            })
-    print (profile_folders)
+            folder_name = os.path.basename(folder_path)
+            if os.path.isdir(folder_path) and folder_name not in excluded_folders:
+                profile_folders.append({
+                    'Profile Name': folder_name,
+                    'Folder Path': folder_path
+                })
+    print(profile_folders)
     return profile_folders
 
 
@@ -160,6 +160,7 @@ class FixedData:
 
         return version
 
+
 def get_profile_info(database_path):
     logger.info(f"database path: {database_path}")
     system = platform.system()
@@ -169,9 +170,9 @@ def get_profile_info(database_path):
         prefs_file_path = os.path.join(os.path.dirname(database_path), "prefs.js")
 
     name_path = os.path.dirname(database_path)
-    email_id= 'Not Available'
-    full_name='Not Available'
-    Account_id='Not Available'
+    email_id = 'Not Available'
+    full_name = 'Not Available'
+    Account_id = 'Not Available'
     try:
 
         id = os.path.basename(name_path)
@@ -182,25 +183,26 @@ def get_profile_info(database_path):
             match = re.search(pattern, prefs_content)
             Account_id = id
             if match:
-                email_id =  match.group(1)
+                email_id = match.group(1)
                 parts = email_id.split('@')
                 full_name = parts[0]
 
-                logger.info(f"Profile info found - Account ID: {Account_id}, Email ID: {email_id}, Full Name: {full_name}")
-
+                logger.info(
+                    f"Profile info found - Account ID: {Account_id}, Email ID: {email_id}, Full Name: {full_name}")
 
             profile_information = {
-                    "email_id": email_id if email_id is not None else "Not Available",
-                    "full_name": full_name if full_name is not None else "Not Available",
-                    "Account_id": Account_id if Account_id is not None else "Not Available"
-                
-                }
-            return( profile_information )
+                "email_id": email_id if email_id is not None else "Not Available",
+                "full_name": full_name if full_name is not None else "Not Available",
+                "Account_id": Account_id if Account_id is not None else "Not Available"
+
+            }
+            return (profile_information)
     except (FileNotFoundError, json.JSONDecodeError, KeyError):
-        
+
         logger.error(f"No user Data found for {database_path}, exiting", extra={'log_code': 'BM9001'})
         pass
-    
+
+
 def filter_folders(folder_path):
     excluded_items = ['Crash Reports', 'Pending Pings']
 
@@ -208,10 +210,12 @@ def filter_folders(folder_path):
         os.path.join(folder_path, f)
         for f in os.listdir(folder_path)
         if os.path.isdir(os.path.join(folder_path, f))
-        and not any(exclude_item in f for exclude_item in excluded_items)
+           and not any(exclude_item in f for exclude_item in excluded_items)
     ]
 
     return folder_paths
+
+
 def get_firefox_profile_folders(logdir):
     logdirec = logdir
     profile_data = get_profile_folders(logdirec)
@@ -224,7 +228,8 @@ def get_firefox_profile_folders(logdir):
 
         system = platform.system()
         if system == "Windows":
-            folder_path = os.path.join('C:\\Users', get_os_username, 'AppData', 'Roaming', 'Mozilla', 'Firefox', 'Profiles')
+            folder_path = os.path.join('C:\\Users', get_os_username, 'AppData', 'Roaming', 'Mozilla', 'Firefox',
+                                       'Profiles')
         elif system == "Linux":
             folder_path = os.path.join('/home', get_os_username, '.mozilla', 'firefox')
         if not os.path.exists(folder_path):
@@ -242,7 +247,8 @@ def get_firefox_profile_folders(logdir):
                 'Last saved value number': 0
             }
             print("Profile found for", get_os_username)
-            logger.info(f"Profile found for {get_os_username}  at {profile_info['Profile Link']}", extra={'log_code': 'BM4002'})
+            logger.info(f"Profile found for {get_os_username}  at {profile_info['Profile Link']}",
+                        extra={'log_code': 'BM4002'})
             profile_objects[profile_folder] = profile_info  # Update the profile_objects dictionary here
 
     json_file_for_profiles = os.path.join(logdir, 'Firefox_profiles_data.json')
@@ -255,14 +261,16 @@ def get_firefox_profile_folders(logdir):
             logger.error("File Not found to Write profile links, exiting", extra={'log_code': 'BM9001'})
 
         existing_links = {profile['Profile Link'] for profile in existing_data}
-        new_profile_objects = [profile for profile in profile_objects.values() if profile['Profile Link'] not in existing_links]
+        new_profile_objects = [profile for profile in profile_objects.values() if
+                               profile['Profile Link'] not in existing_links]
         merged_data = existing_data + new_profile_objects
 
         with open(json_file_for_profiles, 'w') as outfile:
             json.dump(merged_data, outfile, indent=4)
 
     except IOError as e:
-        logger.warn(f"ERROR Exception Found while writing Profiles data to JSON file: {e}", extra={'log_code': 'BM9001'})
+        logger.warn(f"ERROR Exception Found while writing Profiles data to JSON file: {e}",
+                    extra={'log_code': 'BM9001'})
 
 
 def table_exists(cursor, table_name):
@@ -276,8 +284,8 @@ class InvalidScheduleWindowFormat(Exception):
     """
     pass
 
-def parse_schedule_window(window):
 
+def parse_schedule_window(window):
     try:
         if window[-1] == "m":
             return int(window[:-1]) * 60
@@ -288,47 +296,46 @@ def parse_schedule_window(window):
         else:
             raise InvalidScheduleWindowFormat
     except InvalidScheduleWindowFormat:
-        logger.warn("Invalid schedule window format. Please use the valid format (e.g., 1m, 1h, 1d)", extra={'log_code': 'BM9001'})
+        logger.warn("Invalid schedule window format. Please use the valid format (e.g., 1m, 1h, 1d)",
+                    extra={'log_code': 'BM9001'})
         sys.exit(1)
 
 
-
 def monitor_history_db(db_path, logdir):
-
     if not os.path.isfile(db_path):
         logger.error(f"ERROR Database to get history logs not found for {db_path}", extra={'log_code': 'BM9001'})
         return None
-     
+
     try:
         conn = sqlite3.connect(f"file:{db_path}?immutable=1", uri=True)
         cursor = conn.cursor()
 
         if not table_exists(cursor, 'moz_historyvisits'):
             return None
-        
+
         json_file = os.path.join(logdir, 'Firefox_profiles_data.json')
-        
+
         if os.path.exists(json_file):
-    
-         with open(json_file, 'r') as file:
-            
-            profiles = json.load(file)
-            for profile in profiles:
-                system = platform.system()
-                if system == 'Windows':
-                    if profile['Profile Link'] == os.path.normpath(db_path).replace(os.sep + 'places.sqlite', ''):
-                        last_saved_value_number = profile.get('Last saved value number')
-                        break
-                elif system == 'Linux':
-                    if profile['Profile Link'] == os.path.normpath(db_path).replace(os.path.sep + 'places.sqlite', ''):
-                        last_saved_value_number = profile.get('Last saved value number')
-                        break
-            else:
-                last_saved_value_number = None
+
+            with open(json_file, 'r') as file:
+
+                profiles = json.load(file)
+                for profile in profiles:
+                    system = platform.system()
+                    if system == 'Windows':
+                        if profile['Profile Link'] == os.path.normpath(db_path).replace(os.sep + 'places.sqlite', ''):
+                            last_saved_value_number = profile.get('Last saved value number')
+                            break
+                    elif system == 'Linux':
+                        if profile['Profile Link'] == os.path.normpath(db_path).replace(os.path.sep + 'places.sqlite',
+                                                                                        ''):
+                            last_saved_value_number = profile.get('Last saved value number')
+                            break
+                else:
+                    last_saved_value_number = None
         else:
             logger.error("File not found to read Profile Links", extra={'log_code': 'BM9001'})
 
-        
         if last_saved_value_number is not None:
             query = """
                 SELECT
@@ -357,49 +364,50 @@ def monitor_history_db(db_path, logdir):
         # Catch the error and log it, but do not crash the program
         logger.error(f"ERROR Exception Found while processing {db_path}: {e}", extra={'log_code': 'BM9001'})
         return None
-    
+
     except PermissionError as pe:
-        logger.error(f"Firefox-READER: WARN Permission error while reading the {db_path}: {pe}", extra={'log_code': 'BM4003'})
+        logger.error(f"Firefox-READER: WARN Permission error while reading the {db_path}: {pe}",
+                     extra={'log_code': 'BM4003'})
         return None
     finally:
         conn.close()
 
 
 def write_history_data_to_json(history_data, write_file, db_path, logdirec, write_format):
-    print( "db_path used", db_path)
-    process_id= 'null'
+    print("db_path used", db_path)
+    process_id = 'null'
     global entries_count
-    entries_count = 0 
+    entries_count = 0
     logger.info(f"Writing logs to browsermon_history.log in {write_format}", extra={'log_code': 'BM5001'})
-    profile_path= db_path 
-    Profile_data = get_profile_info(db_path)  
+    profile_path = db_path
+    Profile_data = get_profile_info(db_path)
 
-    Os_username= db_path.split(os.path.sep)[2]
+    Os_username = db_path.split(os.path.sep)[2]
 
-    fix_data = FixedData(db_path= db_path)
+    fix_data = FixedData(db_path=db_path)
 
     fix_data.os_username = Os_username
-    
+
     for entry in history_data:
-        entry_data= {}
-        entry_data["hostname"] = fix_data.hostname 
+        entry_data = {}
+        entry_data["hostname"] = fix_data.hostname
         entry_data["os"] = fix_data.os
         entry_data["os_username"] = fix_data.os_username
-        entry_data["browser"] = fix_data.browser     
+        entry_data["browser"] = fix_data.browser
         entry_data["browser_version"] = fix_data.browser_version
         entry_data["browser_db"] = fix_data.browser_db
         if Profile_data is not None:
             # Check each field separately and provide default value if it's None
-            entry_data["profile_id"] = Profile_data.get("Account_id")      
+            entry_data["profile_id"] = Profile_data.get("Account_id")
             entry_data["profile_title"] = Profile_data.get("full_name")
             entry_data["profile_username"] = Profile_data.get("email_id")
         else:
-            entry_data["profile_id"] = "Not Available" 
+            entry_data["profile_id"] = "Not Available"
             entry_data["profile_title"] = "Not Available"
             entry_data["profile_username"] = "Not Available"
 
         entry_data["Database_Path"] = profile_path
-        visit_time_microseconds = entry[0] / 1000000 
+        visit_time_microseconds = entry[0] / 1000000
         adjusted_timestamp = visit_time_microseconds - 18000
         visit_time_obj = datetime.datetime.fromtimestamp(adjusted_timestamp)
         entry_data.update({
@@ -410,45 +418,54 @@ def write_history_data_to_json(history_data, write_file, db_path, logdirec, writ
             'visit_date': visit_time_obj.strftime("%Y-%m-%d %H:%M:%S"),
             'visit_count': entry[3],
         })
-        entries_count+=1
-        try:  
-          if entry_data:  # Check if data is not empty before writing to the file
-           if write_format == 'json':
-               with open(write_file, 'a') as file:
-                  json.dump(entry_data, file, indent=4)
-                  file.write(", ")   
-                  file.write("\n")
+        entries_count += 1
+        try:
+            if entry_data:  # Check if data is not empty before writing to the file
+                if write_format == "json":
+                    with open(write_file, 'r+b', ) as file:
 
-           elif write_format == 'csv':
-                fieldnames = ["hostname", "os", "os_username", "browser", "browser_version", "browser_db",
-                               "profile_id", "profile_title", "profile_username", "Database_Path",
-                                 "session_id", "referrer", "Url", "Title", "visit_date", "visit_count"
-                                  ] 
-                
-                
-                for key, value in entry_data.items():
-                    if isinstance(value, str):
-                       entry_data[key] = value.encode('unicode_escape').decode()
-    
-                with open(write_file, 'a', newline='', encoding='utf-8') as csvfile:
-                    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                    if csvfile.tell() == 0:
-                        writer.writeheader()
-                    writer.writerow(entry_data)
+                        library = 'json_writer'
 
-          else:
-            logger.info("No Data found for Writing:", extra={'log_code': 'BM5001'})
-       
+                        if platform.system() == 'Linux':
+                            writer = ctypes.CDLL(f'{library}_linux64.so')
+                        else:
+                            if arch == '64bit':
+                                writer = ctypes.CDLL(f'{library}_win64.dll')
+                            else:
+                                writer = ctypes.CDLL(f'{library}_win32.dll')
+                        writer.write_json_entry.argtypes = [ctypes.c_int, ctypes.c_char_p]
+                        writer.write_json_entry.restype = None
+                        file_descriptor = file.fileno()
+                        writer.write_json_entry(file_descriptor, json.dumps(entry_data))
+
+                elif write_format == 'csv':
+                    fieldnames = ["hostname", "os", "os_username", "browser", "browser_version", "browser_db",
+                                  "profile_id", "profile_title", "profile_username", "Database_Path",
+                                  "session_id", "referrer", "Url", "Title", "visit_date", "visit_count"
+                                  ]
+
+                    for key, value in entry_data.items():
+                        if isinstance(value, str):
+                            entry_data[key] = value.encode('unicode_escape').decode()
+
+                    with open(write_file, 'a', newline='', encoding='utf-8') as csvfile:
+                        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                        if csvfile.tell() == 0:
+                            writer.writeheader()
+                        writer.writerow(entry_data)
+
+            else:
+                logger.info("No Data found for Writing:", extra={'log_code': 'BM5001'})
+
         except Exception:
-          logger.warn("ERROR Exception Found while writing browsermon_history.log :" , extra={'log_code': 'BM9001'})  
-                
+            logger.warn("ERROR Exception Found while writing browsermon_history.log :", extra={'log_code': 'BM9001'})
+
     logger.info(f"Total {entries_count} for Profile {db_path}: are Processed ", extra={'log_code': 'BM5002'})
 
     entries_count = 0  # Reset the count for the next function call
 
 
 def server(db_path, write_file, logdir, write_format):
-    
     data = monitor_history_db(db_path, logdir)
     if data:
         last_visit_time = data[-1][0]
@@ -478,18 +495,17 @@ def server(db_path, write_file, logdir, write_format):
                 with open(json_file_profiles, 'w') as file:
                     json.dump(profiles, file, indent=4)
             else:
-                logger.error("Invalid Path:" , extra={'log_code': 'BM9001'})  
+                logger.error("Invalid Path:", extra={'log_code': 'BM9001'})
 
         else:
-            logger.error("Can't find Firefox Profile Data file:" , extra={'log_code': 'BM9001'})  
+            logger.error("Can't find Firefox Profile Data file:", extra={'log_code': 'BM9001'})
     else:
-        logger.info(f"No New data Found while monitoring Profile {db_path}:" , extra={'log_code': 'BM5003'})  
-
+        logger.info(f"No New data Found while monitoring Profile {db_path}:", extra={'log_code': 'BM5003'})
 
 
 def process_Firefox_history(logdir, write_format):
     global entries_count
-    entries_count = 0 
+    entries_count = 0
     system = platform.system()
     get_profile_folders(logdir)
     get_firefox_profile_folders(logdir)
@@ -519,10 +535,11 @@ def process_Firefox_history(logdir, write_format):
     except Exception as e:
         logger.error(f"ERROR Exception Found: {e}", extra={'log_code': 'BM9001'})
 
+
 def handle_signal(exit_feedback_queue, signum, frame):
-    
     logger.info("Gracefully Exiting Writing funtion after reading all profiles", extra={'log_code': 'BM5003'})
     sys.exit(0)
+
 
 def log_os_info():
     if platform.system() == "Windows":
@@ -542,42 +559,40 @@ def log_os_info():
         logger.error("Unsupported operating system.")
         logger.info("Exiting the program Due to Unsupported OS.")
         exit()  # Exit the program for unsupported operating systems.
-  
+
 
 def main(exit_feedback_queue, shared_lock, logdir, write_format, mode, schedule_window):
-
     signal_handler = partial(handle_signal, exit_feedback_queue)
     signal.signal(signal.SIGTERM, signal_handler)
     log_os_info()
     if write_format == 'json':
-        json_file =os.path.join(logdir, 'browsermon_history.json')
+        json_file = os.path.join(logdir, 'browsermon_history.json')
 
         if os.path.exists(json_file):
             logger.info(f"Found logdir {json_file} for writing history files", extra={'log_code': 'BM3001'})
-        else:       
+        else:
             logger.error(f"Logdir {json_file} not found, creating new", extra={'log_code': 'BM3002'})
 
     elif write_format == 'csv':
 
-        csv_file =os.path.join(logdir, 'browsermon_history.csv')
+        csv_file = os.path.join(logdir, 'browsermon_history.csv')
         if os.path.exists(csv_file):
             logger.info(f"Found logdir {csv_file} for writing history files", extra={'log_code': 'BM3001'})
-        else:       
+        else:
             logger.error(f"Logdir {csv_file} not found, creating new", extra={'log_code': 'BM3002'})
 
     scheduler = BackgroundScheduler()
-    
+
     logger.info(f"Reader Started successfully in {mode} mode", extra={'log_code': 'BM1001'})
-    logger.info("Validated parameters Successfully",extra={'log_code': 'BM2001'})
+    logger.info("Validated parameters Successfully", extra={'log_code': 'BM2001'})
 
     if mode == "scheduled":
         schedule_interval = parse_schedule_window(schedule_window)
-        scheduler.add_job(process_Firefox_history, 'interval', args=[logdir, write_format],seconds=schedule_interval)    
+        scheduler.add_job(process_Firefox_history, 'interval', args=[logdir, write_format], seconds=schedule_interval)
     elif mode == "real-time":
-        scheduler.add_job(process_Firefox_history, 'interval', args=[logdir, write_format],seconds=10)    
+        scheduler.add_job(process_Firefox_history, 'interval', args=[logdir, write_format], seconds=10)
     else:
-        logger.error("Issue found while processing input parameters, exiting",extra={'log_code': 'BM2002'})
-    
+        logger.error("Issue found while processing input parameters, exiting", extra={'log_code': 'BM2002'})
 
     try:
         process_Firefox_history(logdir, write_format)
@@ -594,11 +609,11 @@ def main(exit_feedback_queue, shared_lock, logdir, write_format, mode, schedule_
         logger.warn("Came here Exception e")
         exit_feedback_queue.put("Firefox exited")
         sys.exit(1)
-    
+
     logger.info("Firefox; shutting down scheduler")
     scheduler.shutdown()
     scheduler.remove_all_jobs()
-    
+
     logger.info("releasing shared_lock in Firefox")
     shared_lock.release()
     exit_feedback_queue.put_nowait("no error")
