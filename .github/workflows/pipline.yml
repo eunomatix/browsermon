@@ -158,8 +158,14 @@ jobs:
       - name: Create Troubleshooter exe
         run: pyinstaller -F troubleshoot/browsermon_ts.py
 
-      - name: Copy troubleshooter executeable
-        run: cp dist/browsermon_ts artifact/
+      - name: Copy troubleshooter executable
+        run: |
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+            cp dist/browsermon_ts.exe artifact/
+          else
+            cp dist/browsermon_ts artifact/
+          fi
+        shell: bash
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
