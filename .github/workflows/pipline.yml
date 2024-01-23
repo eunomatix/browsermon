@@ -128,7 +128,7 @@ jobs:
         shell: bash
 
       - name: Download Libraries
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: ${{ matrix.os }}-libraries
           path: ${{ matrix.os }}-libraries
@@ -168,7 +168,7 @@ jobs:
 
     steps:
       - name: Download Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: browsermon-${{ matrix.os }}-${{ matrix.architecture }}
           path: browsermon-${{ matrix.os }}-${{ matrix.architecture }}
