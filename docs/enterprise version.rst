@@ -140,8 +140,8 @@ The ``get-licenses`` API endpoint retrieves the list of active GUIDs.
 
 **Description:** Display the list of active licensed controllers.
 
-Installtaion
-------------
+Browsermon Enterprise Installation Guide
+----------------------------------------
 
 Browsermon Enterprise Version runs in client-server model, 
 where Browsermon Controller(s) run on all enterprise endpoints
@@ -155,41 +155,51 @@ management of all Browsermon controllers installed endpoints.
 
 **Windows:**
 
-To install, download the `browsermon.zip <https://github.com/eunomatix/browsermon-private/releases>`__ file, extract the file and open powershell as 
-administrator where you extracted the file.Run the following command
+1.  Download the latest release of Browsermon Private `releases page <https://github.com/eunomatix/browsermon-private/releases>`_ based on your system architecture and extract the files.
 
-``Set-ExecutionPolicy RemoteSigned -Force ; .\win_install.ps1`` 
+2.  Populate the ``browsermon.conf``file with the required parameters.
+
+3.  Open the Administrative PowerShell in the Browsermon Private directory and execute the following command to install:
+   ``Set-ExecutionPolicy RemoteSigned -Force ; .\win_install.ps1``
+4.  Verify the installation by checking the Browsermon service in the Windows service manager to ensure it is installed and functioning correctly.
+
+5.  Configure your ``watchdog_ip`` and ``watchdog_port`` in the Browsermon Config file ``browsermon.conf`` to integrate Watchdog.
 
 **Linux:**
 
-Download the ``browsermon_linux-x64.zip`` extract it and run
-``linux_install.sh`` as sudo
+1.  Download the latest release of Browsermon Private from GitHub according to your architecture and extract the files.
+2.  Populate the ``browsermon.conf`` file with the necessary parameters.
+3.  Open the terminal in the Browsermon Private directory and run the following command:
+    ``sudo ./linux_install.sh``
+4. Run ``systemctl status browsermon`` to check the status of your service
+5. Configure your ``watchdog_ip`` and ``watchdog_port``in the Browsermon Config file ``browsermon.conf`` to integrate Watchdog
 
 **Watchdog installation** 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 Watchdog Server is supported on Linux only. To seamlessly integrate Watchdog into your system, 
 follow these straightforward steps:
 
-
 1. Download the latest Watchdog release for  Linux 
 2. Extract the downloaded zip file.
-3. Ensure the watchdog.conf file is passed as the arguments to the Watchdog. 
-4. Populate your ``watchdog.conf`` file with the provided *BMKEY* and
-   *AUTHCODE*. Please see your license file to find the BMKEY and AUTHCODE for your company. 
-   You can also drop email to support@browsermon.ai to get this information.
-5. Ready to roll! Execute the binary using the following command:
+3. Populate your ``watchdog.conf`` file with the provided *BMKEY* and *AUTHCODE*.
+4. Ready to roll! Execute the binary using the following command:
 
 .. code:: bash
 
-   ./Watchdog --config-path /path/to/watchdog.conf
+   ./Watchdog --config-path /path/to/watchdog.conf 
 
-6. Watchdog to Controller communication is encrypted through SSL. We shipped our own certificates with Watchdog. 
-   To generate your own SSL certificates, modify the config in ``ssl_config.ini`` and run the
-   following command.
-   
+5. Watchdog to Controller communication is encrypted through SSL. We shipped our own certificates with Watchdog. To generate your own SSL certificates, modify the config in ``ssl_config.ini`` and run the following command.
+
 .. code:: bash
 
    ./Watchdog --config-path /path/to/watchdog.conf --generate-ssl
+
+For the latest releases, explore the Watchdog `releases page <https://github.com/eunomatix/watchdog/releases>`_.
+
+
+
+
+
 
 
 .. |image2| image:: https://browsermon.ai/wp-content/uploads/2024/01/pic.png
