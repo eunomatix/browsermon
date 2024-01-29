@@ -170,9 +170,9 @@ def get_profile_info(database_path):
         prefs_file_path = os.path.join(os.path.dirname(database_path), "prefs.js")
 
     name_path = os.path.dirname(database_path)
-    email_id = 'Not Available'
-    full_name = 'Not Available'
-    Account_id = 'Not Available'
+    email_id = ''
+    full_name = ''
+    Account_id = ''
     try:
 
         id = os.path.basename(name_path)
@@ -191,9 +191,9 @@ def get_profile_info(database_path):
                     f"Profile info found - Account ID: {Account_id}, Email ID: {email_id}, Full Name: {full_name}")
 
             profile_information = {
-                "email_id": email_id if email_id is not None else "Not Available",
-                "full_name": full_name if full_name is not None else "Not Available",
-                "Account_id": Account_id if Account_id is not None else "Not Available"
+                "email_id": email_id if email_id is not None else "",
+                "full_name": full_name if full_name is not None else "",
+                "Account_id": Account_id if Account_id is not None else ""
 
             }
             return (profile_information)
@@ -201,7 +201,7 @@ def get_profile_info(database_path):
 
         logger.error(f"No user Data found for {database_path}, exiting", extra={'log_code': 'BM9001'})
         pass
-
+    return None
 
 def filter_folders(folder_path):
     excluded_items = ['Crash Reports', 'Pending Pings']
@@ -402,9 +402,9 @@ def write_history_data_to_json(history_data, write_file, db_path, logdirec, writ
             entry_data["profile_title"] = Profile_data.get("full_name")
             entry_data["profile_username"] = Profile_data.get("email_id")
         else:
-            entry_data["profile_id"] = "Not Available"
-            entry_data["profile_title"] = "Not Available"
-            entry_data["profile_username"] = "Not Available"
+            entry_data["profile_id"] = ""
+            entry_data["profile_title"] = ""
+            entry_data["profile_username"] = ""
 
         entry_data["Database_Path"] = profile_path
         visit_time_microseconds = entry[0] / 1000000

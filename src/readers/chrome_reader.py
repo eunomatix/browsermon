@@ -129,9 +129,9 @@ def get_profile_info(database_path):
                 email_id = account.get("email")
 
                 profile_information = {
-                    "email_id": email_id if email_id is not None else "Not Available",
-                    "full_name": full_name if full_name is not None else "Not Available",
-                    "Account_id": Account_id if Account_id is not None else "Not Available"
+                    "email_id": email_id if email_id is not None else "",
+                    "full_name": full_name if full_name is not None else "",
+                    "Account_id": Account_id if Account_id is not None else ""
 
                 }
                 return profile_information
@@ -365,9 +365,9 @@ def write_history_data_to_json(history_data, write_file, db_path, logdirec, writ
             entry_data["profile_username"] = Profile_data.get("email_id")
 
         else:
-            entry_data["profile_id"] = "Not Available"
-            entry_data["profile_title"] = "Not Available"
-            entry_data["profile_username"] = "Not Available"
+            entry_data["profile_id"] = ""
+            entry_data["profile_title"] = ""
+            entry_data["profile_username"] = ""
         entry_data["Database_Path"] = profile_path
         visit_time_microseconds = entry[0]
         visit_time_obj = datetime.datetime(1601, 1, 1) + datetime.timedelta(microseconds=visit_time_microseconds)
